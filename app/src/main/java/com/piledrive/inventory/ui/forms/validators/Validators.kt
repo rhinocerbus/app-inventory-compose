@@ -7,7 +7,7 @@ sealed class Validators<T>(val errMsg: String) {
 		override fun doCheck(value: U?): Boolean {
 			value ?: return false
 			return when (value) {
-				is String -> value.isBlank()
+				is String -> value.isNotBlank()
 				else -> true
 			}
 		}

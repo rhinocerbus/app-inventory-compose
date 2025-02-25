@@ -1,55 +1,56 @@
 package com.piledrive.inventory.ui.forms.state
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.piledrive.inventory.ui.forms.validators.Validators
 
 abstract class BaseFormFieldState<T>(
-	val mainValidator: Validators<T>,
-	val externalValidators: List<Validators.Custom> = listOf()
+	private val mainValidator: Validators<T>,
+	private val externalValidators: List<Validators.Custom> = listOf(),
+	private val initialValue: T
 ) {
 
-	protected var hasInteracted = false
+	private var hasInteracted = false
 
-	protected var _currentValue: T? = null
-	val currentValue: T?
-		get() = _currentValue
+	// mutablestate to trigger recomposition
+	var currentValue: T by mutableStateOf(initialValue)
+		protected set
 
-	protected var _isValid: Boolean = false
-	val isValid: Boolean
-		get() = _isValid
+	var isValid: Boolean = false
+		protected set
 
-	protected var _errorMsg: String? = null
-	val errorMsg: String?
-		get() = _errorMsg
+	var errorMsg: String? = null
+		protected set
 	val hasError: Boolean
-		get() = !_errorMsg.isNullOrBlank()
+		get() = !errorMsg.isNullOrBlank()
 
 	fun check(value: T) {
-		val interacted = hasInteracted
-		hasInteracted = true
-		_currentValue = value
+		hasInteracted = value != initialValue
+		currentValue = value
 
 		var isPassing = true
-		isPassing = mainValidator.doCheck(_currentValue)
+		isPassing = mainValidator.doCheck(currentValue)
 		if (!isPassing) {
-			_isValid = false
-			_errorMsg = if (interacted) {
+			this.isValid = false
+			this.errorMsg = if (hasInteracted) {
 				mainValidator.errMsg
 			} else null
 			return
 		}
 
 		externalValidators.forEach {
-			isPassing = it.doCheck(_currentValue)
+			isPassing = it.doCheck(currentValue)
 			if (!isPassing) {
-				_isValid = false
-				_errorMsg = if (interacted) {
+				this.isValid = false
+				this.errorMsg = if (hasInteracted) {
 					it.errMsg
 				} else null
 				return
 			}
 		}
 
-		_isValid = true
-		_errorMsg = null
+		this.isValid = true
+		this.errorMsg = null
 	}
 }
