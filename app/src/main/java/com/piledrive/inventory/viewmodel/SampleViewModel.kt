@@ -30,7 +30,7 @@ class SampleViewModel @Inject constructor(
 		_locationContentState.value = updated
 	}
 
-	suspend fun addNewLocation(name: String) {
+	fun addNewLocation(name: String) {
 		val newLocation = Location(name)
 		val updated = _locationContentState.value.copy(data = _locationContentState.value.data + newLocation)
 		_locationContentState.value = updated
