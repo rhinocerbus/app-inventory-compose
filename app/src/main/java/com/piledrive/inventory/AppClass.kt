@@ -1,4 +1,4 @@
-package com.piledrive.template
+package com.piledrive.inventory
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

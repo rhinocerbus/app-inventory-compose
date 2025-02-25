@@ -1,4 +1,4 @@
-package com.piledrive.template.ui.theme
+package com.piledrive.inventory.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
