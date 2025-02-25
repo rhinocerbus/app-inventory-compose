@@ -1,4 +1,4 @@
-package com.piledrive.movies_sample_compose
+package com.piledrive.template
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
