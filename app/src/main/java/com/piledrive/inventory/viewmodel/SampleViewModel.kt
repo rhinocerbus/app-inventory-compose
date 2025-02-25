@@ -16,15 +16,18 @@ class SampleViewModel @Inject constructor(
 
 	private var activeLocation: Location? = null
 
-	private val _locationContentState = MutableStateFlow<LocationContentState>(LocationContentState())
+	private var locationContent: LocationContentState = LocationContentState()
+	private val _locationContentState = MutableStateFlow<LocationContentState>(locationContent)
 	val locationContentState: StateFlow<LocationContentState> = _locationContentState
 
 	init {
-
+		locationContent = locationContent.copy(hasLoaded = true)
+		_locationContentState.value = locationContent
 	}
 
 	suspend fun reloadContent() {
-
+		val updated = _locationContentState.value.copy()
+		_locationContentState.value = updated
 	}
 
 	suspend fun addNewLocation(name: String) {
@@ -32,5 +35,4 @@ class SampleViewModel @Inject constructor(
 		val updated = _locationContentState.value.copy(data = _locationContentState.value.data + newLocation)
 		_locationContentState.value = updated
 	}
-
 }
