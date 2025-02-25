@@ -6,14 +6,16 @@ plugins {
 	alias(libs.plugins.google.ksp)
 	// DI
 	alias(libs.plugins.hilt.android)
+	// serialization
+	kotlin(libs.plugins.kotlin.serialization.get().pluginId).version(libs.versions.kotlin)
 }
 
 android {
-	namespace = "com.piledrive.template"
+	namespace = "com.piledrive.inventory"
 	compileSdk = 35
 
 	defaultConfig {
-		applicationId = "com.piledrive.template"
+		applicationId = "com.piledrive.inventory"
 		minSdk = 27
 		targetSdk = 35
 		versionCode = 1
@@ -63,6 +65,11 @@ dependencies {
 	implementation(libs.hilt)
 	ksp(libs.hilt.compiler)
 	implementation(libs.hilt.navigation)
+
+	// supabase
+	implementation(platform(libs.supabase.bom))
+	implementation(libs.supabase.db)
+	implementation(libs.ktor)
 
 	// testing
 	testImplementation(libs.junit)

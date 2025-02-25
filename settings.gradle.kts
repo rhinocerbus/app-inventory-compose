@@ -21,7 +21,7 @@ dependencyResolutionManagement {
 	}
 }
 
-rootProject.name = "app-template"
+rootProject.name = "inventory"
 include(":app")
 // composite build config
 // list private library git submodules
