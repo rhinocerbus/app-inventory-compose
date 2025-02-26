@@ -99,6 +99,7 @@ object CreateLocationModalSheet {
 
 				IconButton(
 					modifier = Modifier.size(40.dp),
+					enabled = formState.isValid,
 					onClick = { createLocationCallbacks.onAddLocation(formState.currentValue) }) {
 					Icon(Icons.Default.Add, contentDescription = "add new location")
 				}

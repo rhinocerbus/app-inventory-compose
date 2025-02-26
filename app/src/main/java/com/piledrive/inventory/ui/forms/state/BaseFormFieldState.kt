@@ -17,7 +17,7 @@ abstract class BaseFormFieldState<T>(
 	var currentValue: T by mutableStateOf(initialValue)
 		protected set
 
-	var isValid: Boolean = false
+	var isValid: Boolean by mutableStateOf(false)
 		protected set
 
 	var errorMsg: String? = null
