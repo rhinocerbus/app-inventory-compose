@@ -2,6 +2,7 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.piledrive.inventory.model.Location
+import com.piledrive.inventory.model.Tag
 import com.piledrive.inventory.repo.SampleRepo
 import com.piledrive.inventory.ui.state.LocationContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,25 +15,35 @@ class SampleViewModel @Inject constructor(
 	private val repo: SampleRepo
 ) : ViewModel() {
 
+	companion object {
+		private val allTags = Tag("All")
+	}
+
 	private var activeLocation: Location? = null
 
-	private var locationContent: LocationContentState = LocationContentState()
-	private val _locationContentState = MutableStateFlow<LocationContentState>(locationContent)
-	val locationContentState: StateFlow<LocationContentState> = _locationContentState
+
+	private var userLocationsContent: LocationContentState = LocationContentState()
+	private val _userLocationContentState = MutableStateFlow<LocationContentState>(userLocationsContent)
+	val userLocationContentState: StateFlow<LocationContentState> = _userLocationContentState
 
 	init {
-		locationContent = locationContent.copy(hasLoaded = true)
-		_locationContentState.value = locationContent
+		userLocationsContent = userLocationsContent.copy(hasLoaded = true)
+		_userLocationContentState.value = userLocationsContent
 	}
 
 	suspend fun reloadContent() {
-		val updated = _locationContentState.value.copy()
-		_locationContentState.value = updated
+		val updated = _userLocationContentState.value.copy()
+		_userLocationContentState.value = updated
 	}
 
 	fun addNewLocation(name: String) {
 		val newLocation = Location(name)
-		val updated = _locationContentState.value.copy(data = _locationContentState.value.data + newLocation)
-		_locationContentState.value = updated
+		val curr = userLocationsContent.data
+		val updatedContent = userLocationsContent.data.copy(
+			allLocations = curr.allLocations + newLocation,
+			userLocations = curr.userLocations + newLocation
+		)
+		userLocationsContent = userLocationsContent.copy(data = updatedContent, hasLoaded = true)
+		_userLocationContentState.value = userLocationsContent
 	}
 }

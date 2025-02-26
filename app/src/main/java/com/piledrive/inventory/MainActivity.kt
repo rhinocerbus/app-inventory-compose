@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.piledrive.inventory.ui.nav.RootNavHost
-import com.piledrive.inventory.ui.theme.SampleComposeTheme
+import com.piledrive.inventory.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()
 		setContent {
-			SampleComposeTheme {
+			AppTheme {
 				RootNavHost()
 			}
 		}
