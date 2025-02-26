@@ -20,9 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,7 +31,6 @@ import com.piledrive.inventory.ui.callbacks.stubCreateLocationCallbacks
 import com.piledrive.inventory.ui.forms.state.TextFormFieldState
 import com.piledrive.inventory.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.theme.AppTheme
-import kotlinx.coroutines.launch
 
 object CreateLocationModalSheet {
 	@Composable
@@ -100,7 +97,12 @@ object CreateLocationModalSheet {
 				IconButton(
 					modifier = Modifier.size(40.dp),
 					enabled = formState.isValid,
-					onClick = { createLocationCallbacks.onAddLocation(formState.currentValue) }) {
+					onClick = {
+						// todo - add another callback layer to have viewmodel do content-level validation (dupe check)
+						// todo - dismiss based on success of ^
+						createLocationCallbacks.onAddLocation(formState.currentValue)
+					}
+				) {
 					Icon(Icons.Default.Add, contentDescription = "add new location")
 				}
 			}
