@@ -7,5 +7,5 @@ import kotlinx.coroutines.flow.StateFlow
 
 fun previewMainContentFlow(
 ): StateFlow<LocationContentState> {
-	return MutableStateFlow(LocationContentState())
+	return MutableStateFlow(LocationContentState(hasLoaded = true, isLoading = false))
 }

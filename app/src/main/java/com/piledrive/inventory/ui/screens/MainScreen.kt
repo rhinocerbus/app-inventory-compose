@@ -4,6 +4,7 @@ package com.piledrive.inventory.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -90,19 +91,22 @@ object MainScreen : NavRoute {
 
 	@Composable
 	fun DrawBody(
-		modifier: Modifier = Modifier, contentState: StateFlow<LocationContentState>,
+		modifier: Modifier = Modifier,
+		contentState: StateFlow<LocationContentState>,
 		showCreateLocationBottomSheet: Boolean,
 		createLocationCallbacks: CreateLocationCallbacks,
 		modalSheetCallbacks: ModalSheetCallbacks,
 	) {
 		val content = contentState.collectAsState().value
 		Column(
+			modifier = modifier,
 			verticalArrangement = Arrangement.Center,
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
 			when {
 				content.data.userLocations.isEmpty() -> {
 					if (content.hasLoaded) {
+						// empty
 						DrawEmptyLocationsState(createLocationCallbacks)
 					} else {
 						// main spinner
@@ -111,16 +115,22 @@ object MainScreen : NavRoute {
 
 				else -> {
 					// content
+					LazyColumn(
+						modifier = Modifier.fillMaxSize(),
+					) {
+						//items
+						//itemsIndexed(content.data.)
+					}
 
 					if (content.isLoading) {
 						// secondary spinner?
 					}
 				}
 			}
-			if (content.data.userLocations.isEmpty())
-				if (showCreateLocationBottomSheet) {
-					CreateLocationModalSheet.Draw(Modifier, modalSheetCallbacks, createLocationCallbacks)
-				}
+
+			if (showCreateLocationBottomSheet) {
+				CreateLocationModalSheet.Draw(Modifier, modalSheetCallbacks, createLocationCallbacks)
+			}
 		}
 	}
 
@@ -182,12 +192,12 @@ object MainScreen : NavRoute {
 	}
 
 	@Composable
-	fun DrawLocationItems(modifier: Modifier = Modifier) {
+	fun ColumnScope.DrawLocationItems(modifier: Modifier = Modifier) {
 		LazyColumn() { }
 	}
 
 	@Composable
-	fun DrawEmptyLocationsState(createLocationCallbacks: CreateLocationCallbacks) {
+	fun ColumnScope.DrawEmptyLocationsState(createLocationCallbacks: CreateLocationCallbacks) {
 		// empty
 		Text(
 			"no locations :("
