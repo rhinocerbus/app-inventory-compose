@@ -9,4 +9,6 @@ plugins {
 	alias(libs.plugins.google.ksp) apply false
 	// DI
 	alias(libs.plugins.hilt.android) apply false
+	// serialization
+	kotlin(libs.plugins.kotlin.serialization.get().pluginId).version(libs.versions.kotlin).apply(false)
 }
