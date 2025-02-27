@@ -1,6 +1,7 @@
 package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.model.Location
 import com.piledrive.inventory.model.Tag
 import com.piledrive.inventory.repo.SampleRepo
@@ -8,6 +9,7 @@ import com.piledrive.inventory.ui.state.LocationContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,13 +33,22 @@ class SampleViewModel @Inject constructor(
 		_userLocationContentState.value = userLocationsContent
 	}
 
-	suspend fun reloadContent() {
-		val updated = _userLocationContentState.value.copy()
-		_userLocationContentState.value = updated
+	fun reloadContent() {
+		viewModelScope.launch {
+			val apiLocations = repo.getAllLocations()
+			val current = userLocationsContent.data
+			userLocationsContent = userLocationsContent.copy(data = current.copy(userLocations = apiLocations))
+			val updated = _userLocationContentState.value.copy()
+			_userLocationContentState.value = updated
+
+		}
 	}
 
 	fun addNewLocation(name: String) {
-		val newLocation = Location(name)
+		viewModelScope.launch {
+			repo.addLocation(name)
+			/*
+					val newLocation = Location(name)
 		val curr = userLocationsContent.data
 		val updatedContent = userLocationsContent.data.copy(
 			allLocations = curr.allLocations + newLocation,
@@ -45,5 +56,8 @@ class SampleViewModel @Inject constructor(
 		)
 		userLocationsContent = userLocationsContent.copy(data = updatedContent, hasLoaded = true)
 		_userLocationContentState.value = userLocationsContent
+
+			 */
+		}
 	}
 }
