@@ -70,6 +70,7 @@ dependencies {
 	// supabase
 	implementation(platform(libs.supabase.bom))
 	implementation(libs.supabase.db)
+	implementation(libs.supabase.realtime)
 	implementation(libs.supabase.moshi)
 	implementation(libs.ktor)
 
