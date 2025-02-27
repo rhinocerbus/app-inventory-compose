@@ -1,5 +1,7 @@
 package com.piledrive.inventory.hilt
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -8,10 +10,17 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.serializer.KotlinXSerializer
+import io.github.jan.supabase.serializer.MoshiSerializer
 
 @Module
 @InstallIn(SingletonComponent::class)
 object SupaBaseModule {
+
+	private val moshi by lazy {
+		Moshi.Builder()
+			.add(KotlinJsonAdapterFactory())
+			.build()
+	}
 
 	@Provides
 	fun provideSupaBase(): SupabaseClient {
@@ -22,6 +31,7 @@ object SupaBaseModule {
 		) {
 			//aso supports moshi, jackson
 			//defaultSerializer = KotlinXSerializer()
+			defaultSerializer = MoshiSerializer(moshi)
 			install(Postgrest)
 		}
 		return supabase

@@ -18,9 +18,11 @@ lifecycleRuntimeKtx = "2.8.7"
 uiGraphicsAndroid = "1.7.8"
 uiTooling = "1.7.8"
 # supabase
-serialization = "1.9.10"
 supabase = "3.1.1"
 ktor = "3.1.0"
+# serialization
+serialization = "1.8.0"
+moshiKotlin = "1.15.1"
 # testing
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -52,7 +54,11 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref =
 # supabase
 supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }
 supabase-db = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }
+supabase-moshi = { group = "io.github.jan-tennert.supabase", name = "serializer-moshi" }
 ktor = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
+# serialization
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshiKotlin" }
 # testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

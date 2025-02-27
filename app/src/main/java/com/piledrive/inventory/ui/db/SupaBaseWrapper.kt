@@ -23,7 +23,7 @@ class SupaBaseWrapper @Inject constructor(
 
 	suspend fun addLocation(name: String) {
 		val location = LocationSlug(name = name)
-		val result = client.from(TABLE_LOCATIONS).insert(LocationSlug)
+		val result = client.from(TABLE_LOCATIONS).insert(location)
 		Log.d("sadf", "${result.data}")
 	}
 }

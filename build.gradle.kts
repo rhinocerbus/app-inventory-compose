@@ -10,5 +10,6 @@ plugins {
 	// DI
 	alias(libs.plugins.hilt.android) apply false
 	// serialization
+	//alias(libs.plugins.kotlin.serialization) apply false
 	kotlin(libs.plugins.kotlin.serialization.get().pluginId).version(libs.versions.kotlin).apply(false)
 }

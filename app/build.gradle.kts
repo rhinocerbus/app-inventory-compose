@@ -70,7 +70,13 @@ dependencies {
 	// supabase
 	implementation(platform(libs.supabase.bom))
 	implementation(libs.supabase.db)
+	implementation(libs.supabase.moshi)
 	implementation(libs.ktor)
+
+	// serialization
+	implementation(libs.kotlinx.serialization.json)
+	implementation(libs.moshi.kotlin)
+	ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
 
 	// testing
 	testImplementation(libs.junit)
