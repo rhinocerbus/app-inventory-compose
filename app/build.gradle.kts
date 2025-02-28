@@ -43,10 +43,6 @@ android {
 }
 
 dependencies {
-	// composite build config
-	//implementation("com.piledrive.lib_retrofit_moshi:lib") // no version necessary
-	//implementation("com.piledrive.lib_datastore:lib") // no version necessary
-
 	// android/androidx/compose
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -61,6 +57,9 @@ dependencies {
 	implementation(libs.androidx.material3)
 	implementation(libs.androidx.navigation.compose)
 	debugImplementation(libs.ui.tooling)
+
+	// internal libraries
+	implementation("com.piledrive.lib_db_room:lib") // no version necessary
 
 	// DI
 	implementation(libs.hilt)
