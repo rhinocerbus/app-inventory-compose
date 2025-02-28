@@ -10,7 +10,7 @@ data class LocationOptions(
 	val currentLocation: Location = defaultLocation
 ) {
 	companion object {
-		private val defaultLocation = Location("", "All", "")
+		val defaultLocation = Location("", "All", "")
 	}
 }
 

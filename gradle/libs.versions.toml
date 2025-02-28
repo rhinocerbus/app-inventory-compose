@@ -25,6 +25,8 @@ serialization = "1.8.0"
 moshiKotlin = "1.15.1"
 # powersync
 powersync = "1.0.0+"
+# logging
+timber = "5.0.1"
 # testing
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -59,6 +61,7 @@ lib-db-room = { module = "com.piledrive.lib_db_room:lib" }
 supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }
 supabase-db = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }
 supabase-realtime = { group = "io.github.jan-tennert.supabase", name = "realtime-kt" }
+supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
 supabase-moshi = { group = "io.github.jan-tennert.supabase", name = "serializer-moshi" }
 ktor = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 # serialization
@@ -67,7 +70,8 @@ moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.re
 # powersync
 powersync-core = { group = "com.powersync", name = "core", version.ref = "powersync" }
 powersync-supabase = { group = "com.powersync", name = "connector-supabase", version.ref = "powersync" }
-
+# logging
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 # testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

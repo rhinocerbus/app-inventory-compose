@@ -77,6 +77,7 @@ dependencies {
 	implementation(platform(libs.supabase.bom))
 	implementation(libs.supabase.db)
 	implementation(libs.supabase.realtime)
+	implementation(libs.supabase.auth)
 	implementation(libs.supabase.moshi)
 	implementation(libs.ktor)
 
@@ -88,6 +89,9 @@ dependencies {
 	// powersync
 	implementation(libs.powersync.core)
 	implementation(libs.powersync.supabase)
+
+	// logging
+	implementation(libs.timber)
 
 	// testing
 	testImplementation(libs.junit)
