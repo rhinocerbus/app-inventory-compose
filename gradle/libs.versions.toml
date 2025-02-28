@@ -23,6 +23,8 @@ ktor = "3.1.0"
 # serialization
 serialization = "1.8.0"
 moshiKotlin = "1.15.1"
+# powersync
+powersync = "1.0.0+"
 # testing
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -62,6 +64,10 @@ ktor = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 # serialization
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshiKotlin" }
+# powersync
+powersync-core = { group = "com.powersync", name = "core", version.ref = "powersync" }
+powersync-supabase = { group = "com.powersync", name = "connector-supabase", version.ref = "powersync" }
+
 # testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
