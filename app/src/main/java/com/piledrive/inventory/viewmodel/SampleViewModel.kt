@@ -2,6 +2,7 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.piledrive.inventory.model.Location
 import com.piledrive.inventory.model.Tag
 import com.piledrive.inventory.repo.SampleRepo
@@ -31,6 +32,7 @@ class SampleViewModel @Inject constructor(
 	init {
 		userLocationsContent = userLocationsContent.copy(hasLoaded = true)
 		_userLocationContentState.value = userLocationsContent
+		watchLocations()
 	}
 
 	fun reloadContent() {
@@ -58,6 +60,14 @@ class SampleViewModel @Inject constructor(
 		_userLocationContentState.value = userLocationsContent
 
 			 */
+		}
+	}
+
+	fun watchLocations() {
+		viewModelScope.launch {
+			repo.watchLocations().collect {
+
+			}
 		}
 	}
 }

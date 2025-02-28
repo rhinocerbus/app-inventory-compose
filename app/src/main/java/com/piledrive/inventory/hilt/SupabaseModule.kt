@@ -9,8 +9,11 @@ import dagger.hilt.components.SingletonComponent
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.realtime.Realtime
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import io.github.jan.supabase.serializer.MoshiSerializer
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -23,6 +26,7 @@ object SupaBaseModule {
 	}
 
 	@Provides
+	@Singleton
 	fun provideSupaBase(): SupabaseClient {
 
 		val supabase = createSupabaseClient(
@@ -33,7 +37,14 @@ object SupaBaseModule {
 			//defaultSerializer = KotlinXSerializer()
 			defaultSerializer = MoshiSerializer(moshi)
 			install(Postgrest)
+			install(Realtime)
 		}
 		return supabase
+	}
+
+	@Provides
+	@Singleton
+	fun provideSupabaseDatabase(client: SupabaseClient): Postgrest {
+		return client.postgrest
 	}
 }

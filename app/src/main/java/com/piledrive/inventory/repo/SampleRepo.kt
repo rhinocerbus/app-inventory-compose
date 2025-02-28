@@ -3,7 +3,9 @@ package com.piledrive.inventory.repo
 import com.piledrive.inventory.model.Location
 import com.piledrive.inventory.ui.db.SupaBaseWrapper
 import dagger.hilt.android.scopes.ViewModelScoped
+import io.github.jan.supabase.realtime.PostgresAction
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -24,5 +26,9 @@ class SampleRepo @Inject constructor(
 		withContext(Dispatchers.Default) {
 			supaBase.addLocation(name)
 		}
+	}
+
+	suspend fun watchLocations(): Flow<PostgresAction> {
+		return supaBase.buildLocationsChannel()
 	}
 }
