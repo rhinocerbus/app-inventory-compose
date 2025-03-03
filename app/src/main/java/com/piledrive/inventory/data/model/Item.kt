@@ -1,4 +1,4 @@
-package com.piledrive.inventory.model
+package com.piledrive.inventory.data.model
 
 import kotlin.Unit
 

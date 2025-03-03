@@ -1,8 +1,8 @@
 package com.piledrive.inventory.ui.state
 
-import com.piledrive.inventory.model.Item
-import com.piledrive.inventory.model.Location
-import com.piledrive.inventory.model.Tag
+import com.piledrive.inventory.data.model.Item
+import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.Tag
 
 data class LocationOptions(
 	val allLocations: List<Location> = listOf(defaultLocation),

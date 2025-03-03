@@ -1,8 +1,8 @@
 package com.piledrive.inventory.ui.db
 
 import android.util.Log
-import com.piledrive.inventory.model.Location
-import com.piledrive.inventory.model.LocationSlug
+import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.LocationSlug
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.realtime.PostgresAction

@@ -1,6 +1,6 @@
 package com.piledrive.inventory.repo.datasource.abstracts
 
-import com.piledrive.inventory.model.Location
+import com.piledrive.inventory.data.model.Location
 import kotlinx.coroutines.flow.Flow
 
 interface LocationsSourceImpl {

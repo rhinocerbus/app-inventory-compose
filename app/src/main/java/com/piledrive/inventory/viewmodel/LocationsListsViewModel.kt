@@ -2,8 +2,8 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.piledrive.inventory.model.Location
-import com.piledrive.inventory.model.Tag
+import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions

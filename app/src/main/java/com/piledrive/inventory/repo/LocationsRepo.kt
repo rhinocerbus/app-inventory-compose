@@ -1,6 +1,6 @@
 package com.piledrive.inventory.repo
 
-import com.piledrive.inventory.model.Location
+import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.repo.datasource.PowerSyncLocationsDataSource
 import com.piledrive.inventory.repo.datasource.SupaBaseLocationsDataSource
 import dagger.hilt.android.scopes.ViewModelScoped

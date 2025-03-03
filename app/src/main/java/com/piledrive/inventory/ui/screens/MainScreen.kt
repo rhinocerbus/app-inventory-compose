@@ -24,8 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.piledrive.inventory.model.Location
-import com.piledrive.inventory.model.Tag
+import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.CreateLocationCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks

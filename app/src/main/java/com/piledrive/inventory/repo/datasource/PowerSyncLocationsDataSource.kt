@@ -2,9 +2,8 @@ package com.piledrive.inventory.repo.datasource
 
 import android.content.ContentValues
 import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
-import com.piledrive.inventory.model.Location
+import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.repo.datasource.abstracts.LocationsSourceImpl
-import com.powersync.PowerSyncDatabase
 import com.powersync.db.getString
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
