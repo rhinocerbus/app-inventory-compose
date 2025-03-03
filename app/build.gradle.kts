@@ -66,7 +66,7 @@ dependencies {
 	debugImplementation(libs.ui.tooling)
 
 	// internal libraries (no version necessary)
-	implementation(libs.lib.db.room)
+	//implementation(libs.lib.db.room)
 
 	// DI
 	implementation(libs.hilt)

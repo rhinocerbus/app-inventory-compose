@@ -26,5 +26,4 @@ rootProject.name = "inventory"
 include(":app")
 // composite build config
 // list private library git submodules
-includeBuild("lib-db-room")
 //includeBuild("lib-datastore")

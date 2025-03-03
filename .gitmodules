@@ -4,6 +4,3 @@
 [submodule "lib-datastore"]
 	path = lib-datastore
 	url = git@github.com:rhinocerbus/lib-datastore.git
-[submodule "lib-db-room"]
-	path = lib-db-room
-	url = git@github.com:rhinocerbus/lib-db-room.git
