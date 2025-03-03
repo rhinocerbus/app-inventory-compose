@@ -108,4 +108,11 @@ class SampleViewModel @Inject constructor(
 			}
 		}
 	}
+
+	fun changeLocation(loc: Location) {
+		userLocationsContent = userLocationsContent.copy(
+			data = userLocationsContent.data.copy(currentLocation = loc)
+		)
+		_userLocationContentState.value = userLocationsContent
+	}
 }
