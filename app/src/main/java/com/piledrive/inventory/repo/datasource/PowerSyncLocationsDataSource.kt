@@ -1,5 +1,7 @@
 package com.piledrive.inventory.repo.datasource
 
+import android.content.ContentValues
+import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.model.Location
 import com.piledrive.inventory.repo.datasource.abstracts.LocationsSourceImpl
 import com.powersync.PowerSyncDatabase
@@ -11,21 +13,21 @@ import javax.inject.Inject
 
 @ViewModelScoped
 class PowerSyncLocationsDataSource @Inject constructor(
-	private val powerSync: PowerSyncDatabase,
+	private val powerSync: PowerSyncDbWrapper,
 ) : LocationsSourceImpl {
 
 
 	fun initPowerSync(): Flow<Int> {
 		return callbackFlow {
 			send(0)
-			powerSync.waitForFirstSync()
+			powerSync.db.waitForFirstSync()
 			send(1)
 			close()
 		}
 	}
 
 	override fun watchLocations(): Flow<List<Location>> {
-		return powerSync.watch(
+		return powerSync.db.watch(
 			"SELECT * FROM locations", mapper = { cursor ->
 				Location(
 					id = cursor.getString("id"),
@@ -37,7 +39,9 @@ class PowerSyncLocationsDataSource @Inject constructor(
 	}
 
 	override suspend fun addLocation(name: String) {
-		//raw sql i think - look it up
-		powerSync.execute("")
+		val values = ContentValues().apply {
+			put("name", name)
+		}
+		powerSync.insert("locations", values)
 	}
 }

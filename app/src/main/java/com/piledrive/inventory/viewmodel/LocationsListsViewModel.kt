@@ -89,7 +89,9 @@ class LocationsListsViewModel @Inject constructor(
 							allLocations = flatLocations,
 							userLocations = it,
 							currentLocation = userLocationsContent.data.currentLocation
-						)
+						),
+						hasLoaded = true,
+						isLoading = false
 					)
 					withContext(Dispatchers.Main) {
 						_userLocationContentState.value = userLocationsContent

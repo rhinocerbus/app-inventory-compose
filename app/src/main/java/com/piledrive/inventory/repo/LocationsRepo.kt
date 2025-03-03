@@ -20,8 +20,8 @@ class LocationsRepo @Inject constructor(
 	}
 
 	suspend fun addLocation(name: String) {
-		//powerSyncSource.addLocation(name)
-		supaBase.addLocation(name)
+		powerSyncSource.addLocation(name)
+		//supaBase.addLocation(name)
 	}
 
 	fun watchLocations(): Flow<List<Location>> {
