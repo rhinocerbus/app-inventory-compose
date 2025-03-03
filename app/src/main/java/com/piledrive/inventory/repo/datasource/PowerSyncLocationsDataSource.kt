@@ -1,27 +1,21 @@
-package com.piledrive.inventory.repo
+package com.piledrive.inventory.repo.datasource
 
 import com.piledrive.inventory.model.Location
-import com.piledrive.inventory.ui.db.SupaBaseWrapper
-import com.piledrive.inventory.ui.state.LocationOptions
+import com.piledrive.inventory.repo.datasource.abstracts.LocationsSourceImpl
 import com.powersync.PowerSyncDatabase
 import com.powersync.db.getString
 import dagger.hilt.android.scopes.ViewModelScoped
-import io.github.jan.supabase.realtime.PostgresAction
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @ViewModelScoped
-class PowerSyncRepo @Inject constructor(
+class PowerSyncLocationsDataSource @Inject constructor(
 	private val powerSync: PowerSyncDatabase,
-	//private val localSource: LocalMoviesSource,
-	//private val settingsSource: LocalSettingsSource
-) {
+) : LocationsSourceImpl {
 
-	fun start(): Flow<Int> {
+
+	fun initPowerSync(): Flow<Int> {
 		return callbackFlow {
 			send(0)
 			powerSync.waitForFirstSync()
@@ -30,7 +24,7 @@ class PowerSyncRepo @Inject constructor(
 		}
 	}
 
-	fun loadLocations(): Flow<List<Location>> {
+	override fun watchLocations(): Flow<List<Location>> {
 		return powerSync.watch(
 			"SELECT * FROM locations", mapper = { cursor ->
 				Location(
@@ -42,4 +36,8 @@ class PowerSyncRepo @Inject constructor(
 		)
 	}
 
+	override suspend fun addLocation(name: String) {
+		//raw sql i think - look it up
+		powerSync.execute("")
+	}
 }

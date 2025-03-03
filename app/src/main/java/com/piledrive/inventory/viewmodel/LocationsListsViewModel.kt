@@ -2,11 +2,9 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.piledrive.inventory.model.Location
 import com.piledrive.inventory.model.Tag
-import com.piledrive.inventory.repo.PowerSyncRepo
-import com.piledrive.inventory.repo.SampleRepo
+import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,9 +17,8 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class SampleViewModel @Inject constructor(
-	private val repo: SampleRepo,
-	private val powerSyncRepo: PowerSyncRepo
+class LocationsListsViewModel @Inject constructor(
+	private val locationsRepo: LocationsRepo,
 ) : ViewModel() {
 
 	companion object {
@@ -38,7 +35,28 @@ class SampleViewModel @Inject constructor(
 	init {
 		userLocationsContent = userLocationsContent.copy(hasLoaded = true)
 		_userLocationContentState.value = userLocationsContent
-		watchLocations()
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				locationsRepo.initialize().collect {
+					Timber.d("locations repo init status: $it")
+					when (it) {
+						-1 -> {
+							// init error
+							// todo - add error ui state
+						}
+
+						0 -> {
+							// started
+						}
+
+						1 -> {
+							// done
+							watchLocations()
+						}
+					}
+				}
+			}
+		}
 	}
 
 	fun reloadContent() {
@@ -56,42 +74,15 @@ class SampleViewModel @Inject constructor(
 
 	fun addNewLocation(name: String) {
 		viewModelScope.launch {
-			repo.addLocation(name)
-			/*
-					val newLocation = Location(name)
-		val curr = userLocationsContent.data
-		val updatedContent = userLocationsContent.data.copy(
-			allLocations = curr.allLocations + newLocation,
-			userLocations = curr.userLocations + newLocation
-		)
-		userLocationsContent = userLocationsContent.copy(data = updatedContent, hasLoaded = true)
-		_userLocationContentState.value = userLocationsContent
-
-			 */
+			locationsRepo.addLocation(name)
 		}
 	}
 
-	fun watchLocations() {
-		viewModelScope.launch {
-			repo.watchLocations().collect {
-
-			}
-		}
-
-		viewModelScope.launch {
-		  withContext(Dispatchers.Default) {
-				powerSyncRepo.start().collect {
-					Timber.d("$it")
-					if(it == 1) {
-						reloadContent()
-					}
-				}
-		  }
-		}
-
+	private fun watchLocations() {
 		viewModelScope.launch {
 			withContext(Dispatchers.Default) {
-				powerSyncRepo.loadLocations().collect {
+				locationsRepo.watchLocations().collect {
+					Timber.d("Locations received: $it")
 					val flatLocations = listOf(LocationOptions.defaultLocation, *it.toTypedArray())
 					userLocationsContent = LocationContentState(
 						data = LocationOptions(
@@ -102,7 +93,6 @@ class SampleViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userLocationContentState.value = userLocationsContent
-
 					}
 				}
 			}

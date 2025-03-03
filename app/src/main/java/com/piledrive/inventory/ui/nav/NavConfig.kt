@@ -9,7 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.piledrive.inventory.ui.screens.MainScreen
-import com.piledrive.inventory.viewmodel.SampleViewModel
+import com.piledrive.inventory.viewmodel.LocationsListsViewModel
 
 interface NavRoute {
 	val routeValue: String
@@ -46,7 +46,7 @@ fun RootNavHost() {
 */
 
 		composable(route = MainScreen.routeValue) {
-			val viewModel: SampleViewModel = hiltViewModel<SampleViewModel>()
+			val viewModel: LocationsListsViewModel = hiltViewModel<LocationsListsViewModel>()
 			LaunchedEffect("load_content_on_launch") {
 				viewModel.reloadContent()
 			}

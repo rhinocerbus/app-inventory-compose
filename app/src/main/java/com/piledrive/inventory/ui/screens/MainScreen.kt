@@ -36,7 +36,7 @@ import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.util.previewMainContentFlow
-import com.piledrive.inventory.viewmodel.SampleViewModel
+import com.piledrive.inventory.viewmodel.LocationsListsViewModel
 import kotlinx.coroutines.flow.StateFlow
 
 object MainScreen : NavRoute {
@@ -44,7 +44,7 @@ object MainScreen : NavRoute {
 
 	@Composable
 	fun draw(
-		viewModel: SampleViewModel,
+		viewModel: LocationsListsViewModel,
 	) {
 		var showCreateLocationBottomSheet by remember { mutableStateOf(false) }
 		val createLocationCallbacks = object : CreateLocationCallbacks {
