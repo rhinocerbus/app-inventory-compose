@@ -21,20 +21,11 @@ class LocationsListsViewModel @Inject constructor(
 	private val locationsRepo: LocationsRepo,
 ) : ViewModel() {
 
-	companion object {
-		private val allTags = Tag("All")
+	init {
+		reloadContent()
 	}
 
-	private var activeLocation: Location? = null
-
-
-	private var userLocationsContent: LocationContentState = LocationContentState()
-	private val _userLocationContentState = MutableStateFlow<LocationContentState>(userLocationsContent)
-	val userLocationContentState: StateFlow<LocationContentState> = _userLocationContentState
-
-	init {
-		userLocationsContent = userLocationsContent.copy(hasLoaded = true)
-		_userLocationContentState.value = userLocationsContent
+	fun reloadContent() {
 		viewModelScope.launch {
 			withContext(Dispatchers.Default) {
 				locationsRepo.initialize().collect {
@@ -59,24 +50,25 @@ class LocationsListsViewModel @Inject constructor(
 		}
 	}
 
-	fun reloadContent() {
+
+	//  region Location data
+	/////////////////////////////////////////////////
+
+	private var userLocationsContent: LocationContentState = LocationContentState()
+	private val _userLocationContentState = MutableStateFlow<LocationContentState>(userLocationsContent)
+	val userLocationContentState: StateFlow<LocationContentState> = _userLocationContentState
+
+	/*
+	private fun loadLocations() {
 		viewModelScope.launch {
-			/*
 			val apiLocations = repo.getAllLocations()
 			val current = userLocationsContent.data
 			userLocationsContent = userLocationsContent.copy(data = current.copy(userLocations = apiLocations))
 			val updated = _userLocationContentState.value.copy()
 			_userLocationContentState.value = updated
-*/
-
 		}
 	}
-
-	fun addNewLocation(name: String) {
-		viewModelScope.launch {
-			locationsRepo.addLocation(name)
-		}
-	}
+	*/
 
 	private fun watchLocations() {
 		viewModelScope.launch {
@@ -101,10 +93,20 @@ class LocationsListsViewModel @Inject constructor(
 		}
 	}
 
+	//todo: possible add pref, or keep it session-level
 	fun changeLocation(loc: Location) {
 		userLocationsContent = userLocationsContent.copy(
 			data = userLocationsContent.data.copy(currentLocation = loc)
 		)
 		_userLocationContentState.value = userLocationsContent
 	}
+
+	fun addNewLocation(name: String) {
+		viewModelScope.launch {
+			locationsRepo.addLocation(name)
+		}
+	}
+
+	/////////////////////////////////////////////////
+	//  endregion
 }

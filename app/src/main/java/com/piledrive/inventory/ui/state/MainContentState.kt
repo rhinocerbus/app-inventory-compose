@@ -10,7 +10,7 @@ data class LocationOptions(
 	val currentLocation: Location = defaultLocation
 ) {
 	companion object {
-		val defaultLocation = Location("", "All", "")
+		val defaultLocation = Location("", "Everywhere", "")
 	}
 }
 
@@ -27,7 +27,7 @@ data class TagOptions(
 	val currentTag: Tag = defaultTag
 ) {
 	companion object {
-		private val defaultTag = Tag("All")
+		private val defaultTag = Tag("Everything")
 	}
 }
 

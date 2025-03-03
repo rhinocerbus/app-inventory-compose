@@ -35,6 +35,7 @@ import com.piledrive.inventory.ui.callbacks.stubModalSheetCallbacks
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.LocationContentState
+import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.util.previewMainContentFlow
 import com.piledrive.inventory.viewmodel.LocationsListsViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -78,7 +79,7 @@ object MainScreen : NavRoute {
 
 	@Composable
 	fun drawContent(
-		contentState: StateFlow<LocationContentState>,
+		locationState: StateFlow<LocationContentState>,
 		showCreateLocationBottomSheet: Boolean,
 		createLocationCallbacks: CreateLocationCallbacks,
 		modalSheetCallbacks: ModalSheetCallbacks,
@@ -86,14 +87,14 @@ object MainScreen : NavRoute {
 	) {
 		Scaffold(
 			topBar = {
-				DrawBarWithFilters(Modifier, contentState, contentFilterCallbacks)
+				DrawBarWithFilters(Modifier, locationState, contentFilterCallbacks)
 			},
 			content = { innerPadding ->
 				DrawBody(
 					modifier = Modifier
 						.padding(innerPadding)
 						.fillMaxSize(),
-					contentState = contentState,
+					contentState = locationState,
 					showCreateLocationBottomSheet,
 					createLocationCallbacks,
 					modalSheetCallbacks
@@ -148,7 +149,12 @@ object MainScreen : NavRoute {
 	}
 
 	@Composable
-	fun DrawBarWithFilters(modifier: Modifier = Modifier, contentState: StateFlow<LocationContentState>, callbacks: ContentFilterCallbacks) {
+	fun DrawBarWithFilters(
+		modifier: Modifier = Modifier,
+		locationState: StateFlow<LocationContentState>,
+		tagState: StateFlow<TagsContentState>,
+		callbacks: ContentFilterCallbacks
+	) {
 		val content = contentState.collectAsState().value
 
 		var showLocations by remember { mutableStateOf(false) }

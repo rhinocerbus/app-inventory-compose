@@ -1,22 +1,21 @@
 package com.piledrive.inventory.data.model
 
+import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 //@Serializable
 @JsonClass(generateAdapter = true)
-data class Location(
-	val id: String = "",
-	val name: String,
-	@Json(name = "created_at")
-	val createdAt: String
-)
+interface LocationImpl {
+	val name: String
+}
 
-//@Serializable
-@JsonClass(generateAdapter = true)
 data class LocationSlug(
-	val id: String? = null,
-	val name: String,
-	@Json(name = "created_at")
-	val createdAt: String? = null
-)
+	override val name: String,
+) : LocationImpl
+
+data class Location(
+	override val id: String = "",
+	override val createdAt: String,
+	override val name: String,
+): LocationImpl, SupaBaseModel
