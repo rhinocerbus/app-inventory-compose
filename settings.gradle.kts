@@ -17,6 +17,7 @@ dependencyResolutionManagement {
 	repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
 	repositories {
 		google()
+		maven("https://jitpack.io")
 		mavenCentral()
 	}
 }
@@ -25,5 +26,4 @@ rootProject.name = "inventory"
 include(":app")
 // composite build config
 // list private library git submodules
-//includeBuild("lib-retrofit-moshi")
 //includeBuild("lib-datastore")

@@ -1,26 +1,32 @@
 [versions]
 # Dependencies of the included build-logic
 # core android
-agp = "8.7.2"
+agp = "8.7.3"
 kotlin = "2.0.21"
-androidGradlePlugin = "8.1.2"
+androidGradlePlugin = "8.1.4"
 ksp = "2.0.21-1.0.25"
 coreKtx = "1.15.0"
 # DI
 hilt = "2.51.1"
 hilt-navigation = "1.2.0"
 # compose
-composeBom = "2024.11.00"
-composeLiveData = "1.7.5"
-navigationCompose = "2.8.4"
-activityCompose = "1.9.3"
+composeBom = "2025.02.00"
+composeLiveData = "1.7.8"
+navigationCompose = "2.8.8"
+activityCompose = "1.10.1"
 lifecycleRuntimeKtx = "2.8.7"
 uiGraphicsAndroid = "1.7.8"
 uiTooling = "1.7.8"
 # supabase
-serialization = "1.9.10"
 supabase = "3.1.1"
 ktor = "3.1.0"
+# serialization
+serialization = "1.8.0"
+moshiKotlin = "1.15.1"
+# powersync
+powersync = "1.0.0+"
+# logging
+timber = "5.0.1"
 # testing
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -49,10 +55,23 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
+## internal libraries
+#lib-db-room = { module = "com.piledrive.lib_db_room:lib" }
 # supabase
 supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }
 supabase-db = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }
-ktor = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
+supabase-realtime = { group = "io.github.jan-tennert.supabase", name = "realtime-kt" }
+supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
+supabase-moshi = { group = "io.github.jan-tennert.supabase", name = "serializer-moshi" }
+ktor = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+# serialization
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshiKotlin" }
+# powersync
+powersync-core = { group = "com.powersync", name = "core", version.ref = "powersync" }
+powersync-supabase = { group = "com.powersync", name = "connector-supabase", version.ref = "powersync" }
+# logging
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 # testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

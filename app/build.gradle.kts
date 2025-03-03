@@ -14,6 +14,8 @@ android {
 	namespace = "com.piledrive.inventory"
 	compileSdk = 35
 
+	buildFeatures.buildConfig = true
+
 	defaultConfig {
 		applicationId = "com.piledrive.inventory"
 		minSdk = 27
@@ -22,6 +24,11 @@ android {
 		versionName = "1.0"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+
+		buildConfigField("String", "SUPABASE_URL", "\"https://qchankldevimabcnapws.supabase.co\"")
+		buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjaGFua2xkZXZpbWFiY25hcHdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MzA4NjAsImV4cCI6MjA1NjAwNjg2MH0.VqmE24t68BIFPO0ffNRfZmy33sj_7uAFYaEedQuK7NU\"")
+		buildConfigField("String", "POWERSYNC_URL", "\"https://67c1ea67586c8d282a0671fa.powersync.journeyapps.com\"")
 	}
 
 	buildTypes {
@@ -43,10 +50,6 @@ android {
 }
 
 dependencies {
-	// composite build config
-	//implementation("com.piledrive.lib_retrofit_moshi:lib") // no version necessary
-	//implementation("com.piledrive.lib_datastore:lib") // no version necessary
-
 	// android/androidx/compose
 	implementation(libs.androidx.core.ktx)
 	implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -62,6 +65,9 @@ dependencies {
 	implementation(libs.androidx.navigation.compose)
 	debugImplementation(libs.ui.tooling)
 
+	// internal libraries (no version necessary)
+	//implementation(libs.lib.db.room)
+
 	// DI
 	implementation(libs.hilt)
 	ksp(libs.hilt.compiler)
@@ -70,7 +76,22 @@ dependencies {
 	// supabase
 	implementation(platform(libs.supabase.bom))
 	implementation(libs.supabase.db)
+	implementation(libs.supabase.realtime)
+	implementation(libs.supabase.auth)
+	implementation(libs.supabase.moshi)
 	implementation(libs.ktor)
+
+	// serialization
+	implementation(libs.kotlinx.serialization.json)
+	implementation(libs.moshi.kotlin)
+	ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
+
+	// powersync
+	implementation(libs.powersync.core)
+	implementation(libs.powersync.supabase)
+
+	// logging
+	implementation(libs.timber)
 
 	// testing
 	testImplementation(libs.junit)

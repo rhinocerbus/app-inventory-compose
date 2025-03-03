@@ -24,15 +24,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.piledrive.inventory.model.Location
+import com.piledrive.inventory.model.Tag
+import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.CreateLocationCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
+import com.piledrive.inventory.ui.callbacks.stubContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.stubCreateLocationCallbacks
 import com.piledrive.inventory.ui.callbacks.stubModalSheetCallbacks
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.util.previewMainContentFlow
-import com.piledrive.inventory.viewmodel.SampleViewModel
+import com.piledrive.inventory.viewmodel.LocationsListsViewModel
 import kotlinx.coroutines.flow.StateFlow
 
 object MainScreen : NavRoute {
@@ -40,7 +44,7 @@ object MainScreen : NavRoute {
 
 	@Composable
 	fun draw(
-		viewModel: SampleViewModel,
+		viewModel: LocationsListsViewModel,
 	) {
 		var showCreateLocationBottomSheet by remember { mutableStateOf(false) }
 		val createLocationCallbacks = object : CreateLocationCallbacks {
@@ -56,11 +60,19 @@ object MainScreen : NavRoute {
 			override val onDismissed: () -> Unit = { showCreateLocationBottomSheet = false }
 		}
 
+		val contentFilterCallbacks = object : ContentFilterCallbacks {
+			override val onLocationChanged: (loc: Location) -> Unit = {
+				viewModel.changeLocation(it)
+			}
+			override val onTagChanged: (tag: Tag) -> Unit = {}
+		}
+
 		drawContent(
 			viewModel.userLocationContentState,
 			showCreateLocationBottomSheet,
 			createLocationCallbacks,
-			modalSheetCallbacks
+			modalSheetCallbacks,
+			contentFilterCallbacks
 		)
 	}
 
@@ -70,10 +82,11 @@ object MainScreen : NavRoute {
 		showCreateLocationBottomSheet: Boolean,
 		createLocationCallbacks: CreateLocationCallbacks,
 		modalSheetCallbacks: ModalSheetCallbacks,
+		contentFilterCallbacks: ContentFilterCallbacks
 	) {
 		Scaffold(
 			topBar = {
-				DrawBarWithFilters(Modifier, contentState)
+				DrawBarWithFilters(Modifier, contentState, contentFilterCallbacks)
 			},
 			content = { innerPadding ->
 				DrawBody(
@@ -135,7 +148,7 @@ object MainScreen : NavRoute {
 	}
 
 	@Composable
-	fun DrawBarWithFilters(modifier: Modifier = Modifier, contentState: StateFlow<LocationContentState>) {
+	fun DrawBarWithFilters(modifier: Modifier = Modifier, contentState: StateFlow<LocationContentState>, callbacks: ContentFilterCallbacks) {
 		val content = contentState.collectAsState().value
 
 		var showLocations by remember { mutableStateOf(false) }
@@ -152,18 +165,14 @@ object MainScreen : NavRoute {
 					expanded = showLocations,
 					onDismissRequest = { showLocations = false }
 				) {
-					DropdownMenuItem(
-						text = { Text("Loc A") }, onClick = { showLocations = false }
-					)
-					DropdownMenuItem(
-						text = { Text("Loc B") }, onClick = { showLocations = false }
-					)
-					DropdownMenuItem(
-						text = { Text("Loc V") }, onClick = { showLocations = false }
-					)
-					DropdownMenuItem(
-						text = { Text("Loc F") }, onClick = { showLocations = false }
-					)
+					content.data.allLocations.forEach {
+						DropdownMenuItem(
+							text = { Text(it.name) }, onClick = {
+								callbacks.onLocationChanged(it)
+								showLocations = false
+							}
+						)
+					}
 				}
 
 				Button(onClick = { showTags = true }) {
@@ -218,6 +227,7 @@ fun MainPreview() {
 		contentState,
 		false,
 		stubCreateLocationCallbacks,
-		stubModalSheetCallbacks
+		stubModalSheetCallbacks,
+		stubContentFilterCallbacks
 	)
 }
