@@ -21,7 +21,9 @@ import javax.inject.Singleton
  *
  * https://supabase.com/docs/reference/kotlin/installing
  * https://supabase.com/docs/reference/kotlin/initializing
- * x
+ *
+ * https://www.reddit.com/r/Supabase/comments/12zfn6p/supabase_error_new_row_violates_rowlevel_security/
+ * https://supabase.com/docs/guides/auth/managing-user-data?queryGroups=language&language=kotlin#using-triggers
  */
 @Singleton
 class SupaBaseWrapper @Inject constructor(

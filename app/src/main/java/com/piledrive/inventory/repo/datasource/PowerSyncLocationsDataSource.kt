@@ -41,6 +41,6 @@ class PowerSyncLocationsDataSource @Inject constructor(
 		val values = ContentValues().apply {
 			put("name", name)
 		}
-		powerSync.insert("locations", values)
+		powerSync.insert("locations", values, Location::class)
 	}
 }

@@ -2,11 +2,13 @@ package com.piledrive.inventory.data.powersync
 
 import android.content.ContentValues
 import android.text.format.DateFormat
+import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
 import com.powersync.PowerSyncDatabase
 import timber.log.Timber
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
+import kotlin.reflect.KClass
 
 /**
  * https://docs.powersync.com/intro/powersync-overview#getting-started
@@ -18,7 +20,7 @@ import java.util.Date
  */
 class PowerSyncDbWrapper(val db: PowerSyncDatabase) {
 
-	suspend fun insert(table: String, values: ContentValues) {
+	suspend fun insert(table: String, values: ContentValues, clazz: KClass<out SupaBaseModel>) {
 		Timber.d("> performing INSERT into $table")
 
 		val colNames = when (values.size()) {

@@ -26,7 +26,7 @@ val AppSchema: Schema = Schema(
 			)
 		),
 		Table(
-			name = "quantity_unit",
+			name = "units",
 			columns = listOf(
 				// added by powersync
 				//Column.text("id"),
@@ -37,7 +37,7 @@ val AppSchema: Schema = Schema(
 			)
 		),
 		Table(
-			name = "stock",
+			name = "stocks",
 			columns = listOf(
 				// added by powersync
 				//Column.text("id"),
