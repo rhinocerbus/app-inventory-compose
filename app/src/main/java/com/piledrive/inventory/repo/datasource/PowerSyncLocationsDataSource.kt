@@ -17,12 +17,13 @@ class PowerSyncLocationsDataSource @Inject constructor(
 
 
 	fun initPowerSync(): Flow<Int> {
-		return callbackFlow {
+		/*return callbackFlow {
 			send(0)
 			powerSync.db.waitForFirstSync()
 			send(1)
 			close()
-		}
+		}*/
+		return powerSync.initState
 	}
 
 	override fun watchLocations(): Flow<List<Location>> {

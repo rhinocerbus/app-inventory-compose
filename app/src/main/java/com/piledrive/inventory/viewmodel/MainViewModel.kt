@@ -27,7 +27,7 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
 	init {
-		reloadContent()
+		//reloadContent()
 	}
 
 	fun reloadContent() {
