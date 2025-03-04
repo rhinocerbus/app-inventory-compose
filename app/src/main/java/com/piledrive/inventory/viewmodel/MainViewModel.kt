@@ -3,7 +3,6 @@ package com.piledrive.inventory.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.model.Location
-import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
@@ -18,7 +17,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class LocationsListsViewModel @Inject constructor(
+class MainViewModel @Inject constructor(
 	private val locationsRepo: LocationsRepo,
 ) : ViewModel() {
 
@@ -123,4 +122,13 @@ class LocationsListsViewModel @Inject constructor(
 
 	/////////////////////////////////////////////////
 	//  endregion
+
+
+	//  region Items
+	/////////////////////////////////////////////////
+
+
+	/////////////////////////////////////////////////
+	//  endregion
+
 }
