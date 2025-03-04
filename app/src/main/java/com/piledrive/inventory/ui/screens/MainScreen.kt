@@ -32,14 +32,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
+import com.piledrive.inventory.data.model.Stock
 import com.piledrive.inventory.data.model.Tag
+import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.CreateLocationCallbacks
-import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
+import com.piledrive.inventory.ui.callbacks.stubAddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.stubContentFilterCallbacks
-import com.piledrive.inventory.ui.callbacks.stubCreateLocationCallbacks
-import com.piledrive.inventory.ui.callbacks.stubModalSheetCallbacks
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
+import com.piledrive.inventory.ui.modal.CreateLocationModalSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.LocationContentState
@@ -57,19 +58,19 @@ object MainScreen : NavRoute {
 	fun draw(
 		viewModel: MainViewModel,
 	) {
-		var showCreateLocationBottomSheet by remember { mutableStateOf(false) }
-		val createLocationCallbacks = object : CreateLocationCallbacks {
-			override val onShowCreate: () -> Unit = {
-				showCreateLocationBottomSheet = true
+		val createLocationCoordinator = CreateLocationModalSheetCoordinator(
+			createLocationCallbacks = object : CreateLocationCallbacks {
+				override val onAddLocation: (name: String) -> Unit = {
+					viewModel.addNewLocation(it)
+				}
 			}
-			override val onAddLocation: (name: String) -> Unit = {
-				viewModel.addNewLocation(it)
-			}
+		)
+
+		val addItemStockCallbacks = object : AddItemStockCallbacks {
+			override val onShowAdd: (startingLocation: Location?) -> Unit = {}
+			override val onAddItemToLocation: (itemStock: Stock, location: Location) -> Unit = { _, _ -> }
 		}
 
-		val modalSheetCallbacks = object : ModalSheetCallbacks {
-			override val onDismissed: () -> Unit = { showCreateLocationBottomSheet = false }
-		}
 
 		val contentFilterCallbacks = object : ContentFilterCallbacks {
 			override val onLocationChanged: (loc: Location) -> Unit = {
@@ -82,9 +83,8 @@ object MainScreen : NavRoute {
 			viewModel.userLocationContentState,
 			viewModel.userTagsContentState,
 			viewModel.itemStocksContentState,
-			showCreateLocationBottomSheet,
-			createLocationCallbacks,
-			modalSheetCallbacks,
+			createLocationCoordinator,
+			addItemStockCallbacks,
 			contentFilterCallbacks
 		)
 	}
@@ -94,9 +94,8 @@ object MainScreen : NavRoute {
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
 		itemStockState: StateFlow<ItemContentState>,
-		showCreateLocationBottomSheet: Boolean,
-		createLocationCallbacks: CreateLocationCallbacks,
-		modalSheetCallbacks: ModalSheetCallbacks,
+		createLocationCoordinator: CreateLocationModalSheetCoordinator,
+		addItemStockCallbacks: AddItemStockCallbacks,
 		contentFilterCallbacks: ContentFilterCallbacks
 	) {
 		Scaffold(
@@ -110,13 +109,12 @@ object MainScreen : NavRoute {
 						.fillMaxSize(),
 					locationState,
 					itemStockState,
-					showCreateLocationBottomSheet,
-					createLocationCallbacks,
-					modalSheetCallbacks
+					createLocationCoordinator,
+					addItemStockCallbacks,
 				)
 			},
 			floatingActionButton = {
-				DrawAddContentFab(Modifier, createLocationCallbacks)
+				DrawAddContentFab(Modifier, createLocationCoordinator)
 			},
 		)
 	}
@@ -126,10 +124,11 @@ object MainScreen : NavRoute {
 		modifier: Modifier = Modifier,
 		locationState: StateFlow<LocationContentState>,
 		itemStockState: StateFlow<ItemContentState>,
-		showCreateLocationBottomSheet: Boolean,
-		createLocationCallbacks: CreateLocationCallbacks,
-		modalSheetCallbacks: ModalSheetCallbacks,
+		createLocationCoordinator: CreateLocationModalSheetCoordinator,
+		addItemStockCallbacks: AddItemStockCallbacks,
 	) {
+		val showLocationSheet: Boolean by remember { createLocationCoordinator.showSheetState }
+
 		val locationContent = locationState.collectAsState().value
 		val itemStockContent = itemStockState.collectAsState().value
 
@@ -142,24 +141,31 @@ object MainScreen : NavRoute {
 				locationContent.data.userLocations.isEmpty() -> {
 					if (locationContent.hasLoaded) {
 						// empty
-						DrawEmptyLocationsState(createLocationCallbacks)
+						DrawEmptyLocationsState(createLocationCoordinator)
 					} else {
 						// main spinner
 					}
 				}
 
 				itemStockContent.data.itemStocks.isEmpty() -> {
-					Text(
-						if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
+					if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
+						Text(
 							"no items anywhere"
-						} else {
-							"no items in ${locationContent.data.currentLocation.name}"
+						)
+						Button(onClick = {
+							createLocationCoordinator.showSheetState.value = true
+						}) {
+							Text("add item")
 						}
-					)
-					Button(onClick = {
-						createLocationCallbacks.onShowCreate()
-					}) {
-						Text("add item")
+					} else {
+						Text(
+							"no items in ${locationContent.data.currentLocation.name}"
+						)
+						Button(onClick = {
+							addItemStockCallbacks.onShowAdd(locationContent.data.currentLocation)
+						}) {
+							Text("add item")
+						}
 					}
 				}
 
@@ -173,7 +179,7 @@ object MainScreen : NavRoute {
 							key = { _, item ->
 								item.id
 							}
-						) {_, item ->
+						) { _, item ->
 							Text(item.id)
 						}
 					}
@@ -184,14 +190,17 @@ object MainScreen : NavRoute {
 				}
 			}
 
-			if (showCreateLocationBottomSheet) {
-				CreateLocationModalSheet.Draw(Modifier, modalSheetCallbacks, createLocationCallbacks)
+			if (showLocationSheet) {
+				CreateLocationModalSheet.Draw(Modifier, createLocationCoordinator)
 			}
 		}
 	}
 
 	@Composable
-	fun DrawAddContentFab(modifier: Modifier = Modifier, locationCallbacks: CreateLocationCallbacks) {
+	fun DrawAddContentFab(
+		modifier: Modifier = Modifier,
+		createLocationCoordinator: CreateLocationModalSheetCoordinator,
+	) {
 		/*
 			box added to satisfy dropdown requirement for a sibling wrapped in a parent to anchor
 			https://stackoverflow.com/a/66807367
@@ -216,7 +225,7 @@ object MainScreen : NavRoute {
 				)
 				DropdownMenuItem(
 					text = { Text("Add location") }, onClick = {
-						locationCallbacks.onShowCreate()
+						createLocationCoordinator.showSheetState.value = true
 						showMenu = false
 					}
 				)
@@ -305,13 +314,15 @@ object MainScreen : NavRoute {
 	}
 
 	@Composable
-	fun ColumnScope.DrawEmptyLocationsState(createLocationCallbacks: CreateLocationCallbacks) {
+	fun ColumnScope.DrawEmptyLocationsState(
+		createLocationCoordinator: CreateLocationModalSheetCoordinator,
+	) {
 		// empty
 		Text(
 			"no locations :("
 		)
 		Button(onClick = {
-			createLocationCallbacks.onShowCreate()
+			createLocationCoordinator.showSheetState.value = true
 		}) {
 			Text("add location")
 		}
@@ -325,9 +336,8 @@ fun MainPreview() {
 		previewMainContentFlow(),
 		previewMainTagsFlow(),
 		previewMaintocksFlow(),
-		false,
-		stubCreateLocationCallbacks,
-		stubModalSheetCallbacks,
+		CreateLocationModalSheetCoordinator(),
+		stubAddItemStockCallbacks,
 		stubContentFilterCallbacks
 	)
 }

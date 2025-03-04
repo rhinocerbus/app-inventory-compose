@@ -20,6 +20,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,12 +34,29 @@ import com.piledrive.inventory.ui.forms.state.TextFormFieldState
 import com.piledrive.inventory.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.theme.AppTheme
 
+/*
+ todo - integrate show somehow, but with optional params
+ - was considering adding to modalsheetcallbacks but that boxes-in or otherwise makes params a pain
+ - class-level callback would work i guess
+ -- might make modalsheetcallbacks pointless
+ more to be seen when making a few versions of this per sheet
+ */
+class CreateLocationModalSheetCoordinator(
+	val showSheetState: MutableState<Boolean> = mutableStateOf(false),
+	val createLocationCallbacks: CreateLocationCallbacks = stubCreateLocationCallbacks,
+	val modalSheetCallbacks: ModalSheetCallbacks = object : ModalSheetCallbacks {
+		override val onDismissed: () -> Unit = {
+			showSheetState.value = false
+		}
+	}
+)
+
 object CreateLocationModalSheet {
+
 	@Composable
 	fun Draw(
 		modifier: Modifier = Modifier,
-		modalSheetCallbacks: ModalSheetCallbacks,
-		createLocationCallbacks: CreateLocationCallbacks,
+		coordinator: CreateLocationModalSheetCoordinator
 	) {
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
@@ -45,12 +64,12 @@ object CreateLocationModalSheet {
 		ModalBottomSheet(
 			modifier = Modifier.fillMaxWidth(),
 			onDismissRequest = {
-				modalSheetCallbacks.onDismissed()
+				coordinator.modalSheetCallbacks.onDismissed()
 			},
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
 		) {
-			DrawContent(createLocationCallbacks = createLocationCallbacks)
+			DrawContent(createLocationCallbacks = coordinator.createLocationCallbacks)
 		}
 	}
 
