@@ -3,15 +3,20 @@
 package com.piledrive.inventory.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -38,7 +43,7 @@ import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.util.previewMainContentFlow
 import com.piledrive.inventory.ui.util.previewMainTagsFlow
-import com.piledrive.inventory.viewmodel.LocationsListsViewModel
+import com.piledrive.inventory.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.StateFlow
 
 object MainScreen : NavRoute {
@@ -46,7 +51,7 @@ object MainScreen : NavRoute {
 
 	@Composable
 	fun draw(
-		viewModel: LocationsListsViewModel,
+		viewModel: MainViewModel,
 	) {
 		var showCreateLocationBottomSheet by remember { mutableStateOf(false) }
 		val createLocationCallbacks = object : CreateLocationCallbacks {
@@ -102,7 +107,10 @@ object MainScreen : NavRoute {
 					createLocationCallbacks,
 					modalSheetCallbacks
 				)
-			}
+			},
+			floatingActionButton = {
+				DrawAddContentFab(Modifier, createLocationCallbacks)
+			},
 		)
 	}
 
@@ -147,6 +155,40 @@ object MainScreen : NavRoute {
 
 			if (showCreateLocationBottomSheet) {
 				CreateLocationModalSheet.Draw(Modifier, modalSheetCallbacks, createLocationCallbacks)
+			}
+		}
+	}
+
+	@Composable
+	fun DrawAddContentFab(modifier: Modifier = Modifier, locationCallbacks: CreateLocationCallbacks) {
+		/*
+			box added to satisfy dropdown requirement for a sibling wrapped in a parent to anchor
+			https://stackoverflow.com/a/66807367
+		 */
+		Box {
+			var showMenu by remember { mutableStateOf(false) }
+			FloatingActionButton(
+				onClick = {
+					showMenu = true
+				}
+			) {
+				Icon(Icons.Default.Add, "Show 'add content' menu")
+			}
+			DropdownMenu(
+				expanded = showMenu,
+				onDismissRequest = { showMenu = false }
+			) {
+				DropdownMenuItem(
+					text = { Text("Add item") }, onClick = {
+						showMenu = false
+					}
+				)
+				DropdownMenuItem(
+					text = { Text("Add location") }, onClick = {
+						locationCallbacks.onShowCreate()
+						showMenu = false
+					}
+				)
 			}
 		}
 	}
