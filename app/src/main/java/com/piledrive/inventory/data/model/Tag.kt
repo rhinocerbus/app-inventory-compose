@@ -4,6 +4,8 @@ import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+val STATIC_ID_TAG_ALL = "tag_all"
+
 //@Serializable
 interface TagImpl {
 	val name: String

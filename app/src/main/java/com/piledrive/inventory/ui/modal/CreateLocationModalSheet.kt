@@ -81,7 +81,6 @@ object CreateLocationModalSheet {
 			modifier = Modifier
 				.fillMaxWidth()
 		) {
-
 			val formState = remember {
 				TextFormFieldState(
 					mainValidator = Validators.Required(errMsg = "Location name required")

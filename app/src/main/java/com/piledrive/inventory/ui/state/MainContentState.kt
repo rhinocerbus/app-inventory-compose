@@ -3,6 +3,7 @@ package com.piledrive.inventory.ui.state
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
+import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
 import com.piledrive.inventory.data.model.Stock
 import com.piledrive.inventory.data.model.Tag
 
@@ -39,7 +40,7 @@ data class TagOptions(
 	val currentTag: Tag = defaultTag
 ) {
 	companion object {
-		private val defaultTag = Tag("", "", "Everything")
+		val defaultTag = Tag(STATIC_ID_TAG_ALL, "", "Everything")
 	}
 }
 

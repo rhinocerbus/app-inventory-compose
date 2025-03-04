@@ -3,10 +3,13 @@ package com.piledrive.inventory.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.repo.LocationsRepo
+import com.piledrive.inventory.repo.TagsRepo
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
+import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
 	private val locationsRepo: LocationsRepo,
+	private val tagsRepo: TagsRepo,
 ) : ViewModel() {
 
 	init {
@@ -44,6 +48,7 @@ class MainViewModel @Inject constructor(
 						1 -> {
 							// done
 							watchLocations()
+							watchTags()
 						}
 					}
 				}
@@ -118,6 +123,36 @@ class MainViewModel @Inject constructor(
 	private var userTagsContent: TagsContentState = TagsContentState()
 	private val _userTagsContentState = MutableStateFlow<TagsContentState>(userTagsContent)
 	val userTagsContentState: StateFlow<TagsContentState> = _userTagsContentState
+
+	private fun watchTags() {
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				tagsRepo.watchTags().collect {
+					Timber.d("Tags received: $it")
+					val flatTags = listOf(TagOptions.defaultTag, *it.toTypedArray())
+					userTagsContent = TagsContentState(
+						data = TagOptions(
+							allTags = flatTags,
+							userTags = it,
+							currentTag = userTagsContent.data.currentTag
+						),
+						hasLoaded = true,
+						isLoading = false
+					)
+					withContext(Dispatchers.Main) {
+						_userTagsContentState.value = userTagsContent
+					}
+				}
+			}
+		}
+	}
+
+	fun addNewTag(name: String) {
+		viewModelScope.launch {
+			tagsRepo.addTag(name)
+		}
+	}
+
 
 
 
