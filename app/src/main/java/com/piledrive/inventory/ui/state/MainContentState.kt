@@ -20,6 +20,7 @@ data class LocationContentState(
 	override val isLoading: Boolean = true
 ) : GenericContentState()
 
+//////
 
 data class TagOptions(
 	val allTags: List<Tag> = listOf(defaultTag),

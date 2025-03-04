@@ -37,6 +37,7 @@ import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.util.previewMainContentFlow
+import com.piledrive.inventory.ui.util.previewMainTagsFlow
 import com.piledrive.inventory.viewmodel.LocationsListsViewModel
 import kotlinx.coroutines.flow.StateFlow
 
@@ -70,6 +71,7 @@ object MainScreen : NavRoute {
 
 		drawContent(
 			viewModel.userLocationContentState,
+			viewModel.userTagsContentState,
 			showCreateLocationBottomSheet,
 			createLocationCallbacks,
 			modalSheetCallbacks,
@@ -80,6 +82,7 @@ object MainScreen : NavRoute {
 	@Composable
 	fun drawContent(
 		locationState: StateFlow<LocationContentState>,
+		tagState: StateFlow<TagsContentState>,
 		showCreateLocationBottomSheet: Boolean,
 		createLocationCallbacks: CreateLocationCallbacks,
 		modalSheetCallbacks: ModalSheetCallbacks,
@@ -87,7 +90,7 @@ object MainScreen : NavRoute {
 	) {
 		Scaffold(
 			topBar = {
-				DrawBarWithFilters(Modifier, locationState, contentFilterCallbacks)
+				DrawBarWithFilters(Modifier, locationState, tagState, contentFilterCallbacks)
 			},
 			content = { innerPadding ->
 				DrawBody(
@@ -155,55 +158,67 @@ object MainScreen : NavRoute {
 		tagState: StateFlow<TagsContentState>,
 		callbacks: ContentFilterCallbacks
 	) {
-		val content = contentState.collectAsState().value
-
-		var showLocations by remember { mutableStateOf(false) }
-		var showTags by remember { mutableStateOf(false) }
 		TopAppBar(
 			title = {
 				Text("What's in the: ")
 			},
 			actions = {
-				Button(onClick = { showLocations = true }) {
-					Text(content.data.currentLocation.name)
-				}
-				DropdownMenu(
-					expanded = showLocations,
-					onDismissRequest = { showLocations = false }
-				) {
-					content.data.allLocations.forEach {
-						DropdownMenuItem(
-							text = { Text(it.name) }, onClick = {
-								callbacks.onLocationChanged(it)
-								showLocations = false
-							}
-						)
-					}
-				}
-
-				Button(onClick = { showTags = true }) {
-					Text("Tag")
-				}
-				DropdownMenu(
-					expanded = showTags,
-					onDismissRequest = { showTags = false }
-				) {
-					DropdownMenuItem(
-						text = { Text("Tag A") }, onClick = { showTags = false }
-					)
-					DropdownMenuItem(
-						text = { Text("Tag B") }, onClick = { showTags = false }
-					)
-					DropdownMenuItem(
-						text = { Text("Tag V") }, onClick = { showTags = false }
-					)
-					DropdownMenuItem(
-						text = { Text("Tag F") }, onClick = { showTags = false }
-					)
-				}
-
+				DrawLocationsOptions(locationState = locationState, callbacks = callbacks)
+				DrawTagOptions(tagState = tagState, callbacks = callbacks)
 			}
 		)
+	}
+
+	@Composable
+	fun DrawLocationsOptions(
+		modifier: Modifier = Modifier,
+		locationState: StateFlow<LocationContentState>,
+		callbacks: ContentFilterCallbacks
+	) {
+		val locationsContent = locationState.collectAsState().value
+		var showLocations by remember { mutableStateOf(false) }
+		Button(onClick = { showLocations = true }) {
+			Text(locationsContent.data.currentLocation.name)
+		}
+		DropdownMenu(
+			expanded = showLocations,
+			onDismissRequest = { showLocations = false }
+		) {
+			locationsContent.data.allLocations.forEach {
+				DropdownMenuItem(
+					text = { Text(it.name) }, onClick = {
+						callbacks.onLocationChanged(it)
+						showLocations = false
+					}
+				)
+			}
+		}
+	}
+
+	@Composable
+	fun DrawTagOptions(
+		modifier: Modifier = Modifier,
+		tagState: StateFlow<TagsContentState>,
+		callbacks: ContentFilterCallbacks
+	) {
+		val tagsContent = tagState.collectAsState().value
+		var showTags by remember { mutableStateOf(false) }
+		Button(onClick = { showTags = true }) {
+			Text(tagsContent.data.currentTag.name)
+		}
+		DropdownMenu(
+			expanded = showTags,
+			onDismissRequest = { showTags = false }
+		) {
+			tagsContent.data.allTags.forEach {
+				DropdownMenuItem(
+					text = { Text(it.name) }, onClick = {
+						callbacks.onTagChanged(it)
+						showTags = false
+					}
+				)
+			}
+		}
 	}
 
 	@Composable
@@ -228,9 +243,9 @@ object MainScreen : NavRoute {
 @Preview
 @Composable
 fun MainPreview() {
-	val contentState = previewMainContentFlow()
 	MainScreen.drawContent(
-		contentState,
+		previewMainContentFlow(),
+		previewMainTagsFlow(),
 		false,
 		stubCreateLocationCallbacks,
 		stubModalSheetCallbacks,

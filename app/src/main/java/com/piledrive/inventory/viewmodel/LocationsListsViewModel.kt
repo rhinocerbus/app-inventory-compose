@@ -7,6 +7,7 @@ import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
+import com.piledrive.inventory.ui.state.TagsContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -106,6 +107,19 @@ class LocationsListsViewModel @Inject constructor(
 			locationsRepo.addLocation(name)
 		}
 	}
+
+	/////////////////////////////////////////////////
+	//  endregion
+
+
+	//  region tags
+	/////////////////////////////////////////////////
+
+	private var userTagsContent: TagsContentState = TagsContentState()
+	private val _userTagsContentState = MutableStateFlow<TagsContentState>(userTagsContent)
+	val userTagsContentState: StateFlow<TagsContentState> = _userTagsContentState
+
+
 
 	/////////////////////////////////////////////////
 	//  endregion
