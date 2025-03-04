@@ -1,5 +1,6 @@
 package com.piledrive.inventory.ui.util
 
+import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,4 +15,9 @@ fun previewMainContentFlow(
 fun previewMainTagsFlow(
 ): StateFlow<TagsContentState> {
 	return MutableStateFlow(TagsContentState(hasLoaded = true, isLoading = false))
+}
+
+fun previewMaintocksFlow(
+): StateFlow<ItemContentState> {
+	return MutableStateFlow(ItemContentState(hasLoaded = true, isLoading = false))
 }

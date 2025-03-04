@@ -4,6 +4,8 @@ import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
+val STATIC_ID_LOCATION_ALL = "loc_all"
+
 //@Serializable
 interface LocationImpl {
 	val name: String

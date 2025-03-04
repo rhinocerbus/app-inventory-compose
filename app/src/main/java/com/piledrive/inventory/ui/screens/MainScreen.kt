@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.CreateLocationCallbacks
@@ -39,10 +41,12 @@ import com.piledrive.inventory.ui.callbacks.stubCreateLocationCallbacks
 import com.piledrive.inventory.ui.callbacks.stubModalSheetCallbacks
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
 import com.piledrive.inventory.ui.nav.NavRoute
+import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.util.previewMainContentFlow
 import com.piledrive.inventory.ui.util.previewMainTagsFlow
+import com.piledrive.inventory.ui.util.previewMaintocksFlow
 import com.piledrive.inventory.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.StateFlow
 
@@ -77,6 +81,7 @@ object MainScreen : NavRoute {
 		drawContent(
 			viewModel.userLocationContentState,
 			viewModel.userTagsContentState,
+			viewModel.itemStocksContentState,
 			showCreateLocationBottomSheet,
 			createLocationCallbacks,
 			modalSheetCallbacks,
@@ -88,6 +93,7 @@ object MainScreen : NavRoute {
 	fun drawContent(
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
+		itemStockState: StateFlow<ItemContentState>,
 		showCreateLocationBottomSheet: Boolean,
 		createLocationCallbacks: CreateLocationCallbacks,
 		modalSheetCallbacks: ModalSheetCallbacks,
@@ -102,7 +108,8 @@ object MainScreen : NavRoute {
 					modifier = Modifier
 						.padding(innerPadding)
 						.fillMaxSize(),
-					contentState = locationState,
+					locationState,
+					itemStockState,
 					showCreateLocationBottomSheet,
 					createLocationCallbacks,
 					modalSheetCallbacks
@@ -117,24 +124,42 @@ object MainScreen : NavRoute {
 	@Composable
 	fun DrawBody(
 		modifier: Modifier = Modifier,
-		contentState: StateFlow<LocationContentState>,
+		locationState: StateFlow<LocationContentState>,
+		itemStockState: StateFlow<ItemContentState>,
 		showCreateLocationBottomSheet: Boolean,
 		createLocationCallbacks: CreateLocationCallbacks,
 		modalSheetCallbacks: ModalSheetCallbacks,
 	) {
-		val content = contentState.collectAsState().value
+		val locationContent = locationState.collectAsState().value
+		val itemStockContent = itemStockState.collectAsState().value
+
 		Column(
 			modifier = modifier,
 			verticalArrangement = Arrangement.Center,
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
 			when {
-				content.data.userLocations.isEmpty() -> {
-					if (content.hasLoaded) {
+				locationContent.data.userLocations.isEmpty() -> {
+					if (locationContent.hasLoaded) {
 						// empty
 						DrawEmptyLocationsState(createLocationCallbacks)
 					} else {
 						// main spinner
+					}
+				}
+
+				itemStockContent.data.itemStocks.isEmpty() -> {
+					Text(
+						if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
+							"no items anywhere"
+						} else {
+							"no items in ${locationContent.data.currentLocation.name}"
+						}
+					)
+					Button(onClick = {
+						createLocationCallbacks.onShowCreate()
+					}) {
+						Text("add item")
 					}
 				}
 
@@ -143,11 +168,17 @@ object MainScreen : NavRoute {
 					LazyColumn(
 						modifier = Modifier.fillMaxSize(),
 					) {
-						//items
-						//itemsIndexed(content.data.)
+						itemsIndexed(
+							itemStockContent.data.itemStocks,
+							key = { _, item ->
+								item.id
+							}
+						) {_, item ->
+							Text(item.id)
+						}
 					}
 
-					if (content.isLoading) {
+					if (locationContent.isLoading) {
 						// secondary spinner?
 					}
 				}
@@ -186,6 +217,11 @@ object MainScreen : NavRoute {
 				DropdownMenuItem(
 					text = { Text("Add location") }, onClick = {
 						locationCallbacks.onShowCreate()
+						showMenu = false
+					}
+				)
+				DropdownMenuItem(
+					text = { Text("Add tag") }, onClick = {
 						showMenu = false
 					}
 				)
@@ -288,6 +324,7 @@ fun MainPreview() {
 	MainScreen.drawContent(
 		previewMainContentFlow(),
 		previewMainTagsFlow(),
+		previewMaintocksFlow(),
 		false,
 		stubCreateLocationCallbacks,
 		stubModalSheetCallbacks,

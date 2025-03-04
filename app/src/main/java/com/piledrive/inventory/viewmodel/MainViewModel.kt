@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.repo.LocationsRepo
+import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.TagsContentState
@@ -127,6 +128,9 @@ class MainViewModel @Inject constructor(
 	//  region Items
 	/////////////////////////////////////////////////
 
+	private var itemStocksContent: ItemContentState = ItemContentState()
+	private val _itemStocksContentState = MutableStateFlow<ItemContentState>(itemStocksContent)
+	val itemStocksContentState: StateFlow<ItemContentState> = _itemStocksContentState
 
 	/////////////////////////////////////////////////
 	//  endregion
