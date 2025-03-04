@@ -1,10 +1,10 @@
 package com.piledrive.inventory.data.model
 
 import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 //@Serializable
-@JsonClass(generateAdapter = true)
 interface QuantityUnitImpl {
 	val name: String
 	val label: String
@@ -15,8 +15,10 @@ open class QuantityUnitSlug(
 	override val name: String, override val label: String, override val type: QuantityType
 ) : QuantityUnitImpl
 
+@JsonClass(generateAdapter = true)
 data class QuantityUnit(
 	override val id: String = "",
+	@Json(name = "created_at")
 	override val createdAt: String,
 	override val name: String,
 	override val label: String,

@@ -5,7 +5,6 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 //@Serializable
-@JsonClass(generateAdapter = true)
 interface ItemImpl {
 	val name: String
 	val tags: List<Tag>
@@ -18,8 +17,10 @@ data class ItemSlug(
 ) : ItemImpl
 
 //@Serializable
+@JsonClass(generateAdapter = true)
 data class Item(
 	override val id: String = "",
+	@Json(name = "created_at")
 	override val createdAt: String,
 	override val name: String,
 	override val tags: List<Tag>,

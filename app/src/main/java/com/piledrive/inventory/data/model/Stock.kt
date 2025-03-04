@@ -5,7 +5,6 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 //@Serializable
-@JsonClass(generateAdapter = true)
 interface StockImpl {
 	@Json(name = "item_id")
 	val itemId: String
@@ -21,8 +20,10 @@ data class StockSlug(
 	override val amount: Double
 ) : StockImpl
 
+@JsonClass(generateAdapter = true)
 data class Stock(
 	override val id: String = "",
+	@Json(name = "created_at")
 	override val createdAt: String,
 	override val itemId: String,
 	override val locationId: String,
