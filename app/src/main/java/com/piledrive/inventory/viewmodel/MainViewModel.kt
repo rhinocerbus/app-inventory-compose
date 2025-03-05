@@ -2,6 +2,7 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.repo.ItemsRepo
@@ -183,9 +184,9 @@ class MainViewModel @Inject constructor(
 	val itemsContentState: StateFlow<ItemContentState> = _itemsContentState
 
 
-	fun addNewItem(name: String, tags: List<String>) {
+	fun addNewItem(item: ItemSlug) {
 		viewModelScope.launch {
-			itemsRepo.addItem(name, tags)
+			itemsRepo.addItem(item)
 		}
 	}
 

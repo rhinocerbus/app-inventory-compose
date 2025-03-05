@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.Stock
@@ -84,8 +85,8 @@ object MainScreen : NavRoute {
 
 		val createItemCoordinator = CreateItemSheetCoordinator(
 			createItemCallbacks = object : CreateItemCallbacks {
-				override val onAddItem: (name: String, tags: List<String>) -> Unit = { name, tags ->
-					viewModel.addNewItem(name, tags)
+				override val onAddItem: (item: ItemSlug) -> Unit = {
+					viewModel.addNewItem(it)
 				}
 			}
 		)

@@ -38,6 +38,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.piledrive.inventory.data.model.ItemSlug
+import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.ui.callbacks.CreateItemCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.callbacks.stubCreateItemCallbacks
@@ -158,7 +160,12 @@ object CreateItemModalSheet {
 						onClick = {
 							// todo - add another callback layer to have viewmodel do content-level validation (dupe check)
 							// todo - dismiss based on success of ^
-							coordinator.createItemCallbacks.onAddItem(formState.currentValue, selectedTags)
+							val item = ItemSlug(
+								name = formState.currentValue,
+								tags = selectedTags,
+								unit = QuantityUnit.defaultUnitBags
+							)
+							coordinator.createItemCallbacks.onAddItem(item)
 						}
 					) {
 						Icon(Icons.Default.Add, contentDescription = "add new location")

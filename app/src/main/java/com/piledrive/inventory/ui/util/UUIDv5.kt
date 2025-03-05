@@ -1,4 +1,4 @@
-package com.piledrive.rip_compose.util
+package com.piledrive.inventory.ui.util
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -14,6 +14,10 @@ object UUIDv5 {
 	val NAMESPACE_URL: UUID = UUID.fromString("6ba7b811-9dad-11d1-80b4-00c04fd430c8")
 	val NAMESPACE_OID: UUID = UUID.fromString("6ba7b812-9dad-11d1-80b4-00c04fd430c8")
 	val NAMESPACE_X500: UUID = UUID.fromString("6ba7b814-9dad-11d1-80b4-00c04fd430c8")
+
+	fun nameUUIDFromString(str: String): UUID {
+		return nameUUIDFromNamespaceAndString(NAMESPACE_OID, str)
+	}
 
 	@RequiresApi(api = Build.VERSION_CODES.KITKAT)
 	fun nameUUIDFromNamespaceAndString(namespace: UUID?, name: String): UUID {

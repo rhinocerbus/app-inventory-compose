@@ -84,7 +84,13 @@ class PowerSyncDbWrapper(val db: PowerSyncDatabase) {
 			// singles still require ()
 			//1 -> "(?)"
 			else -> {
-				var placeholderConcat = "(uuid(), '${ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT)}', "
+				var placeholderConcat = "(${
+					if (values.containsKey("id")) {
+						"'${values.get("id")}'"
+					} else {
+						"uuid()"
+					}
+				}, '${ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT)}', "
 				values.valueSet().forEachIndexed { index, mutableEntry ->
 					val s = "?${if (index < values.size() - 1) ", " else ""}"
 					placeholderConcat += s
