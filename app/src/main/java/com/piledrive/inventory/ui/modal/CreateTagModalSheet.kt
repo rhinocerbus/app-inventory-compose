@@ -40,7 +40,7 @@ import com.piledrive.inventory.ui.forms.state.TextFormFieldState
 import com.piledrive.inventory.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.theme.AppTheme
-import com.piledrive.inventory.ui.util.previewMainTagsFlow
+import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import kotlinx.coroutines.flow.StateFlow
 
 
@@ -173,7 +173,7 @@ private fun CreateTagSheetPreview() {
 	AppTheme {
 		CreateTagModalSheet.DrawContent(
 			CreateTagSheetCoordinator(),
-			previewMainTagsFlow()
+			previewTagsContentFlow()
 		)
 	}
 }
