@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.Tag
+import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.TagsRepo
 import com.piledrive.inventory.ui.state.ItemContentState
+import com.piledrive.inventory.ui.state.ItemStockContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.TagOptions
@@ -24,6 +26,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
 	private val locationsRepo: LocationsRepo,
 	private val tagsRepo: TagsRepo,
+	private val itemsRepo: ItemsRepo,
 ) : ViewModel() {
 
 	init {
@@ -163,11 +166,29 @@ class MainViewModel @Inject constructor(
 	//  region Items
 	/////////////////////////////////////////////////
 
-	private var itemStocksContent: ItemContentState = ItemContentState()
-	private val _itemStocksContentState = MutableStateFlow<ItemContentState>(itemStocksContent)
-	val itemStocksContentState: StateFlow<ItemContentState> = _itemStocksContentState
+	private var itemStocksContent: ItemStockContentState = ItemStockContentState()
+	private val _itemStocksContentState = MutableStateFlow<ItemStockContentState>(itemStocksContent)
+	val itemStocksContentState: StateFlow<ItemStockContentState> = _itemStocksContentState
+
 
 	/////////////////////////////////////////////////
 	//  endregion
 
+
+	//  region items
+	/////////////////////////////////////////////////
+
+	private var itemsContent: ItemContentState = ItemContentState()
+	private val _itemsContentState = MutableStateFlow<ItemContentState>(itemsContent)
+	val itemsContentState: StateFlow<ItemContentState> = _itemsContentState
+
+
+	fun addNewItem(name: String, tags: List<Tag>) {
+		viewModelScope.launch {
+			itemsRepo.addItem(name, tags)
+		}
+	}
+
+	/////////////////////////////////////////////////
+	//  endregion
 }

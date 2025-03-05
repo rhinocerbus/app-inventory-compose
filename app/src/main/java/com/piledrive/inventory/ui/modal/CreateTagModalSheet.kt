@@ -97,7 +97,7 @@ object CreateTagModalSheet {
 		) {
 			val formState = remember {
 				TextFormFieldState(
-					mainValidator = Validators.Required(errMsg = "Location name required")
+					mainValidator = Validators.Required(errMsg = "Tag name required")
 				)
 			}
 

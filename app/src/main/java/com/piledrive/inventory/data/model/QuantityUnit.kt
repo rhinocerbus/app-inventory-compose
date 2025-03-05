@@ -25,16 +25,19 @@ data class QuantityUnit(
 	override val type: QuantityType,
 ) : QuantityUnitImpl, SupaBaseModel {
 	companion object {
-		val defaultSet: List<QuantityUnit> = listOf(
-			QuantityUnit("0", createdAt = "0", "bags", "bags", QuantityType.WHOLE),
-			QuantityUnit(
-				"1",
-				createdAt = "0",
-				"weight",
-				"lbs",
-				QuantityType.DECIMAL
-			),      //QuantityUnit("vauge", "lbs", QuantityType.DECIMAL),
+		const val DEFAULT_ID_BAGS = "-1"
+		const val DEFAULT_ID_POUNDS = "-2"
+
+		val defaultUnitBags = QuantityUnit(DEFAULT_ID_BAGS, createdAt = "0", "bags", "bags", QuantityType.WHOLE)
+		val defaultUnitPounds = QuantityUnit(
+			DEFAULT_ID_POUNDS,
+			createdAt = "0",
+			"weight",
+			"lbs",
+			QuantityType.DECIMAL
 		)
+		//val defaultUnitVague = QuantityUnit("vauge", "lbs", QuantityType.DECIMAL)
+		val defaultSet: List<QuantityUnit> = listOf(defaultUnitBags, defaultUnitPounds)
 	}
 }
 
