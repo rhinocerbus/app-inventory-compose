@@ -1,7 +1,6 @@
 package com.piledrive.inventory.repo
 
 import com.piledrive.inventory.data.model.Item
-import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.repo.datasource.PowerSyncItemsDataSource
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
@@ -18,7 +17,7 @@ class ItemsRepo @Inject constructor(
 		return powerSyncSource.initPowerSync()
 	}
 
-	suspend fun addItem(name: String, tags: List<Tag>) {
+	suspend fun addItem(name: String, tags: List<String>) {
 		powerSyncSource.addItem(name, tags)
 		//supaBase.addLocation(name)
 	}

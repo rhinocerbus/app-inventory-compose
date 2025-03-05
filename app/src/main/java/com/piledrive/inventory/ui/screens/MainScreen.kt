@@ -84,7 +84,7 @@ object MainScreen : NavRoute {
 
 		val createItemCoordinator = CreateItemSheetCoordinator(
 			createItemCallbacks = object : CreateItemCallbacks {
-				override val onAddItem: (name: String, tags: List<Tag>) -> Unit = { name, tags ->
+				override val onAddItem: (name: String, tags: List<String>) -> Unit = { name, tags ->
 					viewModel.addNewItem(name, tags)
 				}
 			}
@@ -235,7 +235,7 @@ object MainScreen : NavRoute {
 			}
 
 			if(showItemSheet) {
-				CreateItemModalSheet.Draw(Modifier, createItemCoordinator, itemState, tagState)
+				CreateItemModalSheet.Draw(Modifier, createItemCoordinator, createTagCoordinator, itemState, tagState)
 			}
 
 			if (showTagSheet) {

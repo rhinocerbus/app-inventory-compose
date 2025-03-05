@@ -183,7 +183,7 @@ class MainViewModel @Inject constructor(
 	val itemsContentState: StateFlow<ItemContentState> = _itemsContentState
 
 
-	fun addNewItem(name: String, tags: List<Tag>) {
+	fun addNewItem(name: String, tags: List<String>) {
 		viewModelScope.launch {
 			itemsRepo.addItem(name, tags)
 		}

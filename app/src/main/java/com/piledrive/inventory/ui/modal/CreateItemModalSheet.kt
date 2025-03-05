@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.ui.callbacks.CreateItemCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.callbacks.stubCreateItemCallbacks
@@ -65,9 +66,16 @@ object CreateItemModalSheet {
 	fun Draw(
 		modifier: Modifier = Modifier,
 		coordinator: CreateItemSheetCoordinator,
+		tagSheetCoordinator: CreateTagSheetCoordinator,
 		itemState: StateFlow<ItemContentState>,
 		tagsContentState: StateFlow<TagsContentState>
 	) {
+		var selectedTags by remember { mutableStateOf(listOf<String>()) }
+		/*
+			or
+			val selectedTags = remember { mutableStateListOf<String>() }
+		 */
+
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
 		)
@@ -79,18 +87,31 @@ object CreateItemModalSheet {
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
 		) {
-			DrawContent(coordinator, tagsContentState)
+			DrawContent(
+				coordinator,
+				tagSheetCoordinator,
+				tagsContentState,
+				selectedTags,
+				onTagToggle = { id, update ->
+					selectedTags = if (update) {
+						selectedTags + id
+					} else {
+						selectedTags - id
+					}
+				}
+			)
 		}
 	}
 
 	@Composable
 	internal fun DrawContent(
 		coordinator: CreateItemSheetCoordinator,
-		tagsContentState: StateFlow<TagsContentState>
+		tagSheetCoordinator: CreateTagSheetCoordinator,
+		tagsContentState: StateFlow<TagsContentState>,
+		selectedTags: List<String>,
+		onTagToggle: (String, Boolean) -> Unit
 	) {
-
 		val tags = tagsContentState.collectAsState().value
-		var selectedTags by remember { mutableStateOf(mutableListOf<Tag>()) }
 
 		Surface(
 			modifier = Modifier
@@ -157,27 +178,30 @@ object CreateItemModalSheet {
 					) {
 
 						SuggestionChip(
-							onClick = {},
+							onClick = { tagSheetCoordinator.showSheetState.value = true },
 							label = { Text("Add") },
 							icon = { Icon(Icons.Default.Add, "add new tag") }
 						)
 
 						tags.data.userTags.forEach {
-							val selected = selectedTags.contains(it)
+							val selected = selectedTags.contains(it.id)
 							FilterChip(
 								selected = selected,
 								onClick = {
-									selectedTags = if(selected) {
-										selectedTags.apply {
-											remove(it)
-										}
-									} else {
-										selectedTags.apply {
-											add(it)
-										}
-									}
+									onTagToggle(it.id, !selected)
 								},
 								label = { Text(it.name) },
+								leadingIcon = {
+									if (selected) {
+										Icon(
+											Icons.Default.Check,
+											"${it.name} applied",
+											Modifier.size(FilterChipDefaults.IconSize),
+										)
+									} else {
+										null
+									}
+								}
 							)
 						}
 					}
@@ -193,7 +217,10 @@ private fun CreateItemSheetPreview() {
 	AppTheme {
 		CreateItemModalSheet.DrawContent(
 			CreateItemSheetCoordinator(),
-			previewTagsContentFlow()
+			CreateTagSheetCoordinator(),
+			previewTagsContentFlow(),
+			listOf(),
+			onTagToggle = { _, _ -> }
 		)
 	}
 }

@@ -3,15 +3,11 @@ package com.piledrive.inventory.repo.datasource
 import android.content.ContentValues
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
-import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.QuantityUnit
-import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.repo.datasource.abstracts.ItemsSourceImpl
-import com.piledrive.inventory.repo.datasource.abstracts.LocationsSourceImpl
 import com.powersync.db.getString
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
 @ViewModelScoped
@@ -45,7 +41,7 @@ class PowerSyncItemsDataSource @Inject constructor(
 		)
 	}
 
-	override suspend fun addItem(name: String, tags: List<Tag>) {
+	override suspend fun addItem(name: String, tags: List<String>) {
 		val values = ContentValues().apply {
 			put("name", name)
 		}
