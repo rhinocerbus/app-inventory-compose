@@ -178,7 +178,10 @@ object CreateItemModalSheet {
 					) {
 
 						SuggestionChip(
-							onClick = { tagSheetCoordinator.showSheetState.value = true },
+							onClick = {
+								// todo - add single-fire launch param to tag sheet, with callback to flag as selected here
+								tagSheetCoordinator.showSheetState.value = true
+							},
 							label = { Text("Add") },
 							icon = { Icon(Icons.Default.Add, "add new tag") }
 						)
