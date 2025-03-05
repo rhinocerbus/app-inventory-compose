@@ -25,8 +25,8 @@ data class QuantityUnit(
 	override val type: QuantityType,
 ) : QuantityUnitImpl, SupaBaseModel {
 	companion object {
-		const val DEFAULT_ID_BAGS = "-1"
-		const val DEFAULT_ID_POUNDS = "-2"
+		const val DEFAULT_ID_BAGS = "915c0cb3-28e8-4e79-990b-0051090c98d8"
+		const val DEFAULT_ID_POUNDS = "551bf4da-21ce-4f2d-aa2e-4ea66b969ea1"
 
 		val defaultUnitBags = QuantityUnit(DEFAULT_ID_BAGS, createdAt = "0", "bags", "bags", QuantityType.WHOLE)
 		val defaultUnitPounds = QuantityUnit(

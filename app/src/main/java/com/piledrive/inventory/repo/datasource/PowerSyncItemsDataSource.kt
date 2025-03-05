@@ -51,6 +51,14 @@ class PowerSyncItemsDataSource @Inject constructor(
 			put("unit_id", item.unit.id)
 		}
 		powerSync.insert("items", values, Item::class)
+
 		//items2tags
+		item.tags.forEach {
+			val subVales = ContentValues().apply {
+				put("item_id", itemId.toString())
+				put("tag_id", it)
+			}
+			powerSync.insert("item_tags", subVales, Item::class)
+		}
 	}
 }
