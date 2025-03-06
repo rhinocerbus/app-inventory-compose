@@ -28,6 +28,33 @@ class PowerSyncItemsDataSource @Inject constructor(
 		return powerSync.initState
 	}
 
+	/* this somewhat works but the denormalized items are rough, needs a lot more attention
+	override fun watchItems(): Flow<List<Item>> {
+		return powerSync.db.watch(
+			"SELECT items.id as i_id, items.created_at as i_created_at, items.name as i_name, items.unit_id as i_unit_id, tags.id, tags.created_at, tags.name  FROM items " +
+				"LEFT OUTER JOIN item_tags ON i_id = item_tags.item_id " +
+				"LEFT OUTER JOIN tags ON item_tags.tag_id = tags.id", mapper = { cursor ->
+					Timber.d("${cursor.columnNames}")
+				Item(
+					id = cursor.getString("id"),
+					createdAt = cursor.getString("created_at"),
+					name = cursor.getString("name"),
+					// figure out joins
+					tags = listOf(),
+					unit = QuantityUnit.defaultUnitBags
+				).apply {
+					val tag = Tag(
+						id = cursor.getString("id"),
+						createdAt = cursor.getString("created_at"),
+						name = cursor.getString("name")
+					)
+					fullTags = listOf()
+				}
+			}
+		)
+	}
+*/
+
 	override fun watchItems(): Flow<List<Item>> {
 		return powerSync.db.watch(
 			"SELECT * FROM items", mapper = { cursor ->

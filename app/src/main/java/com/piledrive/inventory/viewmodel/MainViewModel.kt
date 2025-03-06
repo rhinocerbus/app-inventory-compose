@@ -2,6 +2,7 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
@@ -11,6 +12,7 @@ import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.TagsRepo
 import com.piledrive.inventory.ui.state.ItemContentState
+import com.piledrive.inventory.ui.state.ItemOptions
 import com.piledrive.inventory.ui.state.ItemStockContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
@@ -151,6 +153,7 @@ class MainViewModel @Inject constructor(
 					withContext(Dispatchers.Main) {
 						_userTagsContentState.value = userTagsContent
 					}
+					rebuildItemsWithTags()
 				}
 			}
 		}
@@ -161,9 +164,6 @@ class MainViewModel @Inject constructor(
 			tagsRepo.addTag(name)
 		}
 	}
-
-
-
 
 	/////////////////////////////////////////////////
 	//  endregion
@@ -199,18 +199,45 @@ class MainViewModel @Inject constructor(
 			withContext(Dispatchers.Default) {
 				itemsRepo.watchItems().collect {
 					Timber.d("Items received: $it")
+					itemsContent = itemsContent.copy(
+						data = itemsContent.data.copy(items = it)
+					)
+					rebuildItemsWithTags()
 				}
 			}
 		}
 	}
 
+	private val item2Tags = mutableListOf<Item2Tag>()
 	private fun watchItem2Tags() {
 		viewModelScope.launch {
 			withContext(Dispatchers.Default) {
 				item2TagsRepo.watchItem2Tags().collect {
 					Timber.d("Items2Tags received: $it")
+					item2Tags.clear()
+					item2Tags.addAll(it)
+					rebuildItemsWithTags()
 				}
 			}
+		}
+	}
+
+	// todo - resolve this with powersync queries, relations
+	private suspend fun rebuildItemsWithTags() {
+		val tags = userTagsContent.data.userTags
+		val items = itemsContent.data.items
+		val tagsByItemsMap = mutableMapOf<String, List<Tag>>()
+		items.forEach { item ->
+			val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
+			val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
+			tagsByItemsMap[item.id] = tagsForItem
+			Timber.d("added ${tagsForItem.size} tags for item ${item.name}")
+		}
+		itemsContent = itemsContent.copy(
+			data = itemsContent.data.copy(tagsByItemsMap = tagsByItemsMap)
+		)
+		withContext(Dispatchers.Main) {
+			_itemsContentState.value = itemsContent
 		}
 	}
 

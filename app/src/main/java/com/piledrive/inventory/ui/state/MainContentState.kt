@@ -76,6 +76,7 @@ data class ItemStockContentState(
 
 data class ItemOptions(
 	val items: List<Item> = listOf(),
+	val tagsByItemsMap: Map<String, List<Tag>> = mapOf()
 )
 
 data class ItemContentState(
