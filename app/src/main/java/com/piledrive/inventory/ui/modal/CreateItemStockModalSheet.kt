@@ -2,7 +2,6 @@
 
 package com.piledrive.inventory.ui.modal
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -15,6 +14,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
@@ -22,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.InputChip
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -42,12 +41,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
-import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.callbacks.stubAddItemStockCallbacks
-import com.piledrive.inventory.ui.forms.state.TextFormFieldState
-import com.piledrive.inventory.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.theme.AppTheme
@@ -183,10 +179,18 @@ object CreateItemStockModalSheet {
 											"clear item",
 										)
 									}
+								} else {
+									IconButton(
+										onClick = {
+											itemSheetCoordinator.showSheetState.value = true
+										}
+									) {
+										Icon(Icons.Default.Add, contentDescription = "add new item")
+									}
 								}
 							}
 						)
-						if(selectedItem == null) {
+						if (selectedItem == null) {
 							ExposedDropdownMenu(
 								expanded = searchActive,
 								onDismissRequest = { onSearchActiveChanged(false) }
@@ -212,7 +216,7 @@ object CreateItemStockModalSheet {
 						onClick = {
 							itemSheetCoordinator.showSheetState.value = true
 						}) {
-						Icon(Icons.Default.Add, contentDescription = "add new item")
+						Icon(Icons.Default.Done, contentDescription = "add new item")
 					}
 				}
 
@@ -253,7 +257,7 @@ private fun CreateItemStockSheetPreview() {
 			CreateItemSheetCoordinator(),
 			CreateLocationModalSheetCoordinator(),
 			previewLocationContentFlow(listOf(Location(id = "", createdAt = "", name = "Pantry"))),
-			selectedItem = Item(id = "", createdAt = "", name = "Cheese", tags = listOf(), unit = QuantityUnit.defaultUnitBags),
+			selectedItem = null,
 			onSelectedItemChanged = {},
 			selectedLocations = listOf(""),
 			false,
@@ -267,7 +271,6 @@ private fun CreateItemStockSheetPreview() {
 
 
 ///////////// scrap
-
 
 
 /*
