@@ -40,8 +40,10 @@ import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.QuantityUnit
+import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.CreateItemCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
+import com.piledrive.inventory.ui.callbacks.stubAddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.stubCreateItemCallbacks
 import com.piledrive.inventory.ui.forms.state.TextFormFieldState
 import com.piledrive.inventory.ui.forms.validators.Validators
@@ -54,7 +56,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 class CreateItemStockSheetCoordinator(
 	val showSheetState: MutableState<Boolean> = mutableStateOf(false),
-	val createItemCallbacks: CreateItemCallbacks = stubCreateItemCallbacks,
+	val createItemStockCallbacks: AddItemStockCallbacks = stubAddItemStockCallbacks,
 	val modalSheetCallbacks: ModalSheetCallbacks = object : ModalSheetCallbacks {
 		override val onDismissed: () -> Unit = {
 			showSheetState.value = false
@@ -76,6 +78,7 @@ object CreateItemStockModalSheet {
 		var selectedItem: Item? by remember { mutableStateOf(null) }
 		var searchTerm: String by remember { mutableStateOf("") }
 		var searchActive: Boolean by remember { mutableStateOf(false) }
+		var searchResults: List<Item> by remember { mutableStateOf(listOf()) }
 
 		var selectedLocations by remember { mutableStateOf(listOf<String>()) }
 		/*
@@ -106,8 +109,15 @@ object CreateItemStockModalSheet {
 				searchTerm,
 				onSearchUpdated = {
 					searchTerm = it
+					val items = itemState.value.data.items
+					val updatedResults = if (it.isBlank()) {
+						items
+					} else {
+						items.filter { it.name.contains(searchTerm, true) }
+					}
 				},
-				onTagToggle = { id, update ->
+				searchResults,
+				onLocationToggle = { id, update ->
 					selectedLocations = if (update) {
 						selectedLocations + id
 					} else {
@@ -130,7 +140,8 @@ object CreateItemStockModalSheet {
 		onSearchActiveChanged: (Boolean) -> Unit,
 		searchTerm: String,
 		onSearchUpdated: (String) -> Unit,
-		onTagToggle: (String, Boolean) -> Unit
+		searchResults: List<Item>,
+		onLocationToggle: (String, Boolean) -> Unit
 	) {
 		val locations = locationsContentState.collectAsState().value
 
@@ -152,24 +163,39 @@ object CreateItemStockModalSheet {
 				Row(
 					modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
 				) {
-					SearchBar(modifier = Modifier.weight(1f), inputField = {
-						Row {
-							if (selectedItem != null) {
-								InputChip(
-									label = { Text(selectedItem.name) },
-									onClick = { onSelectedItemChanged(null) },
-									trailingIcon = { Icon(Icons.Default.Clear, "clear item") },
-									selected = false
-								)
+					SearchBar(
+						modifier = Modifier.weight(1f), inputField = {
+							Row {
+								if (selectedItem != null) {
+									InputChip(
+										label = { Text(selectedItem.name) },
+										onClick = { onSelectedItemChanged(null) },
+										trailingIcon = { Icon(Icons.Default.Clear, "clear item") },
+										selected = false
+									)
+								}
+								TextField(modifier = Modifier,
+									value = searchTerm,
+									label = { Text("Search for Item") },
+									onValueChange = { onSearchUpdated(it) })
 							}
-							TextField(modifier = Modifier,
-								value = searchTerm,
-								label = { Text("Search for Item") },
-								onValueChange = { onSearchUpdated(it) })
-						}
-					}, onExpandedChange = {}, expanded = false
+						},
+						onExpandedChange = {
+							onSearchActiveChanged(it)
+						},
+						expanded = searchActive
 					) {
-
+						LazyColumn(modifier = Modifier) {
+							itemsIndexed(searchResults, key = { _, item -> item.id }) { _, item ->
+								Surface(
+									onClick = {
+										onSelectedItemChanged(item)
+									}
+								) {
+									Text(item.name)
+								}
+							}
+						}
 					}
 
 					Spacer(Modifier.size(12.dp))
@@ -192,7 +218,7 @@ object CreateItemStockModalSheet {
 						Row() {
 							Checkbox(
 								checked = checked,
-								onCheckedChange = {onTagToggle(loc.id, !checked)}
+								onCheckedChange = { onLocationToggle(loc.id, !checked) }
 							)
 							Text(loc.name)
 						}
@@ -227,6 +253,7 @@ private fun CreateItemStockSheetPreview() {
 			onSearchActiveChanged = {},
 			searchTerm = "",
 			onSearchUpdated = {},
-			onTagToggle = { _, _ -> })
+			listOf(),
+			onLocationToggle = { _, _ -> })
 	}
 }
