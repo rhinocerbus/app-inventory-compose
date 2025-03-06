@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.StockSlug
 import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.callbacks.stubAddItemStockCallbacks
@@ -212,11 +213,17 @@ object CreateItemStockModalSheet {
 					Spacer(Modifier.size(12.dp))
 
 					IconButton(modifier = Modifier.size(40.dp),
-						enabled = selectedItem == null,
+						enabled = selectedItem != null,
 						onClick = {
-							itemSheetCoordinator.showSheetState.value = true
+							selectedLocations.forEach { loc ->
+								// todo - could split this into further callbacks
+								// todo - could add initial quantity set
+								//				...replace selectedLocations with slugs, or a map if we want to stay slug-agnostic prev to call
+								val stockSlug = StockSlug(selectedItem!!.id, loc, 0.0)
+								stubAddItemStockCallbacks.onAddItemToLocation(stockSlug)
+							}
 						}) {
-						Icon(Icons.Default.Done, contentDescription = "add new item")
+						Icon(Icons.Default.Done, contentDescription = "add item to locations")
 					}
 				}
 

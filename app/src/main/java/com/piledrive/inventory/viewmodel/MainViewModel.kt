@@ -2,17 +2,17 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.StockSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.repo.Item2TagsRepo
+import com.piledrive.inventory.repo.ItemStocksRepo
 import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.TagsRepo
 import com.piledrive.inventory.ui.state.ItemContentState
-import com.piledrive.inventory.ui.state.ItemOptions
 import com.piledrive.inventory.ui.state.ItemStockContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
@@ -33,6 +33,7 @@ class MainViewModel @Inject constructor(
 	private val tagsRepo: TagsRepo,
 	private val itemsRepo: ItemsRepo,
 	private val item2TagsRepo: Item2TagsRepo,
+	private val itemStocksRepo: ItemStocksRepo
 ) : ViewModel() {
 
 	init {
@@ -60,6 +61,7 @@ class MainViewModel @Inject constructor(
 							watchTags()
 							watchItems()
 							watchItem2Tags()
+							watchItemStocks()
 						}
 					}
 				}
@@ -176,6 +178,26 @@ class MainViewModel @Inject constructor(
 	private val _itemStocksContentState = MutableStateFlow<ItemStockContentState>(itemStocksContent)
 	val itemStocksContentState: StateFlow<ItemStockContentState> = _itemStocksContentState
 
+	fun addNewItemStock(slug: StockSlug) {
+		viewModelScope.launch {
+			itemStocksRepo.addItemStock(slug)
+		}
+	}
+
+	fun watchItemStocks() {
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				itemStocksRepo.watchItemStocks().collect {
+					Timber.d("Stocks received: $it")
+					itemStocksContent = itemStocksContent.copy(
+						data = itemStocksContent.data.copy(itemStocks = it)
+					)
+					rebuildItemsWithTags()
+				}
+
+			}
+		}
+	}
 
 	/////////////////////////////////////////////////
 	//  endregion

@@ -101,6 +101,7 @@ object MainScreen : NavRoute {
 		val createItemStockCoordinator = CreateItemStockSheetCoordinator(
 			createItemStockCallbacks = object : AddItemStockCallbacks {
 				override val onAddItemToLocation: (slug: StockSlug) -> Unit = {
+					viewModel.itemStocksContentState
 				}
 			}
 		)
