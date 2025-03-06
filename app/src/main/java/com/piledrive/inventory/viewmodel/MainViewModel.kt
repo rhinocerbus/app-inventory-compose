@@ -2,9 +2,11 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.Tag
+import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.TagsRepo
@@ -28,6 +30,7 @@ class MainViewModel @Inject constructor(
 	private val locationsRepo: LocationsRepo,
 	private val tagsRepo: TagsRepo,
 	private val itemsRepo: ItemsRepo,
+	private val item2TagsRepo: Item2TagsRepo,
 ) : ViewModel() {
 
 	init {
@@ -53,6 +56,8 @@ class MainViewModel @Inject constructor(
 							// done
 							watchLocations()
 							watchTags()
+							watchItems()
+							watchItem2Tags()
 						}
 					}
 				}
@@ -183,10 +188,29 @@ class MainViewModel @Inject constructor(
 	private val _itemsContentState = MutableStateFlow<ItemContentState>(itemsContent)
 	val itemsContentState: StateFlow<ItemContentState> = _itemsContentState
 
-
 	fun addNewItem(item: ItemSlug) {
 		viewModelScope.launch {
 			itemsRepo.addItem(item)
+		}
+	}
+
+	private fun watchItems() {
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				itemsRepo.watchItems().collect {
+					Timber.d("Items received: $it")
+				}
+			}
+		}
+	}
+
+	private fun watchItem2Tags() {
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				item2TagsRepo.watchItem2Tags().collect {
+					Timber.d("Items2Tags received: $it")
+				}
+			}
 		}
 	}
 
