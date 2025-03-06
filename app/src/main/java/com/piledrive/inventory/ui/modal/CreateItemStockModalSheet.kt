@@ -2,6 +2,7 @@
 
 package com.piledrive.inventory.ui.modal
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -16,12 +17,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -41,10 +44,8 @@ import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
-import com.piledrive.inventory.ui.callbacks.CreateItemCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.callbacks.stubAddItemStockCallbacks
-import com.piledrive.inventory.ui.callbacks.stubCreateItemCallbacks
 import com.piledrive.inventory.ui.forms.state.TextFormFieldState
 import com.piledrive.inventory.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.state.ItemContentState
@@ -78,17 +79,14 @@ object CreateItemStockModalSheet {
 		var selectedItem: Item? by remember { mutableStateOf(null) }
 		var searchTerm: String by remember { mutableStateOf("") }
 		var searchActive: Boolean by remember { mutableStateOf(false) }
-		var searchResults: List<Item> by remember { mutableStateOf(listOf()) }
+		var searchResults: List<Item> by remember { mutableStateOf(itemState.value.data.items) }
 
 		var selectedLocations by remember { mutableStateOf(listOf<String>()) }
-		/*
-			or
-			val selectedTags = remember { mutableStateListOf<String>() }
-		 */
 
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
 		)
+
 		ModalBottomSheet(modifier = Modifier.fillMaxWidth(), onDismissRequest = {
 			coordinator.modalSheetCallbacks.onDismissed()
 		}, sheetState = sheetState, dragHandle = { BottomSheetDefaults.DragHandle() }) {
@@ -115,6 +113,7 @@ object CreateItemStockModalSheet {
 					} else {
 						items.filter { it.name.contains(searchTerm, true) }
 					}
+					searchResults = updatedResults
 				},
 				searchResults,
 				onLocationToggle = { id, update ->
@@ -148,51 +147,59 @@ object CreateItemStockModalSheet {
 		Surface(
 			modifier = Modifier.fillMaxWidth()
 		) {
-			val formState = remember {
-				TextFormFieldState(
-					mainValidator = Validators.Required(errMsg = "Item name required")
-				)
-			}
-
 			Column(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(horizontal = 12.dp),
+					.padding(12.dp),
 			) {
-				Text("Item:")
 				Row(
 					modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
 				) {
-					SearchBar(
-						modifier = Modifier.weight(1f), inputField = {
-							Row {
-								if (selectedItem != null) {
-									InputChip(
-										label = { Text(selectedItem.name) },
-										onClick = { onSelectedItemChanged(null) },
-										trailingIcon = { Icon(Icons.Default.Clear, "clear item") },
-										selected = false
-									)
-								}
-								TextField(modifier = Modifier,
-									value = searchTerm,
-									label = { Text("Search for Item") },
-									onValueChange = { onSearchUpdated(it) })
-							}
-						},
-						onExpandedChange = {
-							onSearchActiveChanged(it)
-						},
-						expanded = searchActive
+
+					ExposedDropdownMenuBox(
+						modifier = Modifier.weight(1f),
+						expanded = searchActive,
+						onExpandedChange = { onSearchActiveChanged(!searchActive) },
 					) {
-						LazyColumn(modifier = Modifier) {
-							itemsIndexed(searchResults, key = { _, item -> item.id }) { _, item ->
-								Surface(
-									onClick = {
-										onSelectedItemChanged(item)
+
+						TextField(
+							modifier = Modifier
+								.fillMaxWidth()
+								.menuAnchor(MenuAnchorType.PrimaryEditable),
+							value = selectedItem?.name ?: searchTerm,
+							onValueChange = { onSearchUpdated(it) },
+							label = { Text("Search for Item") },
+							readOnly = selectedItem != null,
+							trailingIcon = {
+								if (selectedItem != null) {
+									IconButton(
+										onClick = {
+											onSelectedItemChanged(null)
+											onSearchUpdated("")
+										}
+									) {
+										Icon(
+											Icons.Default.Clear,
+											"clear item",
+										)
 									}
-								) {
-									Text(item.name)
+								}
+							}
+						)
+						if(selectedItem == null) {
+							ExposedDropdownMenu(
+								expanded = searchActive,
+								onDismissRequest = { onSearchActiveChanged(false) }
+							) {
+								searchResults.forEach { item ->
+									DropdownMenuItem(
+										onClick = {
+											onSelectedItemChanged(item)
+											onSearchUpdated(item.name)
+											onSearchActiveChanged(false)
+										},
+										text = { Text(item.name) }
+									)
 								}
 							}
 						}
@@ -201,7 +208,7 @@ object CreateItemStockModalSheet {
 					Spacer(Modifier.size(12.dp))
 
 					IconButton(modifier = Modifier.size(40.dp),
-						enabled = formState.isValid,
+						enabled = selectedItem == null,
 						onClick = {
 							itemSheetCoordinator.showSheetState.value = true
 						}) {
@@ -215,7 +222,7 @@ object CreateItemStockModalSheet {
 				LazyColumn {
 					itemsIndexed(items = locations.data.userLocations, key = { _, loc -> loc.id }) { _, loc ->
 						val checked = selectedLocations.contains(loc.id)
-						Row() {
+						Row(verticalAlignment = Alignment.CenterVertically) {
 							Checkbox(
 								checked = checked,
 								onCheckedChange = { onLocationToggle(loc.id, !checked) }
@@ -225,7 +232,7 @@ object CreateItemStockModalSheet {
 					}
 					item {
 						Surface(onClick = { locationSheetCoordinator.showSheetState.value = true }) {
-							Row {
+							Row(verticalAlignment = Alignment.CenterVertically) {
 								Icon(Icons.Default.Add, "Add new location")
 								Text("Add new location")
 							}
@@ -246,7 +253,7 @@ private fun CreateItemStockSheetPreview() {
 			CreateItemSheetCoordinator(),
 			CreateLocationModalSheetCoordinator(),
 			previewLocationContentFlow(listOf(Location(id = "", createdAt = "", name = "Pantry"))),
-			Item(id = "", createdAt = "", name = "Cheese", tags = listOf(), unit = QuantityUnit.defaultUnitBags),
+			selectedItem = Item(id = "", createdAt = "", name = "Cheese", tags = listOf(), unit = QuantityUnit.defaultUnitBags),
 			onSelectedItemChanged = {},
 			selectedLocations = listOf(""),
 			false,
@@ -257,3 +264,53 @@ private fun CreateItemStockSheetPreview() {
 			onLocationToggle = { _, _ -> })
 	}
 }
+
+
+///////////// scrap
+
+
+
+/*
+					DockedSearchBar(
+						modifier = Modifier,
+						inputField = {
+							Row {
+								if (selectedItem != null) {
+									InputChip(
+										label = { Text(selectedItem.name) },
+										onClick = { onSelectedItemChanged(null) },
+										trailingIcon = { Icon(Icons.Default.Clear, "clear item") },
+										selected = false
+									)
+								}
+								SearchBarDefaults.InputField(
+									modifier = Modifier,
+									query = searchTerm,
+									onQueryChange = { onSearchUpdated(it) },
+									onSearch = { onSearchUpdated(it) },
+									placeholder = { Text("Search for Item") },
+									expanded = searchActive,
+									onExpandedChange = {
+										onSearchActiveChanged(it)
+									},
+								)
+							}
+						},
+						onExpandedChange = {
+							onSearchActiveChanged(it)
+						},
+						expanded = searchActive
+					) {
+						LazyColumn(modifier = Modifier) {
+							itemsIndexed(searchResults, key = { _, item -> item.id }) { _, item ->
+								Surface(
+									onClick = {
+										onSelectedItemChanged(item)
+									}
+								) {
+									Text(item.name)
+								}
+							}
+						}
+					}
+*/
