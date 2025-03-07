@@ -60,10 +60,12 @@ import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStockContentState
+import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.util.previewItemStocksContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
+import com.piledrive.inventory.ui.util.previewLocalizedContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.inventory.viewmodel.MainViewModel
@@ -120,6 +122,7 @@ object MainScreen : NavRoute {
 			viewModel.userTagsContentState,
 			viewModel.itemsContentState,
 			viewModel.itemStocksContentState,
+			viewModel.locationStocksContentState,
 			createItemStockCoordinator,
 			createLocationCoordinator,
 			createTagCoordinator,
@@ -134,6 +137,7 @@ object MainScreen : NavRoute {
 		tagState: StateFlow<TagsContentState>,
 		itemState: StateFlow<ItemContentState>,
 		itemStockState: StateFlow<ItemStockContentState>,
+		localizedStocksContent: StateFlow<LocalizedContentState>,
 		createItemStockSheetCoordinator: CreateItemStockSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
@@ -152,7 +156,7 @@ object MainScreen : NavRoute {
 					locationState,
 					tagState,
 					itemState,
-					itemStockState,
+					localizedStocksContent,
 					createItemStockSheetCoordinator,
 					createLocationCoordinator,
 					createTagCoordinator,
@@ -177,7 +181,7 @@ object MainScreen : NavRoute {
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
 		itemState: StateFlow<ItemContentState>,
-		itemStockState: StateFlow<ItemStockContentState>,
+		localizedStocksContent: StateFlow<LocalizedContentState>,
 		createItemStockSheetCoordinator: CreateItemStockSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
@@ -189,8 +193,8 @@ object MainScreen : NavRoute {
 		val showItemSheet: Boolean by remember { createItemCoordinator.showSheetState }
 
 		val locationContent = locationState.collectAsState().value
-		val itemsContent = itemState.collectAsState().value
-		val itemStockContent = itemStockState.collectAsState().value
+		val itemStockContent = localizedStocksContent.collectAsState().value
+		val forLocation = itemStockContent.data.locationsScopedContent[locationContent.data.currentLocation.id] ?: listOf()
 
 		Column(
 			modifier = modifier,
@@ -207,8 +211,7 @@ object MainScreen : NavRoute {
 					}
 				}
 
-				//itemStockContent.data.itemStocks.isEmpty() -> {
-				itemsContent.data.items.isEmpty() -> {
+				forLocation.isEmpty() -> {
 					if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
 						Text(
 							"no items anywhere"
@@ -237,13 +240,13 @@ object MainScreen : NavRoute {
 					) {
 						itemsIndexed(
 							//itemStockContent.data.itemStocks,
-							itemsContent.data.items,
+							forLocation,
 							key = { _, item ->
-								item.id
+								item.item.id
 							}
 						) { _, item ->
-							val tags = itemsContent.data.tagsByItemsMap[item.id] ?: listOf()
-							ItemWithTagsListItem(Modifier, item, tags)
+							val tags = item.tags
+							ItemWithTagsListItem(Modifier, item.item, tags)
 						}
 					}
 
@@ -445,6 +448,7 @@ fun MainPreview() {
 		previewTagsContentFlow(),
 		previewItemsContentFlow(),
 		previewItemStocksContentFlow(),
+		previewLocalizedContentFlow(),
 		CreateItemStockSheetCoordinator(),
 		CreateLocationModalSheetCoordinator(),
 		CreateTagSheetCoordinator(),

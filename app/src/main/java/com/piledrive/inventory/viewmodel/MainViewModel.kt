@@ -2,13 +2,15 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.StockSlug
-import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
+import com.piledrive.inventory.data.model.composite.ContentForLocation
+import com.piledrive.inventory.data.model.composite.StockWithItem
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemStocksRepo
 import com.piledrive.inventory.repo.ItemsRepo
@@ -16,6 +18,7 @@ import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.TagsRepo
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStockContentState
+import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.TagOptions
@@ -132,7 +135,7 @@ class MainViewModel @Inject constructor(
 	//  endregion
 
 
-	//  region tags
+	//  region Tags data
 	/////////////////////////////////////////////////
 
 	private var userTagsContent: TagsContentState = TagsContentState()
@@ -173,39 +176,7 @@ class MainViewModel @Inject constructor(
 	//  endregion
 
 
-	//  region Items
-	/////////////////////////////////////////////////
-
-	private var itemStocksContent: ItemStockContentState = ItemStockContentState()
-	private val _itemStocksContentState = MutableStateFlow<ItemStockContentState>(itemStocksContent)
-	val itemStocksContentState: StateFlow<ItemStockContentState> = _itemStocksContentState
-
-	fun addNewItemStock(slug: StockSlug) {
-		viewModelScope.launch {
-			itemStocksRepo.addItemStock(slug)
-		}
-	}
-
-	fun watchItemStocks() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				itemStocksRepo.watchItemStocks().collect {
-					Timber.d("Stocks received: $it")
-					itemStocksContent = itemStocksContent.copy(
-						data = itemStocksContent.data.copy(itemStocks = it)
-					)
-					rebuildItemsWithTags()
-				}
-
-			}
-		}
-	}
-
-	/////////////////////////////////////////////////
-	//  endregion
-
-
-	//  region items
+	//  region Items data
 	/////////////////////////////////////////////////
 
 	private var itemsContent: ItemContentState = ItemContentState()
@@ -246,22 +217,72 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
+	/////////////////////////////////////////////////
+	//  endregion
+
+
+	//  region Item stocks data
+	/////////////////////////////////////////////////
+
+	private var itemStocksContent: ItemStockContentState = ItemStockContentState()
+	private val _itemStocksContentState = MutableStateFlow<ItemStockContentState>(itemStocksContent)
+	val itemStocksContentState: StateFlow<ItemStockContentState> = _itemStocksContentState
+
+	fun addNewItemStock(slug: StockSlug) {
+		viewModelScope.launch {
+			itemStocksRepo.addItemStock(slug)
+		}
+	}
+
+	fun watchItemStocks() {
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				itemStocksRepo.watchItemStocks().collect {
+					Timber.d("Stocks received: $it")
+					itemStocksContent = itemStocksContent.copy(
+						data = itemStocksContent.data.copy(itemStocks = it)
+					)
+					rebuildItemsWithTags()
+				}
+			}
+		}
+	}
+
+	/////////////////////////////////////////////////
+	//  endregion
+
+
+	//  region Location-specific items data
+	/////////////////////////////////////////////////
+
+	private var locationStocksContent: LocalizedContentState = LocalizedContentState()
+	private val _locationStocksContentState = MutableStateFlow<LocalizedContentState>(locationStocksContent)
+	val locationStocksContentState: StateFlow<LocalizedContentState> = _locationStocksContentState
+
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
-		val tags = userTagsContent.data.userTags
+		val locations = userLocationsContent.data.userLocations
+		val currLocation = userLocationsContent.data.currentLocation
 		val items = itemsContent.data.items
-		val tagsByItemsMap = mutableMapOf<String, List<Tag>>()
-		items.forEach { item ->
-			val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
-			val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-			tagsByItemsMap[item.id] = tagsForItem
-			Timber.d("added ${tagsForItem.size} tags for item ${item.name}")
+		val stocks = itemStocksContent.data.itemStocks
+		val tags = userTagsContent.data.userTags
+
+		val stocksByLocationMap = mutableMapOf<String, List<StockWithItem>>()
+		locations.forEach { loc ->
+			val stocksForLoc = stocks.filter { it.locationId == loc.id }.mapNotNull { stock ->
+				val item = items.firstOrNull { it.id == stock.itemId } ?: return@mapNotNull null
+				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
+				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
+				StockWithItem(stock, item, tagsForItem)
+			}
+			stocksByLocationMap[loc.id] = stocksForLoc
 		}
-		itemsContent = itemsContent.copy(
-			data = itemsContent.data.copy(tagsByItemsMap = tagsByItemsMap)
+		val content = ContentForLocation(stocksByLocationMap)
+		locationStocksContent = locationStocksContent.copy(
+			data = content
 		)
 		withContext(Dispatchers.Main) {
-			_itemsContentState.value = itemsContent
+			_locationStocksContentState.value = locationStocksContent
 		}
 	}
 

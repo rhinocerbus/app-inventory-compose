@@ -6,6 +6,7 @@ import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
 import com.piledrive.inventory.data.model.Stock
 import com.piledrive.inventory.data.model.Tag
+import com.piledrive.inventory.data.model.composite.ContentForLocation
 
 
 //  region location filter
@@ -54,7 +55,7 @@ data class TagsContentState(
 //  endregion
 
 
-//  region by-location items content
+//  region item stocks
 /////////////////////////////////////////////////
 
 data class ItemStockOptions(
@@ -71,12 +72,24 @@ data class ItemStockContentState(
 //  endregion
 
 
+//  region by-location items content
+/////////////////////////////////////////////////
+
+data class LocalizedContentState(
+	override val data: ContentForLocation = ContentForLocation(),
+	override val hasLoaded: Boolean = false,
+	override val isLoading: Boolean = true
+) : GenericContentState()
+
+/////////////////////////////////////////////////
+//  endregion
+
+
 //  region items content
 /////////////////////////////////////////////////
 
 data class ItemOptions(
 	val items: List<Item> = listOf(),
-	val tagsByItemsMap: Map<String, List<Tag>> = mapOf()
 )
 
 data class ItemContentState(
