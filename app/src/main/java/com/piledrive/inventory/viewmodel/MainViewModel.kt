@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.StockSlug
 import com.piledrive.inventory.data.model.Tag
+import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemStocksRepo
 import com.piledrive.inventory.repo.ItemsRepo
@@ -120,9 +122,9 @@ class MainViewModel @Inject constructor(
 		_userLocationContentState.value = userLocationsContent
 	}
 
-	fun addNewLocation(name: String) {
+	fun addNewLocation(slug: LocationSlug) {
 		viewModelScope.launch {
-			locationsRepo.addLocation(name)
+			locationsRepo.addLocation(slug)
 		}
 	}
 
@@ -161,9 +163,9 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	fun addNewTag(name: String) {
+	fun addNewTag(slug: TagSlug) {
 		viewModelScope.launch {
-			tagsRepo.addTag(name)
+			tagsRepo.addTag(slug)
 		}
 	}
 

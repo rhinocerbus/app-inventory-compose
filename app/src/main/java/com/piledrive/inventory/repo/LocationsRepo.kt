@@ -1,6 +1,7 @@
 package com.piledrive.inventory.repo
 
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.repo.datasource.PowerSyncLocationsDataSource
 import com.piledrive.inventory.repo.datasource.SupaBaseLocationsDataSource
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -19,8 +20,8 @@ class LocationsRepo @Inject constructor(
 		return powerSyncSource.initPowerSync()
 	}
 
-	suspend fun addLocation(name: String) {
-		powerSyncSource.addLocation(name)
+	suspend fun addLocation(slug: LocationSlug) {
+		powerSyncSource.addLocation(slug)
 		//supaBase.addLocation(name)
 	}
 

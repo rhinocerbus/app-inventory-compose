@@ -38,9 +38,11 @@ import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.StockSlug
 import com.piledrive.inventory.data.model.Tag
+import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.CreateItemCallbacks
@@ -76,7 +78,7 @@ object MainScreen : NavRoute {
 	) {
 		val createLocationCoordinator = CreateLocationModalSheetCoordinator(
 			createLocationCallbacks = object : CreateLocationCallbacks {
-				override val onAddLocation: (name: String) -> Unit = {
+				override val onAddLocation: (slug: LocationSlug) -> Unit = {
 					viewModel.addNewLocation(it)
 				}
 			}
@@ -84,7 +86,7 @@ object MainScreen : NavRoute {
 
 		val createTagCoordinator = CreateTagSheetCoordinator(
 			createTagCallbacks = object : CreateTagCallbacks {
-				override val onAddTag: (name: String) -> Unit = {
+				override val onAddTag: (slug: TagSlug) -> Unit = {
 					viewModel.addNewTag(it)
 				}
 			}
@@ -101,7 +103,7 @@ object MainScreen : NavRoute {
 		val createItemStockCoordinator = CreateItemStockSheetCoordinator(
 			createItemStockCallbacks = object : AddItemStockCallbacks {
 				override val onAddItemToLocation: (slug: StockSlug) -> Unit = {
-					viewModel.itemStocksContentState
+					viewModel.addNewItemStock(it)
 				}
 			}
 		)

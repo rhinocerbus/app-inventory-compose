@@ -3,18 +3,17 @@ package com.piledrive.inventory.repo.datasource
 import android.content.ContentValues
 import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.repo.datasource.abstracts.LocationsSourceImpl
 import com.powersync.db.getString
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
 @ViewModelScoped
 class PowerSyncLocationsDataSource @Inject constructor(
 	private val powerSync: PowerSyncDbWrapper,
 ) : LocationsSourceImpl {
-
 
 	fun initPowerSync(): Flow<Int> {
 		/*return callbackFlow {
@@ -38,9 +37,9 @@ class PowerSyncLocationsDataSource @Inject constructor(
 		)
 	}
 
-	override suspend fun addLocation(name: String) {
+	override suspend fun addLocation(slug: LocationSlug) {
 		val values = ContentValues().apply {
-			put("name", name)
+			put("name", slug.name)
 		}
 		powerSync.insert("locations", values, Location::class)
 	}

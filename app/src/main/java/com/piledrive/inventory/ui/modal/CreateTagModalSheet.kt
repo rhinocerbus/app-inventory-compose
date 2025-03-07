@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.piledrive.inventory.data.model.LocationSlug
+import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.ui.callbacks.CreateTagCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.callbacks.stubCreateTagCallbacks
@@ -137,7 +138,8 @@ object CreateTagModalSheet {
 						onClick = {
 							// todo - add another callback layer to have viewmodel do content-level validation (dupe check)
 							// todo - dismiss based on success of ^
-							coordinator.createTagCallbacks.onAddTag(formState.currentValue)
+							val slug = TagSlug(name = formState.currentValue)
+							coordinator.createTagCallbacks.onAddTag(slug)
 						}
 					) {
 						Icon(Icons.Default.Done, contentDescription = "add new location")
