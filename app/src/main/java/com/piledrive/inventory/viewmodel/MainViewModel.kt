@@ -8,6 +8,7 @@ import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.StockSlug
+import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.StockWithItem
@@ -172,6 +173,14 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
+	//todo: possible add pref, or keep it session-level
+	fun changeTag(tag: Tag) {
+		userTagsContent = userTagsContent.copy(
+			data = userTagsContent.data.copy(currentTag = tag)
+		)
+		_userTagsContentState.value = userTagsContent
+	}
+
 	/////////////////////////////////////////////////
 	//  endregion
 
@@ -197,6 +206,9 @@ class MainViewModel @Inject constructor(
 					itemsContent = itemsContent.copy(
 						data = itemsContent.data.copy(items = it)
 					)
+					withContext(Dispatchers.Main) {
+						_itemsContentState.value = itemsContent
+					}
 					rebuildItemsWithTags()
 				}
 			}

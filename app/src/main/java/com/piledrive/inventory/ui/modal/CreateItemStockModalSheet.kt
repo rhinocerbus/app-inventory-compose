@@ -73,12 +73,15 @@ object CreateItemStockModalSheet {
 		itemState: StateFlow<ItemContentState>,
 		locationsContentState: StateFlow<LocationContentState>
 	) {
+		val itemsPool = itemState.collectAsState().value
+
 		var selectedItem: Item? by remember { mutableStateOf(null) }
 		var searchTerm: String by remember { mutableStateOf("") }
 		var searchActive: Boolean by remember { mutableStateOf(false) }
-		var searchResults: List<Item> by remember { mutableStateOf(itemState.value.data.items) }
+		var searchResults: List<Item> by remember { mutableStateOf(itemsPool.data.items) }
 
 		var selectedLocations by remember { mutableStateOf(listOf<String>()) }
+
 
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
@@ -104,7 +107,7 @@ object CreateItemStockModalSheet {
 				searchTerm,
 				onSearchUpdated = {
 					searchTerm = it
-					val items = itemState.value.data.items
+					val items = itemsPool.data.items
 					val updatedResults = if (it.isBlank()) {
 						items
 					} else {
@@ -220,7 +223,7 @@ object CreateItemStockModalSheet {
 								// todo - could add initial quantity set
 								//				...replace selectedLocations with slugs, or a map if we want to stay slug-agnostic prev to call
 								val stockSlug = StockSlug(selectedItem!!.id, loc, 0.0)
-								stubAddItemStockCallbacks.onAddItemToLocation(stockSlug)
+								coordinator.createItemStockCallbacks.onAddItemToLocation(stockSlug)
 							}
 						}) {
 						Icon(Icons.Default.Done, contentDescription = "add item to locations")

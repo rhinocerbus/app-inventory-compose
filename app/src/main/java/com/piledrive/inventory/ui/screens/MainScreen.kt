@@ -40,6 +40,7 @@ import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
+import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
 import com.piledrive.inventory.data.model.StockSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
@@ -114,7 +115,9 @@ object MainScreen : NavRoute {
 			override val onLocationChanged: (loc: Location) -> Unit = {
 				viewModel.changeLocation(it)
 			}
-			override val onTagChanged: (tag: Tag) -> Unit = {}
+			override val onTagChanged: (tag: Tag) -> Unit = {
+				viewModel.changeTag(it)
+			}
 		}
 
 		drawContent(
@@ -192,9 +195,14 @@ object MainScreen : NavRoute {
 		val showTagSheet: Boolean by remember { createTagCoordinator.showSheetState }
 		val showItemSheet: Boolean by remember { createItemCoordinator.showSheetState }
 
+		val tagContent = tagState.collectAsState().value
 		val locationContent = locationState.collectAsState().value
 		val itemStockContent = localizedStocksContent.collectAsState().value
-		val forLocation = itemStockContent.data.locationsScopedContent[locationContent.data.currentLocation.id] ?: listOf()
+		val forLocation = if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
+			itemStockContent.data.flatContent
+		} else {
+			itemStockContent.data.locationsScopedContent[locationContent.data.currentLocation.id] ?: listOf()
+		}
 
 		Column(
 			modifier = modifier,
@@ -234,13 +242,17 @@ object MainScreen : NavRoute {
 				}
 
 				else -> {
+					val finalItems = if (tagContent.data.currentTag.id == STATIC_ID_TAG_ALL) {
+						forLocation
+					} else {
+						forLocation.filter { it.tags.map { it.id }.contains(tagContent.data.currentTag.id) }
+					}
 					// content
 					LazyColumn(
 						modifier = Modifier.fillMaxSize(),
 					) {
 						itemsIndexed(
-							//itemStockContent.data.itemStocks,
-							forLocation,
+							finalItems,
 							key = { _, item ->
 								item.item.id
 							}
