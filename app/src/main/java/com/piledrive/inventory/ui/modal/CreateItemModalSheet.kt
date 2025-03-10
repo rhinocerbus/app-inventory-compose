@@ -41,9 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
-import com.piledrive.inventory.ui.callbacks.CreateItemCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.callbacks.stubCreateItemCallbacks
 import com.piledrive.inventory.ui.forms.state.TextFormFieldState
 import com.piledrive.inventory.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.state.ItemContentState
@@ -52,6 +50,15 @@ import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import kotlinx.coroutines.flow.StateFlow
 
+interface CreateItemCallbacks {
+	//val onShowCreate: () -> Unit
+	val onAddItem: (item: ItemSlug) -> Unit
+}
+
+val stubCreateItemCallbacks = object : CreateItemCallbacks {
+	//override val onShowCreate: () -> Unit = {}
+	override val onAddItem: (item: ItemSlug) -> Unit = { }
+}
 
 class CreateItemSheetCoordinator(
 	val showSheetState: MutableState<Boolean> = mutableStateOf(false),

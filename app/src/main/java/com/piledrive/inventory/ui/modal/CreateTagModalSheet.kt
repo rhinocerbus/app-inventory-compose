@@ -33,11 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.TagSlug
-import com.piledrive.inventory.ui.callbacks.CreateTagCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.callbacks.stubCreateTagCallbacks
 import com.piledrive.inventory.ui.forms.state.TextFormFieldState
 import com.piledrive.inventory.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.state.TagsContentState
@@ -45,6 +42,15 @@ import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import kotlinx.coroutines.flow.StateFlow
 
+interface CreateTagCallbacks {
+	//val onShowCreate: () -> Unit
+	val onAddTag: (slug: TagSlug) -> Unit
+}
+
+val stubCreateTagCallbacks = object : CreateTagCallbacks {
+	//override val onShowCreate: () -> Unit = {}
+	override val onAddTag: (slug: TagSlug) -> Unit = {}
+}
 
 class CreateTagSheetCoordinator(
 	val showSheetState: MutableState<Boolean> = mutableStateOf(false),

@@ -42,15 +42,23 @@ import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.StockSlug
-import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.callbacks.stubAddItemStockCallbacks
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import kotlinx.coroutines.flow.StateFlow
 
+
+interface AddItemStockCallbacks {
+	//val onShowAdd: (startingLocation: Location?) -> Unit
+	val onAddItemToLocation: (slug: StockSlug) -> Unit
+}
+
+val stubAddItemStockCallbacks = object : AddItemStockCallbacks {
+	//override val onShowAdd: (startingLocation: Location?) -> Unit = {}
+	override val onAddItemToLocation: (slug: StockSlug) -> Unit = { }
+}
 
 class CreateItemStockSheetCoordinator(
 	val showSheetState: MutableState<Boolean> = mutableStateOf(false),

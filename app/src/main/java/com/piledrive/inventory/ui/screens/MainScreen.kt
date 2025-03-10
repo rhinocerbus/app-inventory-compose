@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
@@ -44,18 +46,18 @@ import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
 import com.piledrive.inventory.data.model.StockSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
-import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
-import com.piledrive.inventory.ui.callbacks.CreateItemCallbacks
-import com.piledrive.inventory.ui.callbacks.CreateLocationCallbacks
-import com.piledrive.inventory.ui.callbacks.CreateTagCallbacks
 import com.piledrive.inventory.ui.callbacks.stubContentFilterCallbacks
+import com.piledrive.inventory.ui.modal.AddItemStockCallbacks
+import com.piledrive.inventory.ui.modal.CreateItemCallbacks
 import com.piledrive.inventory.ui.modal.CreateItemModalSheet
 import com.piledrive.inventory.ui.modal.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateItemStockModalSheet
 import com.piledrive.inventory.ui.modal.CreateItemStockSheetCoordinator
+import com.piledrive.inventory.ui.modal.CreateLocationCallbacks
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheetCoordinator
+import com.piledrive.inventory.ui.modal.CreateTagCallbacks
 import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
@@ -216,6 +218,11 @@ object MainScreen : NavRoute {
 						DrawEmptyLocationsState(createLocationCoordinator)
 					} else {
 						// main spinner
+						CircularProgressIndicator(
+							modifier = Modifier
+								.padding(8.dp, 16.dp)
+								.zIndex(1f)
+						)
 					}
 				}
 
@@ -242,6 +249,7 @@ object MainScreen : NavRoute {
 				}
 
 				else -> {
+					// todo - fully hoist state-based content up to viewmodel
 					val finalItems = if (tagContent.data.currentTag.id == STATIC_ID_TAG_ALL) {
 						forLocation
 					} else {
