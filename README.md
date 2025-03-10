@@ -1,4 +1,4 @@
-# app-composite-build-template
+# app-inventory-compose
 
 ## Note
 This repo is heavily under rapid, experimental and iterative development. The current state of code quality may not filly reflect professional/production-level work.
