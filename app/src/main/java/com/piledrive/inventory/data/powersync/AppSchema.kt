@@ -7,12 +7,54 @@ import com.powersync.db.schema.Table
 val AppSchema: Schema = Schema(
 	listOf(
 		Table(
+			name = "items",
+			columns = listOf(
+				// added by powersync
+				//Column.text("id"),
+				Column.text("created_at"),
+				Column.text("name"),
+				Column.text("unit_id"),
+			)
+		),
+		Table(
 			name = "locations",
 			columns = listOf(
+				// added by powersync
 				//Column.text("id"),
 				Column.text("created_at"),
 				Column.text("name")
 			)
-		)
+		),
+		Table(
+			name = "units",
+			columns = listOf(
+				// added by powersync
+				//Column.text("id"),
+				Column.text("created_at"),
+				Column.text("name"),
+				Column.text("label"),
+				Column.text("type"),
+			)
+		),
+		Table(
+			name = "stocks",
+			columns = listOf(
+				// added by powersync
+				//Column.text("id"),
+				Column.text("created_at"),
+				Column.text("item_id"),
+				Column.text("location_id"),
+				Column.real("amount"),
+			)
+		),
+		Table(
+			name = "tags",
+			columns = listOf(
+				// added by powersync
+				//Column.text("id"),
+				Column.text("created_at"),
+				Column.text("name"),
+			)
+		),
 	)
 )

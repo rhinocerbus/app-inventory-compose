@@ -1,7 +1,7 @@
 package com.piledrive.inventory.ui.callbacks
 
-import com.piledrive.inventory.model.Location
-import com.piledrive.inventory.model.Tag
+import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.Tag
 
 interface ContentFilterCallbacks {
 	val onLocationChanged: (loc: Location) -> Unit

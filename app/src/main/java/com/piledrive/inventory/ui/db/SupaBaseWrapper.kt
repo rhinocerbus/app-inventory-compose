@@ -1,8 +1,8 @@
 package com.piledrive.inventory.ui.db
 
 import android.util.Log
-import com.piledrive.inventory.model.Location
-import com.piledrive.inventory.model.LocationSlug
+import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.LocationSlug
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.realtime.PostgresAction
@@ -21,7 +21,9 @@ import javax.inject.Singleton
  *
  * https://supabase.com/docs/reference/kotlin/installing
  * https://supabase.com/docs/reference/kotlin/initializing
- * x
+ *
+ * https://www.reddit.com/r/Supabase/comments/12zfn6p/supabase_error_new_row_violates_rowlevel_security/
+ * https://supabase.com/docs/guides/auth/managing-user-data?queryGroups=language&language=kotlin#using-triggers
  */
 @Singleton
 class SupaBaseWrapper @Inject constructor(

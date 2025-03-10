@@ -1,8 +1,15 @@
 package com.piledrive.inventory.ui.state
 
-import com.piledrive.inventory.model.Item
-import com.piledrive.inventory.model.Location
-import com.piledrive.inventory.model.Tag
+import com.piledrive.inventory.data.model.Item
+import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
+import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
+import com.piledrive.inventory.data.model.Stock
+import com.piledrive.inventory.data.model.Tag
+
+
+//  region location filter
+/////////////////////////////////////////////////
 
 data class LocationOptions(
 	val allLocations: List<Location> = listOf(defaultLocation),
@@ -10,7 +17,7 @@ data class LocationOptions(
 	val currentLocation: Location = defaultLocation
 ) {
 	companion object {
-		val defaultLocation = Location("", "All", "")
+		val defaultLocation = Location(STATIC_ID_LOCATION_ALL, "", "Everywhere")
 	}
 }
 
@@ -20,6 +27,12 @@ data class LocationContentState(
 	override val isLoading: Boolean = true
 ) : GenericContentState()
 
+/////////////////////////////////////////////////
+//  endregion
+
+
+//  region tag filter
+/////////////////////////////////////////////////
 
 data class TagOptions(
 	val allTags: List<Tag> = listOf(defaultTag),
@@ -27,7 +40,7 @@ data class TagOptions(
 	val currentTag: Tag = defaultTag
 ) {
 	companion object {
-		private val defaultTag = Tag("All")
+		val defaultTag = Tag(STATIC_ID_TAG_ALL, "", "Everything")
 	}
 }
 
@@ -37,8 +50,22 @@ data class TagsContentState(
 	override val isLoading: Boolean = true
 ) : GenericContentState()
 
+/////////////////////////////////////////////////
+//  endregion
+
+
+//  region by-location items content
+/////////////////////////////////////////////////
+
+data class ItemStockOptions(
+	val itemStocks: List<Stock> = listOf(),
+)
+
 data class ItemContentState(
-	override val data: List<Item> = listOf(),
+	override val data: ItemStockOptions = ItemStockOptions(),
 	override val hasLoaded: Boolean = false,
 	override val isLoading: Boolean = true
 ) : GenericContentState()
+
+/////////////////////////////////////////////////
+//  endregion

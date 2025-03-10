@@ -1,16 +1,58 @@
 package com.piledrive.inventory.data.powersync
 
 import android.content.ContentValues
-import android.text.format.DateFormat
+import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
 import com.powersync.PowerSyncDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
+import kotlin.reflect.KClass
 
+/**
+ * https://docs.powersync.com/intro/powersync-overview#getting-started
+ * https://docs.powersync.com/installation/authentication-setup/development-tokens
+ * https://docs.powersync.com/installation/database-connection
+ * https://github.com/powersync-ja/powersync-kotlin/blob/738fd0a041c43e1efc0374fbf6357ddc504c71ed/connectors/supabase/src/commonMain/kotlin/com/powersync/connector/supabase/SupabaseConnector.kt#L160
+ * https://docs.powersync.com/integration-guides/supabase-+-powersync/realtime-streaming
+ * https://docs.powersync.com/client-sdk-references/kotlin-multiplatform/usage-examples
+ */
 class PowerSyncDbWrapper(val db: PowerSyncDatabase) {
 
-	suspend fun insert(table: String, values: ContentValues) {
+	private val _initState = MutableStateFlow<Int>(0)
+	val initState: StateFlow<Int> = _initState
+
+	init {
+		CoroutineScope(Dispatchers.Default).launch {
+			/*initPowerSync().collect {
+
+			}
+			*/
+			_initState.value = 0
+			db.waitForFirstSync()
+			_initState.value = 1
+		}
+	}
+
+	//val sharedFlow = MutableSharedFlow<Int>(replay = 1)
+
+
+	/*
+	fun initPowerSync(): Flow<Int> {
+		return callbackFlow {
+			send(0)
+			db.waitForFirstSync()
+			send(1)
+			close()
+		}
+	}
+*/
+
+	suspend fun insert(table: String, values: ContentValues, clazz: KClass<out SupaBaseModel>) {
 		Timber.d("> performing INSERT into $table")
 
 		val colNames = when (values.size()) {
