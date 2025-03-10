@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package com.piledrive.inventory.ui.screens
 
@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -19,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -30,6 +34,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.piledrive.inventory.data.model.Item
+import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.Stock
@@ -52,10 +59,10 @@ import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStockContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.inventory.ui.util.previewLocationContentFlow
-import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.inventory.ui.util.previewItemStocksContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
+import com.piledrive.inventory.ui.util.previewLocationContentFlow
+import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.inventory.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.StateFlow
 
@@ -84,8 +91,8 @@ object MainScreen : NavRoute {
 
 		val createItemCoordinator = CreateItemSheetCoordinator(
 			createItemCallbacks = object : CreateItemCallbacks {
-				override val onAddItem: (name: String, tags: List<String>) -> Unit = { name, tags ->
-					viewModel.addNewItem(name, tags)
+				override val onAddItem: (item: ItemSlug) -> Unit = {
+					viewModel.addNewItem(it)
 				}
 			}
 		)
@@ -170,6 +177,7 @@ object MainScreen : NavRoute {
 		val showItemSheet: Boolean by remember { createItemCoordinator.showSheetState }
 
 		val locationContent = locationState.collectAsState().value
+		val itemsContent = itemState.collectAsState().value
 		val itemStockContent = itemStockState.collectAsState().value
 
 		Column(
@@ -187,7 +195,8 @@ object MainScreen : NavRoute {
 					}
 				}
 
-				itemStockContent.data.itemStocks.isEmpty() -> {
+				//itemStockContent.data.itemStocks.isEmpty() -> {
+				itemsContent.data.items.isEmpty() -> {
 					if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
 						Text(
 							"no items anywhere"
@@ -215,12 +224,14 @@ object MainScreen : NavRoute {
 						modifier = Modifier.fillMaxSize(),
 					) {
 						itemsIndexed(
-							itemStockContent.data.itemStocks,
+							//itemStockContent.data.itemStocks,
+							itemsContent.data.items,
 							key = { _, item ->
 								item.id
 							}
 						) { _, item ->
-							Text(item.id)
+							val tags = itemsContent.data.tagsByItemsMap[item.id] ?: listOf()
+							ItemWithTagsListItem(Modifier, item, tags)
 						}
 					}
 
@@ -234,12 +245,33 @@ object MainScreen : NavRoute {
 				CreateLocationModalSheet.Draw(Modifier, createLocationCoordinator)
 			}
 
-			if(showItemSheet) {
+			if (showItemSheet) {
 				CreateItemModalSheet.Draw(Modifier, createItemCoordinator, createTagCoordinator, itemState, tagState)
 			}
 
 			if (showTagSheet) {
 				CreateTagModalSheet.Draw(Modifier, createTagCoordinator, tagState)
+			}
+		}
+	}
+
+	@Composable
+	fun ItemWithTagsListItem(modifier: Modifier = Modifier, item: Item, tags: List<Tag>) {
+		Column(
+			modifier = modifier
+				.fillMaxWidth()
+		) {
+			Text(item.name)
+			FlowRow(
+				horizontalArrangement = Arrangement.spacedBy(7.dp),
+				verticalArrangement = Arrangement.spacedBy(7.dp),
+			) {
+				tags.forEach {
+					SuggestionChip(
+						onClick = {},
+						label = { Text(it.name) },
+					)
+				}
 			}
 		}
 	}

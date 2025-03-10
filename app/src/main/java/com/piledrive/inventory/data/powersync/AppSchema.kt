@@ -7,6 +7,16 @@ import com.powersync.db.schema.Table
 val AppSchema: Schema = Schema(
 	listOf(
 		Table(
+			name = "item_tags",
+			columns = listOf(
+				// added by powersync
+				//Column.text("id"),
+				Column.text("created_at"),
+				Column.text("item_id"),
+				Column.text("tag_id"),
+			)
+		),
+		Table(
 			name = "items",
 			columns = listOf(
 				// added by powersync

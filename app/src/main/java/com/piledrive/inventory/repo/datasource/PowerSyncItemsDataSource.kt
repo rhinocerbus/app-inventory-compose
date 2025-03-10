@@ -2,9 +2,11 @@ package com.piledrive.inventory.repo.datasource
 
 import android.content.ContentValues
 import com.piledrive.inventory.data.model.Item
-import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
+import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
+import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.repo.datasource.abstracts.ItemsSourceImpl
+import com.piledrive.inventory.ui.util.UUIDv5
 import com.powersync.db.getString
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +28,33 @@ class PowerSyncItemsDataSource @Inject constructor(
 		return powerSync.initState
 	}
 
+	/* this somewhat works but the denormalized items are rough, needs a lot more attention
+	override fun watchItems(): Flow<List<Item>> {
+		return powerSync.db.watch(
+			"SELECT items.id as i_id, items.created_at as i_created_at, items.name as i_name, items.unit_id as i_unit_id, tags.id, tags.created_at, tags.name  FROM items " +
+				"LEFT OUTER JOIN item_tags ON i_id = item_tags.item_id " +
+				"LEFT OUTER JOIN tags ON item_tags.tag_id = tags.id", mapper = { cursor ->
+					Timber.d("${cursor.columnNames}")
+				Item(
+					id = cursor.getString("id"),
+					createdAt = cursor.getString("created_at"),
+					name = cursor.getString("name"),
+					// figure out joins
+					tags = listOf(),
+					unit = QuantityUnit.defaultUnitBags
+				).apply {
+					val tag = Tag(
+						id = cursor.getString("id"),
+						createdAt = cursor.getString("created_at"),
+						name = cursor.getString("name")
+					)
+					fullTags = listOf()
+				}
+			}
+		)
+	}
+*/
+
 	override fun watchItems(): Flow<List<Item>> {
 		return powerSync.db.watch(
 			"SELECT * FROM items", mapper = { cursor ->
@@ -41,11 +70,22 @@ class PowerSyncItemsDataSource @Inject constructor(
 		)
 	}
 
-	override suspend fun addItem(name: String, tags: List<String>) {
+	override suspend fun addItem(item: ItemSlug) {
+		val itemId = UUIDv5.nameUUIDFromString(item.name)
 		val values = ContentValues().apply {
-			put("name", name)
+			put("id", itemId.toString())
+			put("name", item.name)
+			put("unit_id", item.unit.id)
 		}
 		powerSync.insert("items", values, Item::class)
+
 		//items2tags
+		item.tags.forEach {
+			val subVales = ContentValues().apply {
+				put("item_id", itemId.toString())
+				put("tag_id", it)
+			}
+			powerSync.insert("item_tags", subVales, Item::class)
+		}
 	}
 }
