@@ -41,7 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
-import com.piledrive.inventory.data.model.StockSlug
+import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.LocationContentState
@@ -50,19 +50,19 @@ import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import kotlinx.coroutines.flow.StateFlow
 
 
-interface AddItemStockCallbacks {
+interface AddItemStashCallbacks {
 	//val onShowAdd: (startingLocation: Location?) -> Unit
-	val onAddItemToLocation: (slug: StockSlug) -> Unit
+	val onAddItemToLocation: (slug: StashSlug) -> Unit
 }
 
-val stubAddItemStockCallbacks = object : AddItemStockCallbacks {
+val stubAddItemStashCallbacks = object : AddItemStashCallbacks {
 	//override val onShowAdd: (startingLocation: Location?) -> Unit = {}
-	override val onAddItemToLocation: (slug: StockSlug) -> Unit = { }
+	override val onAddItemToLocation: (slug: StashSlug) -> Unit = { }
 }
 
-class CreateItemStockSheetCoordinator(
+class CreateItemStashSheetCoordinator(
 	val showSheetState: MutableState<Boolean> = mutableStateOf(false),
-	val createItemStockCallbacks: AddItemStockCallbacks = stubAddItemStockCallbacks,
+	val createItemStockCallbacks: AddItemStashCallbacks = stubAddItemStashCallbacks,
 	val modalSheetCallbacks: ModalSheetCallbacks = object : ModalSheetCallbacks {
 		override val onDismissed: () -> Unit = {
 			showSheetState.value = false
@@ -70,12 +70,12 @@ class CreateItemStockSheetCoordinator(
 	}
 )
 
-object CreateItemStockModalSheet {
+object CreateItemStashModalSheet {
 
 	@Composable
 	fun Draw(
 		modifier: Modifier = Modifier,
-		coordinator: CreateItemStockSheetCoordinator,
+		coordinator: CreateItemStashSheetCoordinator,
 		itemSheetCoordinator: CreateItemSheetCoordinator,
 		locationSheetCoordinator: CreateLocationModalSheetCoordinator,
 		itemState: StateFlow<ItemContentState>,
@@ -136,7 +136,7 @@ object CreateItemStockModalSheet {
 
 	@Composable
 	internal fun DrawContent(
-		coordinator: CreateItemStockSheetCoordinator,
+		coordinator: CreateItemStashSheetCoordinator,
 		itemSheetCoordinator: CreateItemSheetCoordinator,
 		locationSheetCoordinator: CreateLocationModalSheetCoordinator,
 		locationsContentState: StateFlow<LocationContentState>,
@@ -230,8 +230,8 @@ object CreateItemStockModalSheet {
 								// todo - could split this into further callbacks
 								// todo - could add initial quantity set
 								//				...replace selectedLocations with slugs, or a map if we want to stay slug-agnostic prev to call
-								val stockSlug = StockSlug(selectedItem!!.id, loc, 0.0)
-								coordinator.createItemStockCallbacks.onAddItemToLocation(stockSlug)
+								val stashSlug = StashSlug(selectedItem!!.id, loc, 0.0)
+								coordinator.createItemStockCallbacks.onAddItemToLocation(stashSlug)
 							}
 						}) {
 						Icon(Icons.Default.Done, contentDescription = "add item to locations")
@@ -268,10 +268,10 @@ object CreateItemStockModalSheet {
 
 @Preview
 @Composable
-private fun CreateItemStockSheetPreview() {
+private fun CreateItemStashSheetPreview() {
 	AppTheme {
-		CreateItemStockModalSheet.DrawContent(
-			CreateItemStockSheetCoordinator(),
+		CreateItemStashModalSheet.DrawContent(
+			CreateItemStashSheetCoordinator(),
 			CreateItemSheetCoordinator(),
 			CreateLocationModalSheetCoordinator(),
 			previewLocationContentFlow(listOf(Location(id = "", createdAt = "", name = "Pantry"))),

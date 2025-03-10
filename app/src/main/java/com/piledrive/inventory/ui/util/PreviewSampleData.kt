@@ -2,7 +2,7 @@ package com.piledrive.inventory.ui.util
 
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.ui.state.ItemContentState
-import com.piledrive.inventory.ui.state.ItemStockContentState
+import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
@@ -27,9 +27,9 @@ fun previewItemsContentFlow(
 	return MutableStateFlow(ItemContentState(hasLoaded = true, isLoading = false))
 }
 
-fun previewItemStocksContentFlow(
-): StateFlow<ItemStockContentState> {
-	return MutableStateFlow(ItemStockContentState(hasLoaded = true, isLoading = false))
+fun previewItemStashesContentFlow(
+): StateFlow<ItemStashContentState> {
+	return MutableStateFlow(ItemStashContentState(hasLoaded = true, isLoading = false))
 }
 
 fun previewLocalizedContentFlow(

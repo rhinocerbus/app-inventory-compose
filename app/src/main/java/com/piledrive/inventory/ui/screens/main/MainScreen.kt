@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
-package com.piledrive.inventory.ui.screens
+package com.piledrive.inventory.ui.screens.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,17 +43,17 @@ import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
-import com.piledrive.inventory.data.model.StockSlug
+import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.stubContentFilterCallbacks
-import com.piledrive.inventory.ui.modal.AddItemStockCallbacks
+import com.piledrive.inventory.ui.modal.AddItemStashCallbacks
 import com.piledrive.inventory.ui.modal.CreateItemCallbacks
 import com.piledrive.inventory.ui.modal.CreateItemModalSheet
 import com.piledrive.inventory.ui.modal.CreateItemSheetCoordinator
-import com.piledrive.inventory.ui.modal.CreateItemStockModalSheet
-import com.piledrive.inventory.ui.modal.CreateItemStockSheetCoordinator
+import com.piledrive.inventory.ui.modal.CreateItemStashModalSheet
+import com.piledrive.inventory.ui.modal.CreateItemStashSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateLocationCallbacks
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheetCoordinator
@@ -62,11 +62,11 @@ import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.ItemContentState
-import com.piledrive.inventory.ui.state.ItemStockContentState
+import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.inventory.ui.util.previewItemStocksContentFlow
+import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewLocalizedContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
@@ -105,9 +105,9 @@ object MainScreen : NavRoute {
 			}
 		)
 
-		val createItemStockCoordinator = CreateItemStockSheetCoordinator(
-			createItemStockCallbacks = object : AddItemStockCallbacks {
-				override val onAddItemToLocation: (slug: StockSlug) -> Unit = {
+		val createItemStockCoordinator = CreateItemStashSheetCoordinator(
+			createItemStockCallbacks = object : AddItemStashCallbacks {
+				override val onAddItemToLocation: (slug: StashSlug) -> Unit = {
 					viewModel.addNewItemStock(it)
 				}
 			}
@@ -126,8 +126,8 @@ object MainScreen : NavRoute {
 			viewModel.userLocationContentState,
 			viewModel.userTagsContentState,
 			viewModel.itemsContentState,
-			viewModel.itemStocksContentState,
-			viewModel.locationStocksContentState,
+			viewModel.itemStashesContentState,
+			viewModel.locationStashesContentState,
 			createItemStockCoordinator,
 			createLocationCoordinator,
 			createTagCoordinator,
@@ -141,9 +141,9 @@ object MainScreen : NavRoute {
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
 		itemState: StateFlow<ItemContentState>,
-		itemStockState: StateFlow<ItemStockContentState>,
-		localizedStocksContent: StateFlow<LocalizedContentState>,
-		createItemStockSheetCoordinator: CreateItemStockSheetCoordinator,
+		itemStashState: StateFlow<ItemStashContentState>,
+		localizedStashesContent: StateFlow<LocalizedContentState>,
+		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
@@ -161,8 +161,8 @@ object MainScreen : NavRoute {
 					locationState,
 					tagState,
 					itemState,
-					localizedStocksContent,
-					createItemStockSheetCoordinator,
+					localizedStashesContent,
+					createItemStashSheetCoordinator,
 					createLocationCoordinator,
 					createTagCoordinator,
 					createItemCoordinator,
@@ -171,7 +171,7 @@ object MainScreen : NavRoute {
 			floatingActionButton = {
 				DrawAddContentFab(
 					Modifier,
-					createItemStockSheetCoordinator,
+					createItemStashSheetCoordinator,
 					createLocationCoordinator,
 					createTagCoordinator,
 					createItemCoordinator
@@ -186,20 +186,20 @@ object MainScreen : NavRoute {
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
 		itemState: StateFlow<ItemContentState>,
-		localizedStocksContent: StateFlow<LocalizedContentState>,
-		createItemStockSheetCoordinator: CreateItemStockSheetCoordinator,
+		localizedStashesContent: StateFlow<LocalizedContentState>,
+		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
 	) {
-		val showItemStockSheet: Boolean by remember { createItemStockSheetCoordinator.showSheetState }
+		val showItemStashSheet: Boolean by remember { createItemStashSheetCoordinator.showSheetState }
 		val showLocationSheet: Boolean by remember { createLocationCoordinator.showSheetState }
 		val showTagSheet: Boolean by remember { createTagCoordinator.showSheetState }
 		val showItemSheet: Boolean by remember { createItemCoordinator.showSheetState }
 
 		val tagContent = tagState.collectAsState().value
 		val locationContent = locationState.collectAsState().value
-		val itemStockContent = localizedStocksContent.collectAsState().value
+		val itemStockContent = localizedStashesContent.collectAsState().value
 		val forLocation = if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
 			itemStockContent.data.flatContent
 		} else {
@@ -241,7 +241,7 @@ object MainScreen : NavRoute {
 							"no items in ${locationContent.data.currentLocation.name}"
 						)
 						Button(onClick = {
-							createItemStockSheetCoordinator.showSheetState.value = true
+							createItemStashSheetCoordinator.showSheetState.value = true
 						}) {
 							Text("add item")
 						}
@@ -276,10 +276,10 @@ object MainScreen : NavRoute {
 				}
 			}
 
-			if (showItemStockSheet) {
-				CreateItemStockModalSheet.Draw(
+			if (showItemStashSheet) {
+				CreateItemStashModalSheet.Draw(
 					Modifier,
-					createItemStockSheetCoordinator,
+					createItemStashSheetCoordinator,
 					createItemCoordinator,
 					createLocationCoordinator,
 					itemState,
@@ -325,7 +325,7 @@ object MainScreen : NavRoute {
 	@Composable
 	fun DrawAddContentFab(
 		modifier: Modifier = Modifier,
-		createItemStockSheetCoordinator: CreateItemStockSheetCoordinator,
+		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator
@@ -349,7 +349,7 @@ object MainScreen : NavRoute {
 			) {
 				DropdownMenuItem(
 					text = { Text("Add item") }, onClick = {
-						createItemStockSheetCoordinator.showSheetState.value = true
+						createItemStashSheetCoordinator.showSheetState.value = true
 						showMenu = false
 					}
 				)
@@ -467,9 +467,9 @@ fun MainPreview() {
 		previewLocationContentFlow(),
 		previewTagsContentFlow(),
 		previewItemsContentFlow(),
-		previewItemStocksContentFlow(),
+		previewItemStashesContentFlow(),
 		previewLocalizedContentFlow(),
-		CreateItemStockSheetCoordinator(),
+		CreateItemStashSheetCoordinator(),
 		CreateLocationModalSheetCoordinator(),
 		CreateTagSheetCoordinator(),
 		CreateItemSheetCoordinator(),

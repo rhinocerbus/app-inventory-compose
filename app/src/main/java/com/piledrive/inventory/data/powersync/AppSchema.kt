@@ -47,7 +47,7 @@ val AppSchema: Schema = Schema(
 			)
 		),
 		Table(
-			name = "stocks",
+			name = "stashes",
 			columns = listOf(
 				// added by powersync
 				//Column.text("id"),

@@ -4,7 +4,7 @@ import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
-import com.piledrive.inventory.data.model.Stock
+import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 
@@ -55,14 +55,14 @@ data class TagsContentState(
 //  endregion
 
 
-//  region item stocks
+//  region item stashes
 /////////////////////////////////////////////////
 
 data class ItemStockOptions(
-	val itemStocks: List<Stock> = listOf(),
+	val itemStashes: List<Stash> = listOf(),
 )
 
-data class ItemStockContentState(
+data class ItemStashContentState(
 	override val data: ItemStockOptions = ItemStockOptions(),
 	override val hasLoaded: Boolean = false,
 	override val isLoading: Boolean = true
