@@ -61,8 +61,25 @@ data class ItemStockOptions(
 	val itemStocks: List<Stock> = listOf(),
 )
 
-data class ItemContentState(
+data class ItemStockContentState(
 	override val data: ItemStockOptions = ItemStockOptions(),
+	override val hasLoaded: Boolean = false,
+	override val isLoading: Boolean = true
+) : GenericContentState()
+
+/////////////////////////////////////////////////
+//  endregion
+
+
+//  region items content
+/////////////////////////////////////////////////
+
+data class ItemOptions(
+	val items: List<Item> = listOf(),
+)
+
+data class ItemContentState(
+	override val data: ItemOptions = ItemOptions(),
 	override val hasLoaded: Boolean = false,
 	override val isLoading: Boolean = true
 ) : GenericContentState()

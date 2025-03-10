@@ -36,21 +36,26 @@ import com.piledrive.inventory.data.model.Stock
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
+import com.piledrive.inventory.ui.callbacks.CreateItemCallbacks
 import com.piledrive.inventory.ui.callbacks.CreateLocationCallbacks
 import com.piledrive.inventory.ui.callbacks.CreateTagCallbacks
 import com.piledrive.inventory.ui.callbacks.stubAddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.stubContentFilterCallbacks
+import com.piledrive.inventory.ui.modal.CreateItemModalSheet
+import com.piledrive.inventory.ui.modal.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.ItemContentState
+import com.piledrive.inventory.ui.state.ItemStockContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.inventory.ui.util.previewMainContentFlow
-import com.piledrive.inventory.ui.util.previewMainTagsFlow
-import com.piledrive.inventory.ui.util.previewMaintocksFlow
+import com.piledrive.inventory.ui.util.previewLocationContentFlow
+import com.piledrive.inventory.ui.util.previewTagsContentFlow
+import com.piledrive.inventory.ui.util.previewItemStocksContentFlow
+import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.StateFlow
 
@@ -77,6 +82,14 @@ object MainScreen : NavRoute {
 			}
 		)
 
+		val createItemCoordinator = CreateItemSheetCoordinator(
+			createItemCallbacks = object : CreateItemCallbacks {
+				override val onAddItem: (name: String, tags: List<String>) -> Unit = { name, tags ->
+					viewModel.addNewItem(name, tags)
+				}
+			}
+		)
+
 		val addItemStockCallbacks = object : AddItemStockCallbacks {
 			override val onShowAdd: (startingLocation: Location?) -> Unit = {}
 			override val onAddItemToLocation: (itemStock: Stock, location: Location) -> Unit = { _, _ -> }
@@ -93,9 +106,11 @@ object MainScreen : NavRoute {
 		drawContent(
 			viewModel.userLocationContentState,
 			viewModel.userTagsContentState,
+			viewModel.itemsContentState,
 			viewModel.itemStocksContentState,
 			createLocationCoordinator,
 			createTagCoordinator,
+			createItemCoordinator,
 			addItemStockCallbacks,
 			contentFilterCallbacks
 		)
@@ -105,9 +120,11 @@ object MainScreen : NavRoute {
 	fun drawContent(
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
-		itemStockState: StateFlow<ItemContentState>,
+		itemState: StateFlow<ItemContentState>,
+		itemStockState: StateFlow<ItemStockContentState>,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
+		createItemCoordinator: CreateItemSheetCoordinator,
 		addItemStockCallbacks: AddItemStockCallbacks,
 		contentFilterCallbacks: ContentFilterCallbacks
 	) {
@@ -122,14 +139,16 @@ object MainScreen : NavRoute {
 						.fillMaxSize(),
 					locationState,
 					tagState,
+					itemState,
 					itemStockState,
 					createLocationCoordinator,
 					createTagCoordinator,
+					createItemCoordinator,
 					addItemStockCallbacks,
 				)
 			},
 			floatingActionButton = {
-				DrawAddContentFab(Modifier, createLocationCoordinator, createTagCoordinator)
+				DrawAddContentFab(Modifier, createLocationCoordinator, createTagCoordinator, createItemCoordinator)
 			},
 		)
 	}
@@ -139,13 +158,16 @@ object MainScreen : NavRoute {
 		modifier: Modifier = Modifier,
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
-		itemStockState: StateFlow<ItemContentState>,
+		itemState: StateFlow<ItemContentState>,
+		itemStockState: StateFlow<ItemStockContentState>,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
+		createItemCoordinator: CreateItemSheetCoordinator,
 		addItemStockCallbacks: AddItemStockCallbacks,
 	) {
 		val showLocationSheet: Boolean by remember { createLocationCoordinator.showSheetState }
 		val showTagSheet: Boolean by remember { createTagCoordinator.showSheetState }
+		val showItemSheet: Boolean by remember { createItemCoordinator.showSheetState }
 
 		val locationContent = locationState.collectAsState().value
 		val itemStockContent = itemStockState.collectAsState().value
@@ -212,7 +234,11 @@ object MainScreen : NavRoute {
 				CreateLocationModalSheet.Draw(Modifier, createLocationCoordinator)
 			}
 
-			if(showTagSheet) {
+			if(showItemSheet) {
+				CreateItemModalSheet.Draw(Modifier, createItemCoordinator, createTagCoordinator, itemState, tagState)
+			}
+
+			if (showTagSheet) {
 				CreateTagModalSheet.Draw(Modifier, createTagCoordinator, tagState)
 			}
 		}
@@ -222,7 +248,8 @@ object MainScreen : NavRoute {
 	fun DrawAddContentFab(
 		modifier: Modifier = Modifier,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
-		createTagCoordinator: CreateTagSheetCoordinator
+		createTagCoordinator: CreateTagSheetCoordinator,
+		createItemCoordinator: CreateItemSheetCoordinator
 	) {
 		/*
 			box added to satisfy dropdown requirement for a sibling wrapped in a parent to anchor
@@ -243,6 +270,7 @@ object MainScreen : NavRoute {
 			) {
 				DropdownMenuItem(
 					text = { Text("Add item") }, onClick = {
+						createItemCoordinator.showSheetState.value = true
 						showMenu = false
 					}
 				)
@@ -357,11 +385,13 @@ object MainScreen : NavRoute {
 @Composable
 fun MainPreview() {
 	MainScreen.drawContent(
-		previewMainContentFlow(),
-		previewMainTagsFlow(),
-		previewMaintocksFlow(),
+		previewLocationContentFlow(),
+		previewTagsContentFlow(),
+		previewItemsContentFlow(),
+		previewItemStocksContentFlow(),
 		CreateLocationModalSheetCoordinator(),
 		CreateTagSheetCoordinator(),
+		CreateItemSheetCoordinator(),
 		stubAddItemStockCallbacks,
 		stubContentFilterCallbacks
 	)
