@@ -1,6 +1,11 @@
 package com.piledrive.inventory.ui.util
 
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.QuantityUnit
+import com.piledrive.inventory.data.model.Stash
+import com.piledrive.inventory.data.model.composite.ContentForLocation
+import com.piledrive.inventory.data.model.composite.StashForItem
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -35,4 +40,9 @@ fun previewItemStashesContentFlow(
 fun previewLocalizedContentFlow(
 ): StateFlow<LocalizedContentState> {
 	return MutableStateFlow(LocalizedContentState(hasLoaded = true, isLoading = false))
+}
+
+fun previewLocalizedContentFlowWithData(
+): StateFlow<LocalizedContentState> {
+	return MutableStateFlow(LocalizedContentState(data = ContentForLocation.generateSampleSet(), hasLoaded = true, isLoading = false))
 }

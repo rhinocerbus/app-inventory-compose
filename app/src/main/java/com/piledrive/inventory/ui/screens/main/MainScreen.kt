@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -122,12 +121,19 @@ object MainScreen : NavRoute {
 			}
 		}
 
+		val stashesListCallbacks = object : MainStashContentListCallbacks {
+			override val onItemStashQuantityUpdated: () -> Unit = {
+				viewModel
+			}
+		}
+
 		drawContent(
 			viewModel.userLocationContentState,
 			viewModel.userTagsContentState,
 			viewModel.itemsContentState,
 			viewModel.itemStashesContentState,
 			viewModel.locationStashesContentState,
+			stashesListCallbacks,
 			createItemStashCoordinator,
 			createLocationCoordinator,
 			createTagCoordinator,
@@ -143,6 +149,7 @@ object MainScreen : NavRoute {
 		itemState: StateFlow<ItemContentState>,
 		itemStashState: StateFlow<ItemStashContentState>,
 		localizedStashesContent: StateFlow<LocalizedContentState>,
+		stashesListCallbacks: MainStashContentListCallbacks,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
@@ -162,6 +169,7 @@ object MainScreen : NavRoute {
 					tagState,
 					itemState,
 					localizedStashesContent,
+					stashesListCallbacks,
 					createItemStashSheetCoordinator,
 					createLocationCoordinator,
 					createTagCoordinator,
@@ -187,6 +195,7 @@ object MainScreen : NavRoute {
 		tagState: StateFlow<TagsContentState>,
 		itemState: StateFlow<ItemContentState>,
 		localizedStashesContent: StateFlow<LocalizedContentState>,
+		stashesListCallbacks: MainStashContentListCallbacks,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
@@ -255,20 +264,11 @@ object MainScreen : NavRoute {
 					} else {
 						forLocation.filter { it.tags.map { it.id }.contains(tagContent.data.currentTag.id) }
 					}
-					// content
-					LazyColumn(
+					MainStashContentList.Draw(
 						modifier = Modifier.fillMaxSize(),
-					) {
-						itemsIndexed(
-							finalItems,
-							key = { _, item ->
-								item.item.id
-							}
-						) { _, item ->
-							val tags = item.tags
-							ItemWithTagsListItem(Modifier, item.item, tags)
-						}
-					}
+						stashes = finalItems,
+						stashesListCallbacks
+					)
 
 					if (locationContent.isLoading) {
 						// secondary spinner?
@@ -301,26 +301,6 @@ object MainScreen : NavRoute {
 		}
 	}
 
-	@Composable
-	fun ItemWithTagsListItem(modifier: Modifier = Modifier, item: Item, tags: List<Tag>) {
-		Column(
-			modifier = modifier
-				.fillMaxWidth()
-		) {
-			Text(item.name)
-			FlowRow(
-				horizontalArrangement = Arrangement.spacedBy(7.dp),
-				verticalArrangement = Arrangement.spacedBy(7.dp),
-			) {
-				tags.forEach {
-					SuggestionChip(
-						onClick = {},
-						label = { Text(it.name) },
-					)
-				}
-			}
-		}
-	}
 
 	@Composable
 	fun DrawAddContentFab(
@@ -469,6 +449,7 @@ fun MainPreview() {
 		previewItemsContentFlow(),
 		previewItemStashesContentFlow(),
 		previewLocalizedContentFlow(),
+		stubMainStashContentListCallbacks,
 		CreateItemStashSheetCoordinator(),
 		CreateLocationModalSheetCoordinator(),
 		CreateTagSheetCoordinator(),
