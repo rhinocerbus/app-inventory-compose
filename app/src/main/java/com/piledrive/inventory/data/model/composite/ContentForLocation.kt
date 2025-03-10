@@ -8,9 +8,9 @@ data class ContentForLocation(
 			val consolidatedMap = mutableMapOf<String, StashForItem>()
 			locationsScopedContent.values.forEach { items ->
 				items.forEach { item ->
-					val oldStock = consolidatedMap[item.item.id]
-					if(oldStock != null) {
-						consolidatedMap[item.item.id] = oldStock.copy(stash = oldStock.stash.copy(amount = oldStock.stash.amount + item.stash.amount))
+					val oldStash = consolidatedMap[item.item.id]
+					if(oldStash != null) {
+						consolidatedMap[item.item.id] = oldStash.copy(stash = oldStash.stash.copy(amount = oldStash.stash.amount + item.stash.amount))
 					} else {
 						consolidatedMap[item.item.id] = item
 					}

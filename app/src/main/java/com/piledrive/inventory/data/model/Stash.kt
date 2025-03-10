@@ -5,7 +5,7 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 //@Serializable
-interface StockImpl {
+interface StashImpl {
 	@Json(name = "item_id")
 	val itemId: String
 
@@ -18,7 +18,7 @@ data class StashSlug(
 	override val itemId: String,
 	override val locationId: String,
 	override val amount: Double
-) : StockImpl
+) : StashImpl
 
 @JsonClass(generateAdapter = true)
 data class Stash(
@@ -28,5 +28,5 @@ data class Stash(
 	override val itemId: String,
 	override val locationId: String,
 	override val amount: Double,
-) : StockImpl, SupaBaseModel
+) : StashImpl, SupaBaseModel
 

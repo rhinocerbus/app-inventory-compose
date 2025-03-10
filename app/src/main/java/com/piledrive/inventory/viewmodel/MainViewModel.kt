@@ -239,7 +239,7 @@ class MainViewModel @Inject constructor(
 	private val _itemStashesContentState = MutableStateFlow<ItemStashContentState>(itemStashesContent)
 	val itemStashesContentState: StateFlow<ItemStashContentState> = _itemStashesContentState
 
-	fun addNewItemStock(slug: StashSlug) {
+	fun addNewItemStash(slug: StashSlug) {
 		viewModelScope.launch {
 			itemStashesRepo.addItemStash(slug)
 		}
@@ -280,11 +280,11 @@ class MainViewModel @Inject constructor(
 
 		val stashesByLocationMap = mutableMapOf<String, List<StashForItem>>()
 		locations.forEach { loc ->
-			val stashesForLoc = stashes.filter { it.locationId == loc.id }.mapNotNull { stock ->
-				val item = items.firstOrNull { it.id == stock.itemId } ?: return@mapNotNull null
+			val stashesForLoc = stashes.filter { it.locationId == loc.id }.mapNotNull { stash ->
+				val item = items.firstOrNull { it.id == stash.itemId } ?: return@mapNotNull null
 				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
 				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-				StashForItem(stock, item, tagsForItem)
+				StashForItem(stash, item, tagsForItem)
 			}
 			stashesByLocationMap[loc.id] = stashesForLoc
 		}

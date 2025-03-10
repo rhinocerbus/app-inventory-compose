@@ -58,12 +58,12 @@ data class TagsContentState(
 //  region item stashes
 /////////////////////////////////////////////////
 
-data class ItemStockOptions(
+data class ItemStashOptions(
 	val itemStashes: List<Stash> = listOf(),
 )
 
 data class ItemStashContentState(
-	override val data: ItemStockOptions = ItemStockOptions(),
+	override val data: ItemStashOptions = ItemStashOptions(),
 	override val hasLoaded: Boolean = false,
 	override val isLoading: Boolean = true
 ) : GenericContentState()

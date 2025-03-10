@@ -62,7 +62,7 @@ val stubAddItemStashCallbacks = object : AddItemStashCallbacks {
 
 class CreateItemStashSheetCoordinator(
 	val showSheetState: MutableState<Boolean> = mutableStateOf(false),
-	val createItemStockCallbacks: AddItemStashCallbacks = stubAddItemStashCallbacks,
+	val createItemStashCallbacks: AddItemStashCallbacks = stubAddItemStashCallbacks,
 	val modalSheetCallbacks: ModalSheetCallbacks = object : ModalSheetCallbacks {
 		override val onDismissed: () -> Unit = {
 			showSheetState.value = false
@@ -231,7 +231,7 @@ object CreateItemStashModalSheet {
 								// todo - could add initial quantity set
 								//				...replace selectedLocations with slugs, or a map if we want to stay slug-agnostic prev to call
 								val stashSlug = StashSlug(selectedItem!!.id, loc, 0.0)
-								coordinator.createItemStockCallbacks.onAddItemToLocation(stashSlug)
+								coordinator.createItemStashCallbacks.onAddItemToLocation(stashSlug)
 							}
 						}) {
 						Icon(Icons.Default.Done, contentDescription = "add item to locations")

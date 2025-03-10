@@ -105,10 +105,10 @@ object MainScreen : NavRoute {
 			}
 		)
 
-		val createItemStockCoordinator = CreateItemStashSheetCoordinator(
-			createItemStockCallbacks = object : AddItemStashCallbacks {
+		val createItemStashCoordinator = CreateItemStashSheetCoordinator(
+			createItemStashCallbacks = object : AddItemStashCallbacks {
 				override val onAddItemToLocation: (slug: StashSlug) -> Unit = {
-					viewModel.addNewItemStock(it)
+					viewModel.addNewItemStash(it)
 				}
 			}
 		)
@@ -128,7 +128,7 @@ object MainScreen : NavRoute {
 			viewModel.itemsContentState,
 			viewModel.itemStashesContentState,
 			viewModel.locationStashesContentState,
-			createItemStockCoordinator,
+			createItemStashCoordinator,
 			createLocationCoordinator,
 			createTagCoordinator,
 			createItemCoordinator,
@@ -199,11 +199,11 @@ object MainScreen : NavRoute {
 
 		val tagContent = tagState.collectAsState().value
 		val locationContent = locationState.collectAsState().value
-		val itemStockContent = localizedStashesContent.collectAsState().value
+		val itemStashContent = localizedStashesContent.collectAsState().value
 		val forLocation = if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
-			itemStockContent.data.flatContent
+			itemStashContent.data.flatContent
 		} else {
-			itemStockContent.data.locationsScopedContent[locationContent.data.currentLocation.id] ?: listOf()
+			itemStashContent.data.locationsScopedContent[locationContent.data.currentLocation.id] ?: listOf()
 		}
 
 		Column(
