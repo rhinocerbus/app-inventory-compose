@@ -1,10 +1,8 @@
 package com.piledrive.inventory.repo
 
-import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.Tag
-import com.piledrive.inventory.repo.datasource.PowerSyncLocationsDataSource
+import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.repo.datasource.PowerSyncTagsDataSource
-import com.piledrive.inventory.repo.datasource.SupaBaseLocationsDataSource
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -20,8 +18,8 @@ class TagsRepo @Inject constructor(
 		return powerSyncSource.initPowerSync()
 	}
 
-	suspend fun addTag(name: String) {
-		powerSyncSource.addTag(name)
+	suspend fun addTag(slug: TagSlug) {
+		powerSyncSource.addTag(slug)
 		//supaBase.addLocation(name)
 	}
 

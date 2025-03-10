@@ -1,6 +1,7 @@
 package com.piledrive.inventory.repo.datasource
 
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.repo.datasource.abstracts.LocationsSourceImpl
 import com.piledrive.inventory.ui.db.SupaBaseWrapper
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -33,9 +34,9 @@ class SupaBaseLocationsDataSource @Inject constructor(
 		}.flowOn(Dispatchers.Default)
 	}
 
-	override suspend fun addLocation(name: String) {
+	override suspend fun addLocation(slug: LocationSlug) {
 		withContext(Dispatchers.Default) {
-			supaBase.addLocation(name)
+			supaBase.addLocation(slug.name)
 		}
 	}
 }
