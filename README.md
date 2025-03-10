@@ -17,15 +17,15 @@ Using:
 - Leveraging several personal libraries to reduce copy/paste across projects (Compose components, logging, various Android framework wrappers)
 
 ## TODO
-X synchornized remote data storage
-- storage auth for security
-X data models & relations
-- optimize queries given PowerSync's limitations on joins rather than manually joining client-side
-X data model creation with reactive UI
-- modifying item stock quantities at given locations
-- creating cutom stock units
-- mass item-level management screen (rename, change unit, delete with cascading removal across locations)
-- general ui cleanup, styling
-- code quality cleanup from experimental phases
-- testing
-- consider experimenting with other backend approaches (SupaBae GraphQL)
+- [x] data models & relations
+- [x] synchornized remote data storage
+- [ ] storage auth for security
+- [ ] optimize queries given PowerSync's limitations on joins rather than manually joining client-side
+- [x] data model creation with reactive UI
+- [ ] modifying item stock quantities at given locations
+- [ ] creating cutom stock units
+- [ ] mass item-level management screen (rename, change unit, delete with cascading removal across locations)
+- [ ] general ui cleanup, styling
+- [ ] code quality cleanup from experimental phases
+- [ ] testing
+- [ ] consider experimenting with other backend approaches (SupaBae GraphQL)
