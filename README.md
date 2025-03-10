@@ -2,6 +2,7 @@
 
 ## Note
 This repo is heavily under rapid, experimental and iterative development. The current state of code quality may not filly reflect professional/production-level work.
+Work that is part of this project but not represented in this repo include managing a backend in SupaBase with a Postgres DB with authentication and access rules, and syncing rules through PowerSync.
 
 ## Description
 Personal app for keeping track of items in various locations. The main use case is tracking what's in the kitchen freezer, chest freezer, pantry, etc..
