@@ -2,10 +2,8 @@
 
 package com.piledrive.inventory.ui.modal
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,12 +40,13 @@ import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
-import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
+import com.piledrive.lib_compose_components.ui.chips.ChipGroup
+import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
+import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import kotlinx.coroutines.flow.StateFlow
 
 interface CreateItemCallbacks {
@@ -187,11 +186,7 @@ object CreateItemModalSheet {
 					Text("No added tags yet")
 				} else {
 					// no proper chip group in compose
-					FlowRow(
-						horizontalArrangement = Arrangement.spacedBy(7.dp),
-						verticalArrangement = Arrangement.spacedBy(7.dp),
-					) {
-
+					ChipGroup {
 						SuggestionChip(
 							onClick = {
 								// todo - add single-fire launch param to tag sheet, with callback to flag as selected here

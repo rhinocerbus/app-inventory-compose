@@ -3,10 +3,8 @@
 package com.piledrive.inventory.ui.screens.main
 
 import android.text.TextPaint
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,6 +40,7 @@ import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.StashForItem
 import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.MeasureTextWidth
+import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 
 interface MainStashContentListCallbacks {
 	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit
@@ -158,10 +157,7 @@ object MainStashContentList {
 				}
 
 				Spacer(Modifier.size(4.dp))
-				FlowRow(
-					horizontalArrangement = Arrangement.spacedBy(6.dp),
-					verticalArrangement = Arrangement.spacedBy(6.dp),
-				) {
+				ChipGroup {
 					tags.forEach {
 						SuggestionChip(
 							onClick = {},

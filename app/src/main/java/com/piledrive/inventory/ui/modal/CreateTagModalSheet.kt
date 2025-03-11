@@ -2,10 +2,8 @@
 
 package com.piledrive.inventory.ui.modal
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +36,7 @@ import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
+import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import kotlinx.coroutines.flow.StateFlow
@@ -147,10 +146,16 @@ object CreateTagModalSheet {
 						modifier = Modifier.size(40.dp),
 						enabled = formState.isValid,
 						onClick = {
-							// todo - add another callback layer to have viewmodel do content-level validation (dupe check)
-							// todo - dismiss based on success of ^
+							/* todo
+							    - add another callback layer to have viewmodel do content-level validation (dupe check)
+							    - dismiss based on success of ^
+							    - also have error message from ^
+							    requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
+							    form-level viewmodel, feels like clutter in the main VM
+							 */
 							val slug = TagSlug(name = formState.currentValue)
 							coordinator.createTagCallbacks.onAddTag(slug)
+							coordinator.showSheetState.value = false
 						}
 					) {
 						Icon(Icons.Default.Done, contentDescription = "add new location")
@@ -163,11 +168,7 @@ object CreateTagModalSheet {
 				if (tags.data.userTags.isEmpty()) {
 					Text("No added tags yet")
 				} else {
-					// no proper chip group in compose
-					FlowRow(
-						horizontalArrangement = Arrangement.spacedBy(7.dp),
-						verticalArrangement = Arrangement.spacedBy(7.dp),
-					) {
+					ChipGroup{
 						tags.data.userTags.forEach {
 							SuggestionChip(
 								onClick = {},
