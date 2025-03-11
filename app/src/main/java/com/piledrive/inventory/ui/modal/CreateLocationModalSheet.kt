@@ -82,13 +82,13 @@ object CreateLocationModalSheet {
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
 		) {
-			DrawContent(createLocationCallbacks = coordinator.createLocationCallbacks, locationState)
+			DrawContent(coordinator = coordinator, locationState)
 		}
 	}
 
 	@Composable
 	internal fun DrawContent(
-		createLocationCallbacks: CreateLocationCallbacks,
+		coordinator: CreateLocationModalSheetCoordinator,
 		locationState: StateFlow<LocationContentState>,
 	) {
 		Surface(
@@ -135,10 +135,16 @@ object CreateLocationModalSheet {
 					modifier = Modifier.size(40.dp),
 					enabled = formState.isValid,
 					onClick = {
-						// todo - add another callback layer to have viewmodel do content-level validation (dupe check)
-						// todo - dismiss based on success of ^
+						/* todo
+								- add another callback layer to have viewmodel do content-level validation (dupe check)
+								- dismiss based on success of ^
+								- also have error message from ^
+								requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
+								form-level viewmodel, feels like clutter in the main VM
+						 */
 						val slug = LocationSlug(name = formState.currentValue)
-						createLocationCallbacks.onAddLocation(slug)
+						coordinator.createLocationCallbacks.onAddLocation(slug)
+						coordinator.showSheetState.value = false
 					}
 				) {
 					Icon(Icons.Default.Done, contentDescription = "add new location")
@@ -153,7 +159,7 @@ object CreateLocationModalSheet {
 private fun CreateLocationSheetPreview() {
 	AppTheme {
 		CreateLocationModalSheet.DrawContent(
-			createLocationCallbacks = stubCreateLocationCallbacks,
+			coordinator = CreateLocationModalSheetCoordinator(),
 			previewLocationContentFlow()
 		)
 	}

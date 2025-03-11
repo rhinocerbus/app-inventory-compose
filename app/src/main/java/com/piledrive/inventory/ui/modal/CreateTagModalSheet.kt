@@ -64,7 +64,6 @@ class CreateTagSheetCoordinator(
 /*
 	todo - consider:
 	  - single/multi-use
-	  -- auto-dismiss
 	 	-- reporting back what was added for ex: nested sheets (add item -> add tag)
  */
 object CreateTagModalSheet {

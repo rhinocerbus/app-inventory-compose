@@ -43,6 +43,7 @@ import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.theme.AppTheme
+import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
@@ -99,6 +100,7 @@ object CreateItemModalSheet {
 			DrawContent(
 				coordinator,
 				tagSheetCoordinator,
+				itemState,
 				tagsContentState,
 				selectedTags,
 				onTagToggle = { id, update ->
@@ -116,6 +118,7 @@ object CreateItemModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateItemSheetCoordinator,
 		tagSheetCoordinator: CreateTagSheetCoordinator,
+		itemState: StateFlow<ItemContentState>,
 		tagsContentState: StateFlow<TagsContentState>,
 		selectedTags: List<String>,
 		onTagToggle: (String, Boolean) -> Unit
@@ -128,7 +131,12 @@ object CreateItemModalSheet {
 		) {
 			val formState = remember {
 				TextFormFieldState(
-					mainValidator = Validators.Required(errMsg = "Item name required")
+					mainValidator = Validators.Required(errMsg = "Item name required"),
+					externalValidators = listOf(
+						Validators.Custom(runCheck = { nameIn ->
+							itemState.value.data.items.firstOrNull { it.name.equals(nameIn, true) } == null
+						}, "Item with that name already exists")
+					)
 				)
 			}
 
@@ -165,14 +173,20 @@ object CreateItemModalSheet {
 						modifier = Modifier.size(40.dp),
 						enabled = formState.isValid,
 						onClick = {
-							// todo - add another callback layer to have viewmodel do content-level validation (dupe check)
-							// todo - dismiss based on success of ^
+							/* todo
+							    - add another callback layer to have viewmodel do content-level validation (dupe check)
+							    - dismiss based on success of ^
+							    - also have error message from ^
+							    requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
+							    form-level viewmodel, feels like clutter in the main VM
+							 */
 							val item = ItemSlug(
 								name = formState.currentValue,
 								tags = selectedTags,
 								unit = QuantityUnit.defaultUnitBags
 							)
 							coordinator.createItemCallbacks.onAddItem(item)
+							coordinator.showSheetState.value = false
 						}
 					) {
 						Icon(Icons.Default.Done, contentDescription = "add new location")
@@ -231,6 +245,7 @@ private fun CreateItemSheetPreview() {
 		CreateItemModalSheet.DrawContent(
 			CreateItemSheetCoordinator(),
 			CreateTagSheetCoordinator(),
+			previewItemsContentFlow(),
 			previewTagsContentFlow(),
 			listOf(),
 			onTagToggle = { _, _ -> }

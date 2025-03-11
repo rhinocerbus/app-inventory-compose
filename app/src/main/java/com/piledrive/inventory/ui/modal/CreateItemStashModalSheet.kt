@@ -44,8 +44,10 @@ import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.ItemContentState
+import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.theme.AppTheme
+import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -78,8 +80,9 @@ object CreateItemStashModalSheet {
 		coordinator: CreateItemStashSheetCoordinator,
 		itemSheetCoordinator: CreateItemSheetCoordinator,
 		locationSheetCoordinator: CreateLocationModalSheetCoordinator,
+		stashesState: StateFlow<ItemStashContentState>,
 		itemState: StateFlow<ItemContentState>,
-		locationsContentState: StateFlow<LocationContentState>
+		locationsContentState: StateFlow<LocationContentState>,
 	) {
 		val itemsPool = itemState.collectAsState().value
 
@@ -89,7 +92,6 @@ object CreateItemStashModalSheet {
 		var searchResults: List<Item> by remember { mutableStateOf(itemsPool.data.items) }
 
 		var selectedLocations by remember { mutableStateOf(listOf<String>()) }
-
 
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
@@ -102,6 +104,7 @@ object CreateItemStashModalSheet {
 				coordinator,
 				itemSheetCoordinator,
 				locationSheetCoordinator,
+				stashesState,
 				locationsContentState,
 				selectedItem,
 				onSelectedItemChanged = {
@@ -139,6 +142,7 @@ object CreateItemStashModalSheet {
 		coordinator: CreateItemStashSheetCoordinator,
 		itemSheetCoordinator: CreateItemSheetCoordinator,
 		locationSheetCoordinator: CreateLocationModalSheetCoordinator,
+		stashesState: StateFlow<ItemStashContentState>,
 		locationsContentState: StateFlow<LocationContentState>,
 		selectedItem: Item?,
 		onSelectedItemChanged: (Item?) -> Unit,
@@ -151,6 +155,7 @@ object CreateItemStashModalSheet {
 		onLocationToggle: (String, Boolean) -> Unit
 	) {
 		val locations = locationsContentState.collectAsState().value
+		val stashes = stashesState.collectAsState().value
 
 		Surface(
 			modifier = Modifier.fillMaxWidth()
@@ -169,7 +174,6 @@ object CreateItemStashModalSheet {
 						expanded = searchActive,
 						onExpandedChange = { onSearchActiveChanged(!searchActive) },
 					) {
-
 						TextField(
 							modifier = Modifier
 								.fillMaxWidth()
@@ -227,9 +231,13 @@ object CreateItemStashModalSheet {
 						enabled = selectedItem != null,
 						onClick = {
 							selectedLocations.forEach { loc ->
-								// todo - could split this into further callbacks
-								// todo - could add initial quantity set
-								//				...replace selectedLocations with slugs, or a map if we want to stay slug-agnostic prev to call
+								/* todo
+										- add another callback layer to have viewmodel do content-level validation (dupe check)
+										- dismiss based on success of ^
+										- also have error message from ^
+										requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
+										form-level viewmodel, feels like clutter in the main VM
+								 */
 								val stashSlug = StashSlug(selectedItem!!.id, loc, 0.0)
 								coordinator.createItemStashCallbacks.onAddItemToLocation(stashSlug)
 							}
@@ -244,9 +252,12 @@ object CreateItemStashModalSheet {
 				LazyColumn {
 					itemsIndexed(items = locations.data.userLocations, key = { _, loc -> loc.id }) { _, loc ->
 						val checked = selectedLocations.contains(loc.id)
+						val prevAdded =
+							stashes.data.itemStashes.firstOrNull { selectedItem != null && it.itemId == selectedItem.id && it.locationId == loc.id } != null
 						Row(verticalAlignment = Alignment.CenterVertically) {
 							Checkbox(
-								checked = checked,
+								enabled = !prevAdded && selectedItem != null,
+								checked = checked || prevAdded,
 								onCheckedChange = { onLocationToggle(loc.id, !checked) }
 							)
 							Text(loc.name)
@@ -274,6 +285,7 @@ private fun CreateItemStashSheetPreview() {
 			CreateItemStashSheetCoordinator(),
 			CreateItemSheetCoordinator(),
 			CreateLocationModalSheetCoordinator(),
+			previewItemStashesContentFlow(),
 			previewLocationContentFlow(listOf(Location(id = "", createdAt = "", name = "Pantry"))),
 			selectedItem = null,
 			onSelectedItemChanged = {},

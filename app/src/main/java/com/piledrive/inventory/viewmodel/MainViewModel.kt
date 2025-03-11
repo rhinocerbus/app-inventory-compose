@@ -263,6 +263,9 @@ class MainViewModel @Inject constructor(
 					itemStashesContent = itemStashesContent.copy(
 						data = itemStashesContent.data.copy(itemStashes = it)
 					)
+					withContext(Dispatchers.Main) {
+						_itemStashesContentState.value = itemStashesContent
+					}
 					rebuildItemsWithTags()
 				}
 			}

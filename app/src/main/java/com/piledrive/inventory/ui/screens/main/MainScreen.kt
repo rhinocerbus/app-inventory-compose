@@ -163,6 +163,7 @@ object MainScreen : NavRoute {
 					locationState,
 					tagState,
 					itemState,
+					itemStashState,
 					localizedStashesContent,
 					stashesListCallbacks,
 					createItemStashSheetCoordinator,
@@ -189,6 +190,7 @@ object MainScreen : NavRoute {
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
 		itemState: StateFlow<ItemContentState>,
+		stashState: StateFlow<ItemStashContentState>,
 		localizedStashesContent: StateFlow<LocalizedContentState>,
 		stashesListCallbacks: MainStashContentListCallbacks,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
@@ -252,7 +254,7 @@ object MainScreen : NavRoute {
 					MainStashContentList.Draw(
 						modifier = Modifier.fillMaxSize(),
 						currLocationId = locationContent.data.currentLocation.id,
-						currTagId = tagState.value.data.currentTag.id,
+						currTagId = tagContent.data.currentTag.id,
 						stashes = forLocation,
 						stashesListCallbacks
 					)
@@ -269,6 +271,7 @@ object MainScreen : NavRoute {
 					createItemStashSheetCoordinator,
 					createItemCoordinator,
 					createLocationCoordinator,
+					stashState,
 					itemState,
 					locationState
 				)
