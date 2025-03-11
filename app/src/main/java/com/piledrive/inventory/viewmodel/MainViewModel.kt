@@ -6,6 +6,8 @@ import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
+import com.piledrive.inventory.data.model.QuantityUnit
+import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
 import com.piledrive.inventory.data.model.StashSlug
@@ -17,12 +19,14 @@ import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemStashesRepo
 import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
+import com.piledrive.inventory.repo.QuantityUnitsRepo
 import com.piledrive.inventory.repo.TagsRepo
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
+import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +46,8 @@ class MainViewModel @Inject constructor(
 	private val tagsRepo: TagsRepo,
 	private val itemsRepo: ItemsRepo,
 	private val item2TagsRepo: Item2TagsRepo,
-	private val itemStashesRepo: ItemStashesRepo
+	private val quantityUnitsRepo: QuantityUnitsRepo,
+	private val itemStashesRepo: ItemStashesRepo,
 ) : ViewModel() {
 
 	init {
@@ -71,6 +76,7 @@ class MainViewModel @Inject constructor(
 							watchItems()
 							watchItem2Tags()
 							watchItemStashes()
+							watchQuantityUnits()
 						}
 					}
 				}
@@ -187,6 +193,40 @@ class MainViewModel @Inject constructor(
 			)
 			_userTagsContentState.value = userTagsContent
 			rebuildItemsWithTags()
+		}
+	}
+
+	/////////////////////////////////////////////////
+	//  endregion
+
+
+	//  region Quantity units data
+	/////////////////////////////////////////////////
+
+	private var quantityUnitsContent: QuantityUnitContentState = QuantityUnitContentState()
+	private val _quantityUnitsContentState = MutableStateFlow<QuantityUnitContentState>(quantityUnitsContent)
+	val quantityUnitsContentState: StateFlow<QuantityUnitContentState> = _quantityUnitsContentState
+
+	fun addNewQuantityUnit(slug: QuantityUnitSlug) {
+		viewModelScope.launch {
+			quantityUnitsRepo.addQuantityUnit(slug)
+		}
+	}
+
+	private fun watchQuantityUnits() {
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				quantityUnitsRepo.watchQuantityUnits().collect {
+					Timber.d("Units received: $it")
+					quantityUnitsContent = quantityUnitsContent.copy(
+						data = quantityUnitsContent.data.copy(allUnits = QuantityUnit.defaultSet + it)
+					)
+					withContext(Dispatchers.Main) {
+						_quantityUnitsContentState.value = quantityUnitsContent
+					}
+					rebuildItemsWithTags()
+				}
+			}
 		}
 	}
 
