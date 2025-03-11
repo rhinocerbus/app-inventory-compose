@@ -48,18 +48,26 @@ interface MainStashContentListCallbacks {
 }
 
 val stubMainStashContentListCallbacks = object : MainStashContentListCallbacks {
-	override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit = { _, _ ->}
+	override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit = { _, _ -> }
 }
 
 object MainStashContentList {
 	@Composable
-	fun Draw(modifier: Modifier = Modifier, stashes: List<StashForItem>, callbacks: MainStashContentListCallbacks) {
-		DrawContent(modifier, stashes, callbacks)
+	fun Draw(
+		modifier: Modifier = Modifier,
+		currLocationId: String,
+		currTagId: String,
+		stashes: List<StashForItem>,
+		callbacks: MainStashContentListCallbacks
+	) {
+		DrawContent(modifier, currLocationId, currTagId, stashes, callbacks)
 	}
 
 	@Composable
 	internal fun DrawContent(
 		modifier: Modifier = Modifier,
+		currLocationId: String,
+		currTagId: String,
 		stashes: List<StashForItem>,
 		callbacks: MainStashContentListCallbacks
 	) {
@@ -71,7 +79,7 @@ object MainStashContentList {
 				itemsIndexed(
 					stashes,
 					key = { _, stash ->
-						stash.item.id
+						currLocationId + currTagId + stash.stash.id
 					}
 				) { _, stash ->
 					ItemStashListItem(
@@ -172,6 +180,8 @@ private fun MainStashContentListPreview() {
 	AppTheme {
 		MainStashContentList.DrawContent(
 			modifier = Modifier,
+			"",
+			"",
 			ContentForLocation.generateSampleSet().currentLocationItemStashContent,
 			stubMainStashContentListCallbacks
 		)

@@ -256,6 +256,8 @@ object MainScreen : NavRoute {
 				else -> {
 					MainStashContentList.Draw(
 						modifier = Modifier.fillMaxSize(),
+						currLocationId = locationContent.data.currentLocation.id,
+						currTagId = tagState.value.data.currentTag.id,
 						stashes = forLocation,
 						stashesListCallbacks
 					)
