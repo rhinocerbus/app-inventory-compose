@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
@@ -66,6 +67,7 @@ import com.piledrive.inventory.ui.util.previewLocalizedContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.inventory.viewmodel.MainViewModel
+import com.piledrive.lib_compose_components.ui.coordinators.SearchCoordinator
 import kotlinx.coroutines.flow.StateFlow
 
 object MainScreen : NavRoute {
