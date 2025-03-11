@@ -35,8 +35,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.forms.state.TextFormFieldState
-import com.piledrive.inventory.ui.forms.validators.Validators
+import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
+import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
@@ -104,8 +104,8 @@ object CreateTagModalSheet {
 				.fillMaxWidth()
 		) {
 			val formState = remember {
-				TextFormFieldState(
-					mainValidator = Validators.Required(errMsg = "Tag name required")
+				com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState(
+					mainValidator = com.piledrive.lib_compose_components.ui.forms.validators.Validators.Required(errMsg = "Tag name required")
 				)
 			}
 

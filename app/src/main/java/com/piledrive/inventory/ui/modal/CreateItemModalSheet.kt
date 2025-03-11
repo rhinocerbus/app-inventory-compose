@@ -42,8 +42,8 @@ import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.forms.state.TextFormFieldState
-import com.piledrive.inventory.ui.forms.validators.Validators
+import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
+import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.theme.AppTheme
@@ -128,8 +128,8 @@ object CreateItemModalSheet {
 				.fillMaxWidth()
 		) {
 			val formState = remember {
-				TextFormFieldState(
-					mainValidator = Validators.Required(errMsg = "Item name required")
+				com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState(
+					mainValidator = com.piledrive.lib_compose_components.ui.forms.validators.Validators.Required(errMsg = "Item name required")
 				)
 			}
 
