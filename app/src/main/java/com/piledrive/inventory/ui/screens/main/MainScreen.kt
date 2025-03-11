@@ -275,7 +275,7 @@ object MainScreen : NavRoute {
 			}
 
 			if (showLocationSheet) {
-				CreateLocationModalSheet.Draw(Modifier, createLocationCoordinator)
+				CreateLocationModalSheet.Draw(Modifier, createLocationCoordinator, locationState)
 			}
 
 			if (showItemSheet) {

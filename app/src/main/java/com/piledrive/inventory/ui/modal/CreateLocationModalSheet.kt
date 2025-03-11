@@ -29,9 +29,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
+import com.piledrive.inventory.ui.state.LocationContentState
+import com.piledrive.inventory.ui.theme.AppTheme
+import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
-import com.piledrive.inventory.ui.theme.AppTheme
+import kotlinx.coroutines.flow.StateFlow
 
 interface CreateLocationCallbacks {
 	//val onShowCreate: () -> Unit
@@ -65,7 +68,8 @@ object CreateLocationModalSheet {
 	@Composable
 	fun Draw(
 		modifier: Modifier = Modifier,
-		coordinator: CreateLocationModalSheetCoordinator
+		coordinator: CreateLocationModalSheetCoordinator,
+		locationState: StateFlow<LocationContentState>,
 	) {
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
@@ -78,13 +82,14 @@ object CreateLocationModalSheet {
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
 		) {
-			DrawContent(createLocationCallbacks = coordinator.createLocationCallbacks)
+			DrawContent(createLocationCallbacks = coordinator.createLocationCallbacks, locationState)
 		}
 	}
 
 	@Composable
 	internal fun DrawContent(
 		createLocationCallbacks: CreateLocationCallbacks,
+		locationState: StateFlow<LocationContentState>,
 	) {
 		Surface(
 			modifier = Modifier
@@ -92,7 +97,12 @@ object CreateLocationModalSheet {
 		) {
 			val formState = remember {
 				TextFormFieldState(
-					mainValidator = Validators.Required(errMsg = "Location name required")
+					mainValidator = Validators.Required(errMsg = "Location name required"),
+					externalValidators = listOf(
+						Validators.Custom<String>(runCheck = { nameIn ->
+							locationState.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } == null
+						}, "Location with that name exists")
+					)
 				)
 			}
 
@@ -143,7 +153,8 @@ object CreateLocationModalSheet {
 private fun CreateLocationSheetPreview() {
 	AppTheme {
 		CreateLocationModalSheet.DrawContent(
-			createLocationCallbacks = stubCreateLocationCallbacks
+			createLocationCallbacks = stubCreateLocationCallbacks,
+			previewLocationContentFlow()
 		)
 	}
 }
