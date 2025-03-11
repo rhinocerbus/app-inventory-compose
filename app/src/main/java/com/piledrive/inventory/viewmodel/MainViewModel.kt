@@ -6,6 +6,8 @@ import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
+import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
+import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
 import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
@@ -121,10 +123,13 @@ class MainViewModel @Inject constructor(
 
 	//todo: possible add pref, or keep it session-level
 	fun changeLocation(loc: Location) {
-		userLocationsContent = userLocationsContent.copy(
-			data = userLocationsContent.data.copy(currentLocation = loc)
-		)
-		_userLocationContentState.value = userLocationsContent
+		viewModelScope.launch {
+			userLocationsContent = userLocationsContent.copy(
+				data = userLocationsContent.data.copy(currentLocation = loc)
+			)
+			_userLocationContentState.value = userLocationsContent
+			rebuildItemsWithTags()
+		}
 	}
 
 	fun addNewLocation(slug: LocationSlug) {
@@ -176,10 +181,13 @@ class MainViewModel @Inject constructor(
 
 	//todo: possible add pref, or keep it session-level
 	fun changeTag(tag: Tag) {
-		userTagsContent = userTagsContent.copy(
-			data = userTagsContent.data.copy(currentTag = tag)
-		)
-		_userTagsContentState.value = userTagsContent
+		viewModelScope.launch {
+			userTagsContent = userTagsContent.copy(
+				data = userTagsContent.data.copy(currentTag = tag)
+			)
+			_userTagsContentState.value = userTagsContent
+			rebuildItemsWithTags()
+		}
 	}
 
 	/////////////////////////////////////////////////
@@ -285,9 +293,10 @@ class MainViewModel @Inject constructor(
 	private suspend fun rebuildItemsWithTags() {
 		val locations = userLocationsContent.data.userLocations
 		val currLocation = userLocationsContent.data.currentLocation
+		val tags = userTagsContent.data.userTags
+		val currTag = userTagsContent.data.currentTag
 		val items = itemsContent.data.items
 		val stashes = itemStashesContent.data.itemStashes
-		val tags = userTagsContent.data.userTags
 
 		val stashesByLocationMap = mutableMapOf<String, List<StashForItem>>()
 		locations.forEach { loc ->
@@ -299,7 +308,35 @@ class MainViewModel @Inject constructor(
 			}
 			stashesByLocationMap[loc.id] = stashesForLoc
 		}
-		val content = ContentForLocation(stashesByLocationMap)
+
+		val stashesForLocation = if (currLocation.id == STATIC_ID_LOCATION_ALL) {
+			val consolidatedMap = mutableMapOf<String, StashForItem>()
+			stashesByLocationMap.values.forEach { items ->
+				items.forEach { item ->
+					val oldStash = consolidatedMap[item.item.id]
+					if (oldStash != null) {
+						consolidatedMap[item.item.id] =
+							oldStash.copy(stash = oldStash.stash.copy(amount = oldStash.stash.amount + item.stash.amount))
+					} else {
+						consolidatedMap[item.item.id] = item
+					}
+				}
+			}
+			consolidatedMap.values.toList()
+		} else {
+			stashesByLocationMap[currLocation.id] ?: listOf()
+		}
+
+		val filteredByTag = if(currTag.id == STATIC_ID_TAG_ALL) {
+			stashesForLocation
+		} else {
+			stashesForLocation.filter { it.tags.contains(currTag) }
+		}
+
+		val content = ContentForLocation(
+			currLocation.id,
+			currentLocationItemStashContent = filteredByTag
+		)
 		locationStashesContent = locationStashesContent.copy(
 			data = content
 		)

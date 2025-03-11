@@ -172,7 +172,7 @@ private fun MainStashContentListPreview() {
 	AppTheme {
 		MainStashContentList.DrawContent(
 			modifier = Modifier,
-			ContentForLocation.generateSampleSet().locationsScopedContent.values.first(),
+			ContentForLocation.generateSampleSet().currentLocationItemStashContent,
 			stubMainStashContentListCallbacks
 		)
 	}

@@ -2,22 +2,23 @@ package com.piledrive.inventory.data.model.composite
 
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.QuantityUnit
+import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
-import com.piledrive.inventory.ui.state.LocalizedContentState
 
 data class ContentForLocation(
-	val locationsScopedContent: Map<String, List<StashForItem>> = mapOf()
+	val locationId: String = STATIC_ID_LOCATION_ALL,
+	val currentLocationItemStashContent: List<StashForItem> = listOf()
 ) {
 
 	companion object {
 		fun generateSampleSet(): ContentForLocation {
-			val locationId = "asdf"
+			val locationId = "l1"
 			val stashes = listOf<StashForItem>(
 				StashForItem(
 					Stash(
 						id = "s1",
-						createdAt ="",
+						createdAt = "",
 						itemId = "i1",
 						amount = 99.99,
 						locationId = locationId
@@ -35,24 +36,8 @@ data class ContentForLocation(
 					)
 				)
 			)
-			val content = ContentForLocation(mapOf(Pair(locationId, stashes)))
+			val content = ContentForLocation(locationId, stashes)
 			return content
 		}
 	}
-
-	val flatContent: List<StashForItem>
-		get() {
-			val consolidatedMap = mutableMapOf<String, StashForItem>()
-			locationsScopedContent.values.forEach { items ->
-				items.forEach { item ->
-					val oldStash = consolidatedMap[item.item.id]
-					if(oldStash != null) {
-						consolidatedMap[item.item.id] = oldStash.copy(stash = oldStash.stash.copy(amount = oldStash.stash.amount + item.stash.amount))
-					} else {
-						consolidatedMap[item.item.id] = item
-					}
-				}
-			}
-			return consolidatedMap.values.toList()
-		}
 }

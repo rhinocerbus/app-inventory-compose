@@ -209,11 +209,7 @@ object MainScreen : NavRoute {
 		val tagContent = tagState.collectAsState().value
 		val locationContent = locationState.collectAsState().value
 		val itemStashContent = localizedStashesContent.collectAsState().value
-		val forLocation = if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
-			itemStashContent.data.flatContent
-		} else {
-			itemStashContent.data.locationsScopedContent[locationContent.data.currentLocation.id] ?: listOf()
-		}
+		val forLocation = itemStashContent.data.currentLocationItemStashContent
 
 		Column(
 			modifier = modifier,
@@ -258,15 +254,9 @@ object MainScreen : NavRoute {
 				}
 
 				else -> {
-					// todo - fully hoist state-based content up to viewmodel
-					val finalItems = if (tagContent.data.currentTag.id == STATIC_ID_TAG_ALL) {
-						forLocation
-					} else {
-						forLocation.filter { it.tags.map { it.id }.contains(tagContent.data.currentTag.id) }
-					}
 					MainStashContentList.Draw(
 						modifier = Modifier.fillMaxSize(),
-						stashes = finalItems,
+						stashes = forLocation,
 						stashesListCallbacks
 					)
 
