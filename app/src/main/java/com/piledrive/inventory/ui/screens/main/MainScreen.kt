@@ -122,8 +122,8 @@ object MainScreen : NavRoute {
 		}
 
 		val stashesListCallbacks = object : MainStashContentListCallbacks {
-			override val onItemStashQuantityUpdated: () -> Unit = {
-				viewModel
+			override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit = { stashId, qty ->
+				viewModel.updateStashQuantity(stashId, qty)
 			}
 		}
 

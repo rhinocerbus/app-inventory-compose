@@ -27,4 +27,8 @@ class ItemStashesRepo @Inject constructor(
 		return powerSyncSource.watchItemStashes()
 		//return supaBase.watchLocations()
 	}
+
+	suspend fun updateStashQuantity(stashId: String, quantity: Double) {
+		powerSyncSource.updateItemStashQuantity(stashId, quantity)
+	}
 }

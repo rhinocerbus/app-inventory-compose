@@ -27,8 +27,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,11 +44,11 @@ import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.MeasureTextWidth
 
 interface MainStashContentListCallbacks {
-	val onItemStashQuantityUpdated: () -> Unit
+	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit
 }
 
 val stubMainStashContentListCallbacks = object : MainStashContentListCallbacks {
-	override val onItemStashQuantityUpdated: () -> Unit = { }
+	override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit = { _, _ ->}
 }
 
 object MainStashContentList {
@@ -71,17 +74,28 @@ object MainStashContentList {
 						stash.item.id
 					}
 				) { _, stash ->
-					ItemStashListItem(Modifier, stash)
+					ItemStashListItem(
+						Modifier,
+						stash,
+						callbacks
+					)
 				}
 			}
 		}
 	}
 
 	@Composable
-	fun ItemStashListItem(modifier: Modifier = Modifier, stashForItem: StashForItem) {
+	fun ItemStashListItem(
+		modifier: Modifier = Modifier,
+		stashForItem: StashForItem,
+		callbacks: MainStashContentListCallbacks
+	) {
 		val item = stashForItem.item
 		val stash = stashForItem.stash
 		val tags = stashForItem.tags
+
+		var qtyValue by remember { mutableDoubleStateOf(stash.amount) }
+
 		Surface(
 			modifier = modifier
 				.fillMaxWidth()
@@ -94,8 +108,11 @@ object MainStashContentList {
 				Row(verticalAlignment = Alignment.CenterVertically) {
 					Text(modifier = Modifier.weight(1f), text = item.name)
 					IconButton(
-						onClick = {},
-						enabled = stash.amount > 0
+						onClick = {
+							qtyValue -= 1.0
+							callbacks.onItemStashQuantityUpdated(stash.id, qtyValue)
+						},
+						enabled = qtyValue > 0
 					) {
 						Icon(Icons.Default.KeyboardArrowDown, "decrement item stash amount")
 					}
@@ -105,9 +122,14 @@ object MainStashContentList {
 
 					OutlinedTextField(
 						modifier = Modifier.width(amountW.dp),
-						value = "${stash.amount}",
+						value = "${qtyValue}",
 						onValueChange = {
-
+							if (it.toDouble() < 0) {
+								//err
+							} else {
+								qtyValue = it.toDouble()
+								callbacks.onItemStashQuantityUpdated(stash.id, qtyValue)
+							}
 						},
 						textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
 						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -117,7 +139,10 @@ object MainStashContentList {
 					Text("${item.unit.label}")
 
 					IconButton(
-						onClick = {},
+						onClick = {
+							qtyValue += 1.0
+							callbacks.onItemStashQuantityUpdated(stash.id, qtyValue)
+						},
 						enabled = true
 					) {
 						Icon(Icons.Default.KeyboardArrowUp, "increment item stash amount")

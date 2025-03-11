@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface ItemStashesSourceImpl {
 	fun watchItemStashes(): Flow<List<Stash>>
 	suspend fun addItemStash(slug: StashSlug)
+	suspend fun updateItemStashQuantity(stashId: String, quantity: Double)
 }

@@ -25,6 +25,8 @@ import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -256,6 +258,15 @@ class MainViewModel @Inject constructor(
 					rebuildItemsWithTags()
 				}
 			}
+		}
+	}
+
+	private var quantityJob: Job? = null
+	fun updateStashQuantity(stashId: String, quantity: Double) {
+		quantityJob?.cancel()
+		quantityJob = viewModelScope.launch {
+			delay(5000)
+			itemStashesRepo.updateStashQuantity(stashId, quantity)
 		}
 	}
 

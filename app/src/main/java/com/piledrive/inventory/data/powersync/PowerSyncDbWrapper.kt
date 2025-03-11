@@ -107,4 +107,25 @@ class PowerSyncDbWrapper(val db: PowerSyncDatabase) {
 		val result = db.execute(cmd, things)
 		Timber.d("<< result: $result")
 	}
+
+	suspend fun update(
+		table: String,
+		values: ContentValues,
+		whereClause: String = "WHERE id = ?",
+		whereValue: String,
+		clazz: KClass<out SupaBaseModel>
+	) {
+		Timber.d("> performing UPDATE into $table")
+
+		var colNamesAndPlaceholders = ""
+		values.valueSet().forEachIndexed { index, mutableEntry ->
+			colNamesAndPlaceholders += "${if (index > 0) ", " else ""}${mutableEntry.key} = ?"
+		}
+
+		val cmd = "UPDATE $table SET $colNamesAndPlaceholders $whereClause"
+		Timber.d(cmd)
+		val things = values.valueSet().map { it.value } + whereValue
+		val result = db.execute(cmd, things)
+		Timber.d("<< result: $result")
+	}
 }

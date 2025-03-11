@@ -1,9 +1,9 @@
 package com.piledrive.inventory.repo.datasource
 
 import android.content.ContentValues
-import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.StashSlug
+import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.repo.datasource.abstracts.ItemStashesSourceImpl
 import com.powersync.db.getDouble
 import com.powersync.db.getString
@@ -32,7 +32,7 @@ class PowerSyncItemStashesDataSource @Inject constructor(
 				Stash(
 					id = cursor.getString("id"),
 					createdAt = cursor.getString("created_at"),
-					itemId =  cursor.getString("item_id"),
+					itemId = cursor.getString("item_id"),
 					locationId = cursor.getString("location_id"),
 					amount = cursor.getDouble("amount")
 				)
@@ -47,5 +47,17 @@ class PowerSyncItemStashesDataSource @Inject constructor(
 			put("amount", slug.amount)
 		}
 		powerSync.insert("stashes", values, Stash::class)
+	}
+
+	override suspend fun updateItemStashQuantity(stashId: String, quantity: Double) {
+		val values = ContentValues().apply {
+			put("amount", quantity)
+		}
+		powerSync.update(
+			table = "stashes",
+			values = values,
+			whereValue = stashId,
+			clazz = Stash::class
+		)
 	}
 }
