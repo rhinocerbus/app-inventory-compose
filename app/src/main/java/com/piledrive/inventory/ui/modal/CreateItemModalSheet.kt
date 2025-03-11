@@ -128,8 +128,8 @@ object CreateItemModalSheet {
 				.fillMaxWidth()
 		) {
 			val formState = remember {
-				com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState(
-					mainValidator = com.piledrive.lib_compose_components.ui.forms.validators.Validators.Required(errMsg = "Item name required")
+				TextFormFieldState(
+					mainValidator = Validators.Required(errMsg = "Item name required")
 				)
 			}
 
@@ -145,7 +145,7 @@ object CreateItemModalSheet {
 				) {
 					OutlinedTextField(
 						modifier = Modifier.weight(1f),
-						value = formState.currentValue ?: "",
+						value = formState.currentValue,
 						isError = formState.hasError,
 						supportingText = {
 							if (formState.hasError) {

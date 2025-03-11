@@ -91,8 +91,8 @@ object CreateLocationModalSheet {
 				.fillMaxWidth()
 		) {
 			val formState = remember {
-				com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState(
-					mainValidator = com.piledrive.lib_compose_components.ui.forms.validators.Validators.Required(errMsg = "Location name required")
+				TextFormFieldState(
+					mainValidator = Validators.Required(errMsg = "Location name required")
 				)
 			}
 
@@ -104,7 +104,7 @@ object CreateLocationModalSheet {
 			) {
 				OutlinedTextField(
 					modifier = Modifier.weight(1f),
-					value = formState.currentValue ?: "",
+					value = formState.currentValue,
 					isError = formState.hasError,
 					supportingText = {
 						if (formState.hasError) {
