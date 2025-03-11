@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
-package com.piledrive.inventory.ui.screens
+package com.piledrive.inventory.ui.screens.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,10 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,36 +35,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
-import com.piledrive.inventory.data.model.StockSlug
+import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
-import com.piledrive.inventory.ui.callbacks.AddItemStockCallbacks
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
-import com.piledrive.inventory.ui.callbacks.CreateItemCallbacks
-import com.piledrive.inventory.ui.callbacks.CreateLocationCallbacks
-import com.piledrive.inventory.ui.callbacks.CreateTagCallbacks
 import com.piledrive.inventory.ui.callbacks.stubContentFilterCallbacks
+import com.piledrive.inventory.ui.modal.AddItemStashCallbacks
+import com.piledrive.inventory.ui.modal.CreateItemCallbacks
 import com.piledrive.inventory.ui.modal.CreateItemModalSheet
 import com.piledrive.inventory.ui.modal.CreateItemSheetCoordinator
-import com.piledrive.inventory.ui.modal.CreateItemStockModalSheet
-import com.piledrive.inventory.ui.modal.CreateItemStockSheetCoordinator
+import com.piledrive.inventory.ui.modal.CreateItemStashModalSheet
+import com.piledrive.inventory.ui.modal.CreateItemStashSheetCoordinator
+import com.piledrive.inventory.ui.modal.CreateLocationCallbacks
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheetCoordinator
+import com.piledrive.inventory.ui.modal.CreateTagCallbacks
 import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.ItemContentState
-import com.piledrive.inventory.ui.state.ItemStockContentState
+import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.inventory.ui.util.previewItemStocksContentFlow
+import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewLocalizedContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
@@ -103,10 +104,10 @@ object MainScreen : NavRoute {
 			}
 		)
 
-		val createItemStockCoordinator = CreateItemStockSheetCoordinator(
-			createItemStockCallbacks = object : AddItemStockCallbacks {
-				override val onAddItemToLocation: (slug: StockSlug) -> Unit = {
-					viewModel.addNewItemStock(it)
+		val createItemStashCoordinator = CreateItemStashSheetCoordinator(
+			createItemStashCallbacks = object : AddItemStashCallbacks {
+				override val onAddItemToLocation: (slug: StashSlug) -> Unit = {
+					viewModel.addNewItemStash(it)
 				}
 			}
 		)
@@ -120,13 +121,20 @@ object MainScreen : NavRoute {
 			}
 		}
 
+		val stashesListCallbacks = object : MainStashContentListCallbacks {
+			override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit = { stashId, qty ->
+				viewModel.updateStashQuantity(stashId, qty)
+			}
+		}
+
 		drawContent(
 			viewModel.userLocationContentState,
 			viewModel.userTagsContentState,
 			viewModel.itemsContentState,
-			viewModel.itemStocksContentState,
-			viewModel.locationStocksContentState,
-			createItemStockCoordinator,
+			viewModel.itemStashesContentState,
+			viewModel.locationStashesContentState,
+			stashesListCallbacks,
+			createItemStashCoordinator,
 			createLocationCoordinator,
 			createTagCoordinator,
 			createItemCoordinator,
@@ -139,9 +147,10 @@ object MainScreen : NavRoute {
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
 		itemState: StateFlow<ItemContentState>,
-		itemStockState: StateFlow<ItemStockContentState>,
-		localizedStocksContent: StateFlow<LocalizedContentState>,
-		createItemStockSheetCoordinator: CreateItemStockSheetCoordinator,
+		itemStashState: StateFlow<ItemStashContentState>,
+		localizedStashesContent: StateFlow<LocalizedContentState>,
+		stashesListCallbacks: MainStashContentListCallbacks,
+		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
@@ -159,8 +168,9 @@ object MainScreen : NavRoute {
 					locationState,
 					tagState,
 					itemState,
-					localizedStocksContent,
-					createItemStockSheetCoordinator,
+					localizedStashesContent,
+					stashesListCallbacks,
+					createItemStashSheetCoordinator,
 					createLocationCoordinator,
 					createTagCoordinator,
 					createItemCoordinator,
@@ -169,7 +179,7 @@ object MainScreen : NavRoute {
 			floatingActionButton = {
 				DrawAddContentFab(
 					Modifier,
-					createItemStockSheetCoordinator,
+					createItemStashSheetCoordinator,
 					createLocationCoordinator,
 					createTagCoordinator,
 					createItemCoordinator
@@ -184,25 +194,22 @@ object MainScreen : NavRoute {
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
 		itemState: StateFlow<ItemContentState>,
-		localizedStocksContent: StateFlow<LocalizedContentState>,
-		createItemStockSheetCoordinator: CreateItemStockSheetCoordinator,
+		localizedStashesContent: StateFlow<LocalizedContentState>,
+		stashesListCallbacks: MainStashContentListCallbacks,
+		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
 	) {
-		val showItemStockSheet: Boolean by remember { createItemStockSheetCoordinator.showSheetState }
+		val showItemStashSheet: Boolean by remember { createItemStashSheetCoordinator.showSheetState }
 		val showLocationSheet: Boolean by remember { createLocationCoordinator.showSheetState }
 		val showTagSheet: Boolean by remember { createTagCoordinator.showSheetState }
 		val showItemSheet: Boolean by remember { createItemCoordinator.showSheetState }
 
 		val tagContent = tagState.collectAsState().value
 		val locationContent = locationState.collectAsState().value
-		val itemStockContent = localizedStocksContent.collectAsState().value
-		val forLocation = if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
-			itemStockContent.data.flatContent
-		} else {
-			itemStockContent.data.locationsScopedContent[locationContent.data.currentLocation.id] ?: listOf()
-		}
+		val itemStashContent = localizedStashesContent.collectAsState().value
+		val forLocation = itemStashContent.data.currentLocationItemStashContent
 
 		Column(
 			modifier = modifier,
@@ -216,6 +223,11 @@ object MainScreen : NavRoute {
 						DrawEmptyLocationsState(createLocationCoordinator)
 					} else {
 						// main spinner
+						CircularProgressIndicator(
+							modifier = Modifier
+								.padding(8.dp, 16.dp)
+								.zIndex(1f)
+						)
 					}
 				}
 
@@ -234,7 +246,7 @@ object MainScreen : NavRoute {
 							"no items in ${locationContent.data.currentLocation.name}"
 						)
 						Button(onClick = {
-							createItemStockSheetCoordinator.showSheetState.value = true
+							createItemStashSheetCoordinator.showSheetState.value = true
 						}) {
 							Text("add item")
 						}
@@ -242,25 +254,13 @@ object MainScreen : NavRoute {
 				}
 
 				else -> {
-					val finalItems = if (tagContent.data.currentTag.id == STATIC_ID_TAG_ALL) {
-						forLocation
-					} else {
-						forLocation.filter { it.tags.map { it.id }.contains(tagContent.data.currentTag.id) }
-					}
-					// content
-					LazyColumn(
+					MainStashContentList.Draw(
 						modifier = Modifier.fillMaxSize(),
-					) {
-						itemsIndexed(
-							finalItems,
-							key = { _, item ->
-								item.item.id
-							}
-						) { _, item ->
-							val tags = item.tags
-							ItemWithTagsListItem(Modifier, item.item, tags)
-						}
-					}
+						currLocationId = locationContent.data.currentLocation.id,
+						currTagId = tagState.value.data.currentTag.id,
+						stashes = forLocation,
+						stashesListCallbacks
+					)
 
 					if (locationContent.isLoading) {
 						// secondary spinner?
@@ -268,10 +268,10 @@ object MainScreen : NavRoute {
 				}
 			}
 
-			if (showItemStockSheet) {
-				CreateItemStockModalSheet.Draw(
+			if (showItemStashSheet) {
+				CreateItemStashModalSheet.Draw(
 					Modifier,
-					createItemStockSheetCoordinator,
+					createItemStashSheetCoordinator,
 					createItemCoordinator,
 					createLocationCoordinator,
 					itemState,
@@ -293,31 +293,11 @@ object MainScreen : NavRoute {
 		}
 	}
 
-	@Composable
-	fun ItemWithTagsListItem(modifier: Modifier = Modifier, item: Item, tags: List<Tag>) {
-		Column(
-			modifier = modifier
-				.fillMaxWidth()
-		) {
-			Text(item.name)
-			FlowRow(
-				horizontalArrangement = Arrangement.spacedBy(7.dp),
-				verticalArrangement = Arrangement.spacedBy(7.dp),
-			) {
-				tags.forEach {
-					SuggestionChip(
-						onClick = {},
-						label = { Text(it.name) },
-					)
-				}
-			}
-		}
-	}
 
 	@Composable
 	fun DrawAddContentFab(
 		modifier: Modifier = Modifier,
-		createItemStockSheetCoordinator: CreateItemStockSheetCoordinator,
+		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator
@@ -341,7 +321,7 @@ object MainScreen : NavRoute {
 			) {
 				DropdownMenuItem(
 					text = { Text("Add item") }, onClick = {
-						createItemStockSheetCoordinator.showSheetState.value = true
+						createItemStashSheetCoordinator.showSheetState.value = true
 						showMenu = false
 					}
 				)
@@ -459,9 +439,10 @@ fun MainPreview() {
 		previewLocationContentFlow(),
 		previewTagsContentFlow(),
 		previewItemsContentFlow(),
-		previewItemStocksContentFlow(),
+		previewItemStashesContentFlow(),
 		previewLocalizedContentFlow(),
-		CreateItemStockSheetCoordinator(),
+		stubMainStashContentListCallbacks,
+		CreateItemStashSheetCoordinator(),
 		CreateLocationModalSheetCoordinator(),
 		CreateTagSheetCoordinator(),
 		CreateItemSheetCoordinator(),

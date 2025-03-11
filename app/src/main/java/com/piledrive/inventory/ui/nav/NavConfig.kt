@@ -8,7 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.piledrive.inventory.ui.screens.MainScreen
+import com.piledrive.inventory.ui.screens.main.MainScreen
 import com.piledrive.inventory.viewmodel.MainViewModel
 
 interface NavRoute {

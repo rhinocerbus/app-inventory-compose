@@ -2,23 +2,24 @@ package com.piledrive.inventory.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
-import com.piledrive.inventory.data.model.StockSlug
+import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
+import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
+import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.data.model.composite.ContentForLocation
-import com.piledrive.inventory.data.model.composite.StockWithItem
+import com.piledrive.inventory.data.model.composite.StashForItem
 import com.piledrive.inventory.repo.Item2TagsRepo
-import com.piledrive.inventory.repo.ItemStocksRepo
+import com.piledrive.inventory.repo.ItemStashesRepo
 import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.TagsRepo
 import com.piledrive.inventory.ui.state.ItemContentState
-import com.piledrive.inventory.ui.state.ItemStockContentState
+import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
@@ -26,6 +27,8 @@ import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -39,7 +42,7 @@ class MainViewModel @Inject constructor(
 	private val tagsRepo: TagsRepo,
 	private val itemsRepo: ItemsRepo,
 	private val item2TagsRepo: Item2TagsRepo,
-	private val itemStocksRepo: ItemStocksRepo
+	private val itemStashesRepo: ItemStashesRepo
 ) : ViewModel() {
 
 	init {
@@ -67,7 +70,7 @@ class MainViewModel @Inject constructor(
 							watchTags()
 							watchItems()
 							watchItem2Tags()
-							watchItemStocks()
+							watchItemStashes()
 						}
 					}
 				}
@@ -120,10 +123,13 @@ class MainViewModel @Inject constructor(
 
 	//todo: possible add pref, or keep it session-level
 	fun changeLocation(loc: Location) {
-		userLocationsContent = userLocationsContent.copy(
-			data = userLocationsContent.data.copy(currentLocation = loc)
-		)
-		_userLocationContentState.value = userLocationsContent
+		viewModelScope.launch {
+			userLocationsContent = userLocationsContent.copy(
+				data = userLocationsContent.data.copy(currentLocation = loc)
+			)
+			_userLocationContentState.value = userLocationsContent
+			rebuildItemsWithTags()
+		}
 	}
 
 	fun addNewLocation(slug: LocationSlug) {
@@ -175,10 +181,13 @@ class MainViewModel @Inject constructor(
 
 	//todo: possible add pref, or keep it session-level
 	fun changeTag(tag: Tag) {
-		userTagsContent = userTagsContent.copy(
-			data = userTagsContent.data.copy(currentTag = tag)
-		)
-		_userTagsContentState.value = userTagsContent
+		viewModelScope.launch {
+			userTagsContent = userTagsContent.copy(
+				data = userTagsContent.data.copy(currentTag = tag)
+			)
+			_userTagsContentState.value = userTagsContent
+			rebuildItemsWithTags()
+		}
 	}
 
 	/////////////////////////////////////////////////
@@ -233,30 +242,39 @@ class MainViewModel @Inject constructor(
 	//  endregion
 
 
-	//  region Item stocks data
+	//  region Item stashes data
 	/////////////////////////////////////////////////
 
-	private var itemStocksContent: ItemStockContentState = ItemStockContentState()
-	private val _itemStocksContentState = MutableStateFlow<ItemStockContentState>(itemStocksContent)
-	val itemStocksContentState: StateFlow<ItemStockContentState> = _itemStocksContentState
+	private var itemStashesContent: ItemStashContentState = ItemStashContentState()
+	private val _itemStashesContentState = MutableStateFlow<ItemStashContentState>(itemStashesContent)
+	val itemStashesContentState: StateFlow<ItemStashContentState> = _itemStashesContentState
 
-	fun addNewItemStock(slug: StockSlug) {
+	fun addNewItemStash(slug: StashSlug) {
 		viewModelScope.launch {
-			itemStocksRepo.addItemStock(slug)
+			itemStashesRepo.addItemStash(slug)
 		}
 	}
 
-	fun watchItemStocks() {
+	fun watchItemStashes() {
 		viewModelScope.launch {
 			withContext(Dispatchers.Default) {
-				itemStocksRepo.watchItemStocks().collect {
-					Timber.d("Stocks received: $it")
-					itemStocksContent = itemStocksContent.copy(
-						data = itemStocksContent.data.copy(itemStocks = it)
+				itemStashesRepo.watchItemStashes().collect {
+					Timber.d("Stashes received: $it")
+					itemStashesContent = itemStashesContent.copy(
+						data = itemStashesContent.data.copy(itemStashes = it)
 					)
 					rebuildItemsWithTags()
 				}
 			}
+		}
+	}
+
+	private var quantityJob: Job? = null
+	fun updateStashQuantity(stashId: String, quantity: Double) {
+		quantityJob?.cancel()
+		quantityJob = viewModelScope.launch {
+			delay(5000)
+			itemStashesRepo.updateStashQuantity(stashId, quantity)
 		}
 	}
 
@@ -267,34 +285,63 @@ class MainViewModel @Inject constructor(
 	//  region Location-specific items data
 	/////////////////////////////////////////////////
 
-	private var locationStocksContent: LocalizedContentState = LocalizedContentState()
-	private val _locationStocksContentState = MutableStateFlow<LocalizedContentState>(locationStocksContent)
-	val locationStocksContentState: StateFlow<LocalizedContentState> = _locationStocksContentState
+	private var locationStashesContent: LocalizedContentState = LocalizedContentState()
+	private val _locationStashesContentState = MutableStateFlow<LocalizedContentState>(locationStashesContent)
+	val locationStashesContentState: StateFlow<LocalizedContentState> = _locationStashesContentState
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
 		val locations = userLocationsContent.data.userLocations
 		val currLocation = userLocationsContent.data.currentLocation
-		val items = itemsContent.data.items
-		val stocks = itemStocksContent.data.itemStocks
 		val tags = userTagsContent.data.userTags
+		val currTag = userTagsContent.data.currentTag
+		val items = itemsContent.data.items
+		val stashes = itemStashesContent.data.itemStashes
 
-		val stocksByLocationMap = mutableMapOf<String, List<StockWithItem>>()
+		val stashesByLocationMap = mutableMapOf<String, List<StashForItem>>()
 		locations.forEach { loc ->
-			val stocksForLoc = stocks.filter { it.locationId == loc.id }.mapNotNull { stock ->
-				val item = items.firstOrNull { it.id == stock.itemId } ?: return@mapNotNull null
+			val stashesForLoc = stashes.filter { it.locationId == loc.id }.mapNotNull { stash ->
+				val item = items.firstOrNull { it.id == stash.itemId } ?: return@mapNotNull null
 				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
 				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-				StockWithItem(stock, item, tagsForItem)
+				StashForItem(stash, item, tagsForItem)
 			}
-			stocksByLocationMap[loc.id] = stocksForLoc
+			stashesByLocationMap[loc.id] = stashesForLoc
 		}
-		val content = ContentForLocation(stocksByLocationMap)
-		locationStocksContent = locationStocksContent.copy(
+
+		val stashesForLocation = if (currLocation.id == STATIC_ID_LOCATION_ALL) {
+			val consolidatedMap = mutableMapOf<String, StashForItem>()
+			stashesByLocationMap.values.forEach { items ->
+				items.forEach { item ->
+					val oldStash = consolidatedMap[item.item.id]
+					if (oldStash != null) {
+						consolidatedMap[item.item.id] =
+							oldStash.copy(stash = oldStash.stash.copy(amount = oldStash.stash.amount + item.stash.amount))
+					} else {
+						consolidatedMap[item.item.id] = item
+					}
+				}
+			}
+			consolidatedMap.values.toList()
+		} else {
+			stashesByLocationMap[currLocation.id] ?: listOf()
+		}
+
+		val filteredByTag = if(currTag.id == STATIC_ID_TAG_ALL) {
+			stashesForLocation
+		} else {
+			stashesForLocation.filter { it.tags.contains(currTag) }
+		}
+
+		val content = ContentForLocation(
+			currLocation.id,
+			currentLocationItemStashContent = filteredByTag
+		)
+		locationStashesContent = locationStashesContent.copy(
 			data = content
 		)
 		withContext(Dispatchers.Main) {
-			_locationStocksContentState.value = locationStocksContent
+			_locationStashesContentState.value = locationStashesContent
 		}
 	}
 

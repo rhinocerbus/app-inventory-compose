@@ -2,11 +2,13 @@ package com.piledrive.inventory.ui.state
 
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
-import com.piledrive.inventory.data.model.Stock
+import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.ContentForLocation
+import com.piledrive.inventory.data.model.composite.StashForItem
 
 
 //  region location filter
@@ -55,15 +57,15 @@ data class TagsContentState(
 //  endregion
 
 
-//  region item stocks
+//  region item stashes
 /////////////////////////////////////////////////
 
-data class ItemStockOptions(
-	val itemStocks: List<Stock> = listOf(),
+data class ItemStashOptions(
+	val itemStashes: List<Stash> = listOf(),
 )
 
-data class ItemStockContentState(
-	override val data: ItemStockOptions = ItemStockOptions(),
+data class ItemStashContentState(
+	override val data: ItemStashOptions = ItemStashOptions(),
 	override val hasLoaded: Boolean = false,
 	override val isLoading: Boolean = true
 ) : GenericContentState()

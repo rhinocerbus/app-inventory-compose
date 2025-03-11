@@ -56,7 +56,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
 ## internal libraries
-#lib-db-room = { module = "com.piledrive.lib_db_room:lib" }
+lib-compose-components = { module = "com.piledrive.lib_compose_components:lib" }
 # supabase
 supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }
 supabase-db = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }

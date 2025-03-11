@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,12 +28,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.LocationSlug
-import com.piledrive.inventory.ui.callbacks.CreateLocationCallbacks
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.callbacks.stubCreateLocationCallbacks
 import com.piledrive.inventory.ui.forms.state.TextFormFieldState
 import com.piledrive.inventory.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.theme.AppTheme
+
+interface CreateLocationCallbacks {
+	//val onShowCreate: () -> Unit
+	val onAddLocation: (slug: LocationSlug) -> Unit
+}
+
+val stubCreateLocationCallbacks = object : CreateLocationCallbacks {
+	//override val onShowCreate: () -> Unit = {}
+	override val onAddLocation: (slug: LocationSlug) -> Unit = {}
+}
 
 /*
  todo - integrate show somehow, but with optional params
