@@ -338,6 +338,7 @@ class MainViewModel @Inject constructor(
 		val currLocation = userLocationsContent.data.currentLocation
 		val tags = userTagsContent.data.userTags
 		val currTag = userTagsContent.data.currentTag
+		val quantityUnits = quantityUnitsContent.data.allUnits
 		val items = itemsContent.data.items
 		val stashes = itemStashesContent.data.itemStashes
 
@@ -347,7 +348,8 @@ class MainViewModel @Inject constructor(
 				val item = items.firstOrNull { it.id == stash.itemId } ?: return@mapNotNull null
 				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
 				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-				StashForItem(stash, item, tagsForItem)
+				val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
+				StashForItem(stash, item, tagsForItem, unitForItem)
 			}
 			stashesByLocationMap[loc.id] = stashesForLoc
 		}
@@ -370,7 +372,7 @@ class MainViewModel @Inject constructor(
 			stashesByLocationMap[currLocation.id] ?: listOf()
 		}
 
-		val filteredByTag = if(currTag.id == STATIC_ID_TAG_ALL) {
+		val filteredByTag = if (currTag.id == STATIC_ID_TAG_ALL) {
 			stashesForLocation
 		} else {
 			stashesForLocation.filter { it.tags.contains(currTag) }

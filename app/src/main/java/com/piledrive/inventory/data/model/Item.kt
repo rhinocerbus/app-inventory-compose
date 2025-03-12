@@ -8,12 +8,12 @@ import com.squareup.moshi.JsonClass
 interface ItemImpl {
 	val name: String
 	val tags: List<String>
-	val unit: QuantityUnit
+	val unitId: String
 }
 
 //@Serializable
 data class ItemSlug(
-	override val name: String, override val tags: List<String>, override val unit: QuantityUnit,
+	override val name: String, override val tags: List<String>, override val unitId: String,
 ) : ItemImpl
 
 //@Serializable
@@ -24,5 +24,5 @@ data class Item(
 	override val createdAt: String,
 	override val name: String,
 	override val tags: List<String>,
-	override val unit: QuantityUnit,
+	override val unitId: String,
 ) : ItemImpl, SupaBaseModel
