@@ -11,6 +11,7 @@ import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
+import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,11 @@ fun previewLocationContentFlow(
 fun previewTagsContentFlow(
 ): StateFlow<TagsContentState> {
 	return MutableStateFlow(TagsContentState(hasLoaded = true, isLoading = false))
+}
+
+fun previewQuantityUnitsContentFlow(
+): StateFlow<QuantityUnitContentState> {
+	return MutableStateFlow(QuantityUnitContentState(hasLoaded = true, isLoading = false))
 }
 
 fun previewItemsContentFlow(

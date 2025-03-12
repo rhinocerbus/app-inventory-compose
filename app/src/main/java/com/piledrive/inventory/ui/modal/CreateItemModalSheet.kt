@@ -42,12 +42,12 @@ import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
 
 interface CreateItemCallbacks {
@@ -192,6 +192,10 @@ object CreateItemModalSheet {
 						Icon(Icons.Default.Done, contentDescription = "add new location")
 					}
 				}
+
+				Spacer(Modifier.size(12.dp))
+
+				Text("Quantity unit:")
 
 				Spacer(Modifier.size(12.dp))
 
