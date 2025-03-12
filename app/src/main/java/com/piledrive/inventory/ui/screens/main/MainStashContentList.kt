@@ -38,9 +38,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.StashForItem
-import com.piledrive.inventory.ui.theme.AppTheme
-import com.piledrive.inventory.ui.util.MeasureTextWidth
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
+import com.piledrive.lib_compose_components.ui.util.MeasureTextWidth
 
 interface MainStashContentListCallbacks {
 	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit

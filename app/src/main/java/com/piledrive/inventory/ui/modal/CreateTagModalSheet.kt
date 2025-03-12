@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.inventory.ui.theme.AppTheme
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState

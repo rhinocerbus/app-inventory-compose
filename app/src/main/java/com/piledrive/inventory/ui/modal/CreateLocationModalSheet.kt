@@ -30,10 +30,10 @@ import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.LocationContentState
-import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
 
 interface CreateLocationCallbacks {

@@ -53,10 +53,10 @@ import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocationContentState
-import com.piledrive.inventory.ui.theme.AppTheme
 import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.lib_compose_components.ui.coordinators.SearchCoordinator
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
 import timber.log.Timber
 
