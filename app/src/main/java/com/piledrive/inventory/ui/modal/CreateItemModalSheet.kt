@@ -49,6 +49,7 @@ import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
+import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
 
@@ -183,7 +184,7 @@ object CreateItemModalSheet {
 						onValueChange = { formState.check(it) }
 					)
 
-					Spacer(Modifier.size(12.dp))
+					Gap(12.dp)
 
 					IconButton(
 						modifier = Modifier.size(40.dp),
@@ -209,7 +210,7 @@ object CreateItemModalSheet {
 					}
 				}
 
-				Spacer(Modifier.size(12.dp))
+				Gap(12.dp)
 
 				Text("Quantity unit:")
 				ChipGroup {
@@ -244,7 +245,7 @@ object CreateItemModalSheet {
 					}
 				}
 
-				Spacer(Modifier.size(12.dp))
+				Gap(12.dp)
 
 				Text("Item tags:")
 				if (tags.data.userTags.isEmpty()) {

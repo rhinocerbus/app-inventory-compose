@@ -41,6 +41,7 @@ import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.StashForItem
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
+import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.util.MeasureTextWidth
 
 interface MainStashContentListCallbacks {
@@ -147,7 +148,7 @@ object MainStashContentList {
 						singleLine = true,
 						readOnly = readOnly
 					)
-					Spacer(Modifier.size(8.dp))
+					Gap(8.dp)
 					Text("${unit.label}")
 
 					IconButton(
@@ -161,7 +162,7 @@ object MainStashContentList {
 					}
 				}
 
-				Spacer(Modifier.size(4.dp))
+				Gap(4.dp)
 				ChipGroup {
 					tags.forEach {
 						SuggestionChip(

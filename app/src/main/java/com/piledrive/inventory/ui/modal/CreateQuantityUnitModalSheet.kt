@@ -4,7 +4,6 @@ package com.piledrive.inventory.ui.modal
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +26,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,8 +39,10 @@ import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
+import com.piledrive.lib_compose_components.ui.chips.ToggleChip
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
+import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
 
@@ -60,7 +63,8 @@ class CreateQuantityUnitSheetCoordinator(
 		override val onDismissed: () -> Unit = {
 			showSheetState.value = false
 		}
-	}
+	},
+	val selectedMeasurement: MutableState<QuantityType> = mutableStateOf(QuantityType.WHOLE)
 )
 
 /*
@@ -128,10 +132,12 @@ object CreateQuantityUnitModalSheet {
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(horizontal = 12.dp),
+				//horizontalAlignment = Alignment.CenterHorizontally
 			) {
 
 				ConstraintLayout(
-					modifier = Modifier.fillMaxWidth()
+					modifier = Modifier
+						.fillMaxWidth()
 						.padding(0.dp)
 				) {
 					val (nameInput, labelInput, createBtn) = createRefs()
@@ -184,7 +190,7 @@ object CreateQuantityUnitModalSheet {
 						onValueChange = { labelFieldState.check(it) }
 					)
 
-					//Spacer(Modifier.size(12.dp))
+					//Gap(12.dp)
 
 					IconButton(
 						modifier = Modifier
@@ -204,7 +210,11 @@ object CreateQuantityUnitModalSheet {
 									requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
 									form-level viewmodel, feels like clutter in the main VM
 							 */
-							val slug = QuantityUnitSlug(name = nameFieldState.currentValue, label = labelFieldState.currentValue, type = QuantityType.WHOLE)
+							val slug = QuantityUnitSlug(
+								name = nameFieldState.currentValue,
+								label = labelFieldState.currentValue,
+								type = coordinator.selectedMeasurement.value
+							)
 							coordinator.createQuantityUnitCallbacks.onAddQuantityUnit(slug)
 							coordinator.showSheetState.value = false
 						}
@@ -212,10 +222,34 @@ object CreateQuantityUnitModalSheet {
 						Icon(Icons.Default.Done, contentDescription = "add new location")
 					}
 
-					createHorizontalChain(nameInput.withChainParams(), createBtn.withChainParams(startMargin = 12.dp), chainStyle = ChainStyle.Spread)
+					createHorizontalChain(
+						nameInput.withChainParams(),
+						createBtn.withChainParams(startMargin = 12.dp),
+						chainStyle = ChainStyle.Spread
+					)
 				}
 
-				Spacer(Modifier.size(12.dp))
+				Gap(8.dp)
+				HorizontalDivider(Modifier.fillMaxWidth(0.9f).align(Alignment.CenterHorizontally))
+				Gap(8.dp)
+
+				Text("Measurement:")
+				ChipGroup {
+					QuantityType.values().forEach {
+						if (it == QuantityType.UNKNOWN) {
+							return@forEach
+						}
+						ToggleChip(
+							onClick = { coordinator.selectedMeasurement.value = it },
+							label = { Text(text = "${it.name}") },
+							selected = it == coordinator.selectedMeasurement.value
+						)
+					}
+				}
+
+				Gap(8.dp)
+				HorizontalDivider(Modifier.fillMaxWidth(0.9f).align(Alignment.CenterHorizontally))
+				Gap(8.dp)
 
 				Text("Current units:")
 				if (units.data.allUnits.isEmpty()) {

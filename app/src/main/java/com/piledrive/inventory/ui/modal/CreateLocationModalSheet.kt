@@ -33,6 +33,7 @@ import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
+import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
 
@@ -129,7 +130,7 @@ object CreateLocationModalSheet {
 					onValueChange = { formState.check(it) }
 				)
 
-				Spacer(Modifier.size(12.dp))
+				Gap(12.dp)
 
 				IconButton(
 					modifier = Modifier.size(40.dp),

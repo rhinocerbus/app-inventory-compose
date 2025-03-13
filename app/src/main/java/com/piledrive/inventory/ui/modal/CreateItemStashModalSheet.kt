@@ -56,6 +56,7 @@ import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.lib_compose_components.ui.coordinators.SearchCoordinator
+import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
 import timber.log.Timber
@@ -232,7 +233,7 @@ object CreateItemStashModalSheet {
 						}
 					}
 
-					Spacer(Modifier.size(12.dp))
+					Gap(12.dp)
 
 					IconButton(modifier = Modifier.size(40.dp),
 						enabled = selectedItem != null,
@@ -254,7 +255,7 @@ object CreateItemStashModalSheet {
 					}
 				}
 
-				Spacer(Modifier.size(12.dp))
+				Gap(12.dp)
 
 				Text("Locations:")
 				LazyColumn {
