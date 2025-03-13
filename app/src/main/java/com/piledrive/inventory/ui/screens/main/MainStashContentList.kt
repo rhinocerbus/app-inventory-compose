@@ -3,10 +3,9 @@
 package com.piledrive.inventory.ui.screens.main
 
 import android.text.TextPaint
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -38,10 +38,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.StashForItem
-import com.piledrive.inventory.ui.theme.AppTheme
-import com.piledrive.inventory.ui.util.MeasureTextWidth
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
+import com.piledrive.lib_compose_components.ui.chips.ChipGroup
+import com.piledrive.lib_compose_components.ui.spacer.Gap
+import com.piledrive.lib_compose_components.ui.util.MeasureTextWidth
 
 interface MainStashContentListCallbacks {
 	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit
@@ -81,11 +84,15 @@ object MainStashContentList {
 					key = { _, stash ->
 						currLocationId + currTagId + stash.stash.id
 					}
-				) { _, stash ->
+				) { idx, stash ->
+					if(idx > 0) {
+						HorizontalDivider(Modifier.fillMaxWidth())
+					}
 					ItemStashListItem(
 						Modifier,
 						stash,
-						callbacks
+						callbacks,
+						currLocationId == STATIC_ID_LOCATION_ALL
 					)
 				}
 			}
@@ -96,10 +103,12 @@ object MainStashContentList {
 	fun ItemStashListItem(
 		modifier: Modifier = Modifier,
 		stashForItem: StashForItem,
-		callbacks: MainStashContentListCallbacks
+		callbacks: MainStashContentListCallbacks,
+		readOnly: Boolean
 	) {
 		val item = stashForItem.item
 		val stash = stashForItem.stash
+		val unit = stashForItem.quantityUnit
 		val tags = stashForItem.tags
 
 		var qtyValue by remember { mutableDoubleStateOf(stash.amount) }
@@ -115,12 +124,17 @@ object MainStashContentList {
 			) {
 				Row(verticalAlignment = Alignment.CenterVertically) {
 					Text(modifier = Modifier.weight(1f), text = item.name)
+
+					Gap(8.dp)
+					Text("(${unit.label})")
+					Gap(8.dp)
+
 					IconButton(
 						onClick = {
 							qtyValue -= 1.0
 							callbacks.onItemStashQuantityUpdated(stash.id, qtyValue)
 						},
-						enabled = qtyValue > 0
+						enabled = qtyValue > 0 && !readOnly
 					) {
 						Icon(Icons.Default.KeyboardArrowDown, "decrement item stash amount")
 					}
@@ -129,7 +143,7 @@ object MainStashContentList {
 						MeasureTextWidth("00.00", MaterialTheme.typography.bodySmall, TextPaint())
 
 					OutlinedTextField(
-						modifier = Modifier.width(amountW.dp),
+						modifier = Modifier.width(amountW.dp).focusable(!readOnly),
 						value = "${qtyValue}",
 						onValueChange = {
 							if (it.toDouble() < 0) {
@@ -141,27 +155,23 @@ object MainStashContentList {
 						},
 						textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
 						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-						singleLine = true
+						singleLine = true,
+						readOnly = readOnly
 					)
-					Spacer(Modifier.size(8.dp))
-					Text("${item.unit.label}")
 
 					IconButton(
 						onClick = {
 							qtyValue += 1.0
 							callbacks.onItemStashQuantityUpdated(stash.id, qtyValue)
 						},
-						enabled = true
+						enabled = !readOnly
 					) {
 						Icon(Icons.Default.KeyboardArrowUp, "increment item stash amount")
 					}
 				}
 
-				Spacer(Modifier.size(4.dp))
-				FlowRow(
-					horizontalArrangement = Arrangement.spacedBy(6.dp),
-					verticalArrangement = Arrangement.spacedBy(6.dp),
-				) {
+				Gap(4.dp)
+				ChipGroup {
 					tags.forEach {
 						SuggestionChip(
 							onClick = {},

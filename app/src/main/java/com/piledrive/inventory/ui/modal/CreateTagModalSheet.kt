@@ -2,10 +2,8 @@
 
 package com.piledrive.inventory.ui.modal
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,11 +33,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.forms.state.TextFormFieldState
-import com.piledrive.inventory.ui.forms.validators.Validators
 import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.inventory.ui.theme.AppTheme
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
+import com.piledrive.lib_compose_components.ui.chips.ChipGroup
+import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
+import com.piledrive.lib_compose_components.ui.forms.validators.Validators
+import com.piledrive.lib_compose_components.ui.spacer.Gap
 import kotlinx.coroutines.flow.StateFlow
 
 interface CreateTagCallbacks {
@@ -65,7 +65,6 @@ class CreateTagSheetCoordinator(
 /*
 	todo - consider:
 	  - single/multi-use
-	  -- auto-dismiss
 	 	-- reporting back what was added for ex: nested sheets (add item -> add tag)
  */
 object CreateTagModalSheet {
@@ -105,7 +104,12 @@ object CreateTagModalSheet {
 		) {
 			val formState = remember {
 				TextFormFieldState(
-					mainValidator = Validators.Required(errMsg = "Tag name required")
+					mainValidator = Validators.Required(errMsg = "Tag name required"),
+					externalValidators = listOf(
+						Validators.Custom<String>(runCheck = { nameIn ->
+							tags.data.allTags.firstOrNull { it.name.equals(nameIn, true) } == null
+						}, errMsg = "Tag already exists")
+					)
 				)
 			}
 
@@ -136,33 +140,35 @@ object CreateTagModalSheet {
 						onValueChange = { formState.check(it) }
 					)
 
-					Spacer(Modifier.size(12.dp))
+					Gap(12.dp)
 
 					IconButton(
 						modifier = Modifier.size(40.dp),
 						enabled = formState.isValid,
 						onClick = {
-							// todo - add another callback layer to have viewmodel do content-level validation (dupe check)
-							// todo - dismiss based on success of ^
+							/* todo
+							    - add another callback layer to have viewmodel do content-level validation (dupe check)
+							    - dismiss based on success of ^
+							    - also have error message from ^
+							    requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
+							    form-level viewmodel, feels like clutter in the main VM
+							 */
 							val slug = TagSlug(name = formState.currentValue)
 							coordinator.createTagCallbacks.onAddTag(slug)
+							coordinator.showSheetState.value = false
 						}
 					) {
 						Icon(Icons.Default.Done, contentDescription = "add new location")
 					}
 				}
 
-				Spacer(Modifier.size(12.dp))
+				Gap(12.dp)
 
 				Text("Current tags:")
 				if (tags.data.userTags.isEmpty()) {
 					Text("No added tags yet")
 				} else {
-					// no proper chip group in compose
-					FlowRow(
-						horizontalArrangement = Arrangement.spacedBy(7.dp),
-						verticalArrangement = Arrangement.spacedBy(7.dp),
-					) {
+					ChipGroup{
 						tags.data.userTags.forEach {
 							SuggestionChip(
 								onClick = {},

@@ -64,9 +64,10 @@ dependencies {
 	implementation(libs.androidx.material3)
 	implementation(libs.androidx.navigation.compose)
 	debugImplementation(libs.ui.tooling)
+	implementation(libs.androidx.compose.constraint)
 
 	// internal libraries (no version necessary)
-	//implementation(libs.lib.db.room)
+	implementation(libs.lib.compose.components)
 
 	// DI
 	implementation(libs.hilt)

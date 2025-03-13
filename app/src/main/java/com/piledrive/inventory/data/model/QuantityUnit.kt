@@ -32,7 +32,7 @@ data class QuantityUnit(
 		val defaultUnitPounds = QuantityUnit(
 			DEFAULT_ID_POUNDS,
 			createdAt = "0",
-			"weight",
+			"pounds",
 			"lbs",
 			QuantityType.DECIMAL
 		)

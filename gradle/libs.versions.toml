@@ -17,6 +17,7 @@ activityCompose = "1.10.1"
 lifecycleRuntimeKtx = "2.8.7"
 uiGraphicsAndroid = "1.7.8"
 uiTooling = "1.7.8"
+composeConstraint = "1.1.1"
 # supabase
 supabase = "3.1.1"
 ktor = "3.1.0"
@@ -55,6 +56,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-ui-graphics-android = { group = "androidx.compose.ui", name = "ui-graphics-android", version.ref = "uiGraphicsAndroid" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "uiTooling" }
+androidx-compose-constraint = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "composeConstraint" }
 ## internal libraries
 lib-compose-components = { module = "com.piledrive.lib_compose_components:lib" }
 # supabase

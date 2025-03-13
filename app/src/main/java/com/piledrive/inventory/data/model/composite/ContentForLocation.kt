@@ -27,13 +27,34 @@ data class ContentForLocation(
 						id = "i1",
 						createdAt = "",
 						name = "item 1",
-						tags = listOf("t1", "t2"),
-						unit = QuantityUnit.defaultUnitBags
+						unitId = QuantityUnit.defaultUnitBags.id
 					),
 					tags = listOf(
 						Tag(id = "t1", createdAt = "", name = "meat"),
 						Tag(id = "t2", createdAt = "", name = "leftovers"),
-					)
+					),
+					quantityUnit = QuantityUnit.defaultUnitBags
+				),
+
+				StashForItem(
+					Stash(
+						id = "s2",
+						createdAt = "",
+						itemId = "i2",
+						amount = 99.99,
+						locationId = locationId
+					),
+					item = Item(
+						id = "i2",
+						createdAt = "",
+						name = "item 2",
+						unitId = QuantityUnit.defaultUnitBags.id
+					),
+					tags = listOf(
+						Tag(id = "t1", createdAt = "", name = "meat"),
+						Tag(id = "t2", createdAt = "", name = "leftovers"),
+					),
+					quantityUnit = QuantityUnit.defaultUnitBags
 				)
 			)
 			val content = ContentForLocation(locationId, stashes)

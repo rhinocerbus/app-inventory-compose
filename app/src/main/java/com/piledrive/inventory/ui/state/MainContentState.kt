@@ -57,6 +57,23 @@ data class TagsContentState(
 //  endregion
 
 
+//  region quantity units
+/////////////////////////////////////////////////
+
+data class QuantityUnitOptions(
+	val allUnits: List<QuantityUnit> = QuantityUnit.defaultSet,
+)
+
+data class QuantityUnitContentState(
+	override val data: QuantityUnitOptions = QuantityUnitOptions(),
+	override val hasLoaded: Boolean = false,
+	override val isLoading: Boolean = true
+) : GenericContentState()
+
+/////////////////////////////////////////////////
+//  endregion
+
+
 //  region item stashes
 /////////////////////////////////////////////////
 

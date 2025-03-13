@@ -6,6 +6,8 @@ import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
+import com.piledrive.inventory.data.model.QuantityUnit
+import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
 import com.piledrive.inventory.data.model.StashSlug
@@ -17,12 +19,14 @@ import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemStashesRepo
 import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
+import com.piledrive.inventory.repo.QuantityUnitsRepo
 import com.piledrive.inventory.repo.TagsRepo
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
+import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +46,8 @@ class MainViewModel @Inject constructor(
 	private val tagsRepo: TagsRepo,
 	private val itemsRepo: ItemsRepo,
 	private val item2TagsRepo: Item2TagsRepo,
-	private val itemStashesRepo: ItemStashesRepo
+	private val quantityUnitsRepo: QuantityUnitsRepo,
+	private val itemStashesRepo: ItemStashesRepo,
 ) : ViewModel() {
 
 	init {
@@ -71,6 +76,7 @@ class MainViewModel @Inject constructor(
 							watchItems()
 							watchItem2Tags()
 							watchItemStashes()
+							watchQuantityUnits()
 						}
 					}
 				}
@@ -194,6 +200,40 @@ class MainViewModel @Inject constructor(
 	//  endregion
 
 
+	//  region Quantity units data
+	/////////////////////////////////////////////////
+
+	private var quantityUnitsContent: QuantityUnitContentState = QuantityUnitContentState()
+	private val _quantityUnitsContentState = MutableStateFlow<QuantityUnitContentState>(quantityUnitsContent)
+	val quantityUnitsContentState: StateFlow<QuantityUnitContentState> = _quantityUnitsContentState
+
+	fun addNewQuantityUnit(slug: QuantityUnitSlug) {
+		viewModelScope.launch {
+			quantityUnitsRepo.addQuantityUnit(slug)
+		}
+	}
+
+	private fun watchQuantityUnits() {
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				quantityUnitsRepo.watchQuantityUnits().collect {
+					Timber.d("Units received: $it")
+					quantityUnitsContent = quantityUnitsContent.copy(
+						data = quantityUnitsContent.data.copy(allUnits = QuantityUnit.defaultSet + it)
+					)
+					withContext(Dispatchers.Main) {
+						_quantityUnitsContentState.value = quantityUnitsContent
+					}
+					rebuildItemsWithTags()
+				}
+			}
+		}
+	}
+
+	/////////////////////////////////////////////////
+	//  endregion
+
+
 	//  region Items data
 	/////////////////////////////////////////////////
 
@@ -263,16 +303,19 @@ class MainViewModel @Inject constructor(
 					itemStashesContent = itemStashesContent.copy(
 						data = itemStashesContent.data.copy(itemStashes = it)
 					)
+					withContext(Dispatchers.Main) {
+						_itemStashesContentState.value = itemStashesContent
+					}
 					rebuildItemsWithTags()
 				}
 			}
 		}
 	}
 
-	private var quantityJob: Job? = null
+	private var quantityJobs = hashMapOf<String, Job?>()
 	fun updateStashQuantity(stashId: String, quantity: Double) {
-		quantityJob?.cancel()
-		quantityJob = viewModelScope.launch {
+		quantityJobs[stashId]?.cancel()
+		quantityJobs[stashId] = viewModelScope.launch {
 			delay(5000)
 			itemStashesRepo.updateStashQuantity(stashId, quantity)
 		}
@@ -295,6 +338,7 @@ class MainViewModel @Inject constructor(
 		val currLocation = userLocationsContent.data.currentLocation
 		val tags = userTagsContent.data.userTags
 		val currTag = userTagsContent.data.currentTag
+		val quantityUnits = quantityUnitsContent.data.allUnits
 		val items = itemsContent.data.items
 		val stashes = itemStashesContent.data.itemStashes
 
@@ -304,7 +348,8 @@ class MainViewModel @Inject constructor(
 				val item = items.firstOrNull { it.id == stash.itemId } ?: return@mapNotNull null
 				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
 				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-				StashForItem(stash, item, tagsForItem)
+				val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
+				StashForItem(stash, item, tagsForItem, unitForItem)
 			}
 			stashesByLocationMap[loc.id] = stashesForLoc
 		}
@@ -327,7 +372,7 @@ class MainViewModel @Inject constructor(
 			stashesByLocationMap[currLocation.id] ?: listOf()
 		}
 
-		val filteredByTag = if(currTag.id == STATIC_ID_TAG_ALL) {
+		val filteredByTag = if (currTag.id == STATIC_ID_TAG_ALL) {
 			stashesForLocation
 		} else {
 			stashesForLocation.filter { it.tags.contains(currTag) }
