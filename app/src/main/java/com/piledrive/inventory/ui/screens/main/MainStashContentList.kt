@@ -119,6 +119,11 @@ object MainStashContentList {
 			) {
 				Row(verticalAlignment = Alignment.CenterVertically) {
 					Text(modifier = Modifier.weight(1f), text = item.name)
+
+					Gap(8.dp)
+					Text("(${unit.label})")
+					Gap(8.dp)
+
 					IconButton(
 						onClick = {
 							qtyValue -= 1.0
@@ -148,8 +153,6 @@ object MainStashContentList {
 						singleLine = true,
 						readOnly = readOnly
 					)
-					Gap(8.dp)
-					Text("${unit.label}")
 
 					IconButton(
 						onClick = {
