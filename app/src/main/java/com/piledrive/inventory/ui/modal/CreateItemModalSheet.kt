@@ -198,8 +198,8 @@ object CreateItemModalSheet {
 							 */
 							val item = ItemSlug(
 								name = formState.currentValue,
-								tags = selectedTags,
 								unitId = selectedQuantityUnit ?: QuantityUnit.DEFAULT_ID_BAGS,
+								tagIds = selectedTags,
 							)
 							coordinator.createItemCallbacks.onAddItem(item)
 							coordinator.showSheetState.value = false

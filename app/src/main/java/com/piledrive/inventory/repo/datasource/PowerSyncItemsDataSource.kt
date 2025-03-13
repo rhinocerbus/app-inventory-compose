@@ -63,7 +63,6 @@ class PowerSyncItemsDataSource @Inject constructor(
 					createdAt = cursor.getString("created_at"),
 					name = cursor.getString("name"),
 					// figure out joins
-					tags = listOf(),
 					unit = QuantityUnit.defaultUnitBags
 				)
 			}
@@ -80,7 +79,7 @@ class PowerSyncItemsDataSource @Inject constructor(
 		powerSync.insert("items", values, Item::class)
 
 		//items2tags
-		item.tags.forEach {
+		item.tagIds.forEach {
 			val subVales = ContentValues().apply {
 				put("item_id", itemId.toString())
 				put("tag_id", it)

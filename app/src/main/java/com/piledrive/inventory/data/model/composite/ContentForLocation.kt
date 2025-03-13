@@ -27,7 +27,6 @@ data class ContentForLocation(
 						id = "i1",
 						createdAt = "",
 						name = "item 1",
-						tags = listOf("t1", "t2"),
 						unit = QuantityUnit.defaultUnitBags
 					),
 					tags = listOf(
