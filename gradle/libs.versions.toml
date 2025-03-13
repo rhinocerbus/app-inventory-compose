@@ -3,9 +3,11 @@
 # core android
 agp = "8.7.3"
 kotlin = "2.0.21"
-androidGradlePlugin = "8.1.4"
-ksp = "2.0.21-1.0.25"
 coreKtx = "1.15.0"
+# ksp
+ksp = "2.0.21-1.0.25"
+# composite build config
+androidGradlePlugin = "8.1.4"
 # DI
 hilt = "2.51.1"
 hilt-navigation = "1.2.0"
