@@ -312,10 +312,10 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	private var quantityJob: Job? = null
+	private var quantityJobs = hashMapOf<String, Job?>()
 	fun updateStashQuantity(stashId: String, quantity: Double) {
-		quantityJob?.cancel()
-		quantityJob = viewModelScope.launch {
+		quantityJobs[stashId]?.cancel()
+		quantityJobs[stashId] = viewModelScope.launch {
 			delay(5000)
 			itemStashesRepo.updateStashQuantity(stashId, quantity)
 		}
