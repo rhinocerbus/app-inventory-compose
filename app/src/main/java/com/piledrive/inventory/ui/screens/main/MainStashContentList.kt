@@ -3,6 +3,7 @@
 package com.piledrive.inventory.ui.screens.main
 
 import android.text.TextPaint
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -82,7 +84,10 @@ object MainStashContentList {
 					key = { _, stash ->
 						currLocationId + currTagId + stash.stash.id
 					}
-				) { _, stash ->
+				) { idx, stash ->
+					if(idx > 0) {
+						HorizontalDivider(Modifier.fillMaxWidth())
+					}
 					ItemStashListItem(
 						Modifier,
 						stash,
@@ -138,7 +143,7 @@ object MainStashContentList {
 						MeasureTextWidth("00.00", MaterialTheme.typography.bodySmall, TextPaint())
 
 					OutlinedTextField(
-						modifier = Modifier.width(amountW.dp),
+						modifier = Modifier.width(amountW.dp).focusable(!readOnly),
 						value = "${qtyValue}",
 						onValueChange = {
 							if (it.toDouble() < 0) {
