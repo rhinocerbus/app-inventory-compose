@@ -33,10 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
+import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
@@ -52,6 +52,9 @@ import com.piledrive.inventory.ui.modal.CreateItemStashSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateLocationCallbacks
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
 import com.piledrive.inventory.ui.modal.CreateLocationModalSheetCoordinator
+import com.piledrive.inventory.ui.modal.CreateQuantityUnitCallbacks
+import com.piledrive.inventory.ui.modal.CreateQuantityUnitModalSheet
+import com.piledrive.inventory.ui.modal.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateTagCallbacks
 import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
@@ -60,14 +63,15 @@ import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
+import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewLocalizedContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
+import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.inventory.viewmodel.MainViewModel
-import com.piledrive.lib_compose_components.ui.coordinators.SearchCoordinator
 import kotlinx.coroutines.flow.StateFlow
 
 object MainScreen : NavRoute {
@@ -109,6 +113,14 @@ object MainScreen : NavRoute {
 			}
 		)
 
+		val createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+			createQuantityUnitCallbacks = object : CreateQuantityUnitCallbacks {
+				override val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit = {
+					viewModel.addNewQuantityUnit(it)
+				}
+			}
+		)
+
 		val contentFilterCallbacks = object : ContentFilterCallbacks {
 			override val onLocationChanged: (loc: Location) -> Unit = {
 				viewModel.changeLocation(it)
@@ -127,6 +139,7 @@ object MainScreen : NavRoute {
 		drawContent(
 			viewModel.userLocationContentState,
 			viewModel.userTagsContentState,
+			viewModel.quantityUnitsContentState,
 			viewModel.itemsContentState,
 			viewModel.itemStashesContentState,
 			viewModel.locationStashesContentState,
@@ -134,6 +147,7 @@ object MainScreen : NavRoute {
 			createItemStashCoordinator,
 			createLocationCoordinator,
 			createTagCoordinator,
+			createQuantityUnitSheetCoordinator,
 			createItemCoordinator,
 			contentFilterCallbacks
 		)
@@ -143,6 +157,7 @@ object MainScreen : NavRoute {
 	fun drawContent(
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
+		quantityState: StateFlow<QuantityUnitContentState>,
 		itemState: StateFlow<ItemContentState>,
 		itemStashState: StateFlow<ItemStashContentState>,
 		localizedStashesContent: StateFlow<LocalizedContentState>,
@@ -150,6 +165,7 @@ object MainScreen : NavRoute {
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
+		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
 		contentFilterCallbacks: ContentFilterCallbacks
 	) {
@@ -164,6 +180,7 @@ object MainScreen : NavRoute {
 						.fillMaxSize(),
 					locationState,
 					tagState,
+					quantityState,
 					itemState,
 					itemStashState,
 					localizedStashesContent,
@@ -171,6 +188,7 @@ object MainScreen : NavRoute {
 					createItemStashSheetCoordinator,
 					createLocationCoordinator,
 					createTagCoordinator,
+					createQuantityUnitSheetCoordinator,
 					createItemCoordinator,
 				)
 			},
@@ -191,6 +209,7 @@ object MainScreen : NavRoute {
 		modifier: Modifier = Modifier,
 		locationState: StateFlow<LocationContentState>,
 		tagState: StateFlow<TagsContentState>,
+		quantityState: StateFlow<QuantityUnitContentState>,
 		itemState: StateFlow<ItemContentState>,
 		stashState: StateFlow<ItemStashContentState>,
 		localizedStashesContent: StateFlow<LocalizedContentState>,
@@ -198,12 +217,14 @@ object MainScreen : NavRoute {
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
+		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
 	) {
 		val showItemStashSheet: Boolean by remember { createItemStashSheetCoordinator.showSheetState }
 		val showLocationSheet: Boolean by remember { createLocationCoordinator.showSheetState }
 		val showTagSheet: Boolean by remember { createTagCoordinator.showSheetState }
 		val showItemSheet: Boolean by remember { createItemCoordinator.showSheetState }
+		val showQuantityUnitSheet: Boolean by remember { createQuantityUnitSheetCoordinator.showSheetState }
 
 		val tagContent = tagState.collectAsState().value
 		val locationContent = locationState.collectAsState().value
@@ -284,11 +305,23 @@ object MainScreen : NavRoute {
 			}
 
 			if (showItemSheet) {
-				CreateItemModalSheet.Draw(Modifier, createItemCoordinator, createTagCoordinator, itemState, tagState)
+				CreateItemModalSheet.Draw(
+					Modifier,
+					createItemCoordinator,
+					createQuantityUnitSheetCoordinator,
+					createTagCoordinator,
+					itemState,
+					quantityState,
+					tagState
+				)
 			}
 
 			if (showTagSheet) {
 				CreateTagModalSheet.Draw(Modifier, createTagCoordinator, tagState)
+			}
+
+			if (showQuantityUnitSheet) {
+				CreateQuantityUnitModalSheet.Draw(Modifier, createQuantityUnitSheetCoordinator, quantityState)
 			}
 		}
 	}
@@ -438,6 +471,7 @@ fun MainPreview() {
 	MainScreen.drawContent(
 		previewLocationContentFlow(),
 		previewTagsContentFlow(),
+		previewQuantityUnitsContentFlow(),
 		previewItemsContentFlow(),
 		previewItemStashesContentFlow(),
 		previewLocalizedContentFlow(),
@@ -445,6 +479,7 @@ fun MainPreview() {
 		CreateItemStashSheetCoordinator(),
 		CreateLocationModalSheetCoordinator(),
 		CreateTagSheetCoordinator(),
+		CreateQuantityUnitSheetCoordinator(),
 		CreateItemSheetCoordinator(),
 		stubContentFilterCallbacks
 	)
