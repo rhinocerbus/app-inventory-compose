@@ -15,14 +15,14 @@ import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.StashForItem
+import com.piledrive.inventory.data.model.composite.StashForItemAtLocation
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemStashesRepo
 import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.QuantityUnitsRepo
 import com.piledrive.inventory.repo.TagsRepo
-import com.piledrive.inventory.ui.modal.TransferItemStashCallbacks
-import com.piledrive.inventory.ui.modal.TransferItemStashSheetCoordinator
+import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -327,19 +327,32 @@ class MainViewModel @Inject constructor(
 	val transferFromLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<Location>()
 	val transferToLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<Location>()
 	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
-		stashesState = itemStashesContentState,
-		itemState = itemsContentState,
-		locationsState = userLocationContentState,
+		stashesStateSource = itemStashesContentState,
+		itemStateSource = itemsContentState,
+		locationsStateSource = userLocationContentState,
 		fromLocationDropdownCoordinator = transferFromLocationCoordinator,
 		toLocationDropdownCoordinator = transferToLocationCoordinator,
-		callbacks = object : TransferItemStashCallbacks {
-			override val onCommitStashTransfer: (fromStashId: String, updatedFromAmount: Double, toStashId: String, updatedToAmount: Double) -> Unit =
-				{ fId, fA, tId, tA ->
-					viewModelScope.launch {
-						itemStashesRepo.updateStashQuantity(fId, fA)
-						itemStashesRepo.updateStashQuantity(tId, tA)
-					}
-				}
+		reloadOptions = { itemId ->
+			val items = itemsContent.data.items
+			val quantityUnits = quantityUnitsContent.data.allUnits
+			val stashes = itemStashesContent.data.itemStashes
+			val locations = userLocationsContent.data.userLocations
+
+			val rootItem = items.firstOrNull { it.id == itemId } ?: throw IllegalStateException("no item by given id")
+			val compiledData = mutableListOf<StashForItemAtLocation>()
+			val stashesForItem = stashes.filter { it.itemId == itemId }
+			stashesForItem.forEach { stash ->
+				val atLocation = locations.firstOrNull { it.id == stash.locationId } ?: run { return@forEach }
+				val withUnit = quantityUnits.firstOrNull { it.id == rootItem.unitId } ?: run { return@forEach }
+				compiledData.add(StashForItemAtLocation(stash = stash, location = atLocation, item = rootItem, quantityUnit = withUnit))
+			}
+			return@TransferItemStashSheetCoordinator compiledData
+		},
+		onCommitStashTransfer = { fId, fA, tId, tA ->
+			viewModelScope.launch {
+				itemStashesRepo.updateStashQuantity(fId, fA)
+				itemStashesRepo.updateStashQuantity(tId, tA)
+			}
 		}
 	)
 

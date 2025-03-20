@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
@@ -58,6 +59,8 @@ import com.piledrive.inventory.ui.modal.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateTagCallbacks
 import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashModalSheet
+import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
@@ -134,6 +137,9 @@ object MainScreen : NavRoute {
 			override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit = { stashId, qty ->
 				viewModel.updateStashQuantity(stashId, qty)
 			}
+			override val onStartStashTransfer: (item: Item) -> Unit = {
+				viewModel.transferItemStashSheetCoordinator.showSheetForItem(it)
+			}
 		}
 
 		drawContent(
@@ -149,7 +155,8 @@ object MainScreen : NavRoute {
 			createTagCoordinator,
 			createQuantityUnitSheetCoordinator,
 			createItemCoordinator,
-			contentFilterCallbacks
+			contentFilterCallbacks,
+			viewModel.transferItemStashSheetCoordinator
 		)
 	}
 
@@ -167,7 +174,8 @@ object MainScreen : NavRoute {
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
-		contentFilterCallbacks: ContentFilterCallbacks
+		contentFilterCallbacks: ContentFilterCallbacks,
+		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinator
 	) {
 		Scaffold(
 			topBar = {
@@ -190,6 +198,7 @@ object MainScreen : NavRoute {
 					createTagCoordinator,
 					createQuantityUnitSheetCoordinator,
 					createItemCoordinator,
+					transferItemStashSheetCoordinator
 				)
 			},
 			floatingActionButton = {
@@ -219,12 +228,14 @@ object MainScreen : NavRoute {
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
+		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinator
 	) {
 		val showItemStashSheet: Boolean by remember { createItemStashSheetCoordinator.showSheetState }
 		val showLocationSheet: Boolean by remember { createLocationCoordinator.showSheetState }
 		val showTagSheet: Boolean by remember { createTagCoordinator.showSheetState }
 		val showItemSheet: Boolean by remember { createItemCoordinator.showSheetState }
 		val showQuantityUnitSheet: Boolean by remember { createQuantityUnitSheetCoordinator.showSheetState }
+		val showTransferSheet: Boolean by remember { transferItemStashSheetCoordinator.showSheetState }
 
 		val tagContent = tagState.collectAsState().value
 		val locationContent = locationState.collectAsState().value
@@ -322,6 +333,10 @@ object MainScreen : NavRoute {
 
 			if (showQuantityUnitSheet) {
 				CreateQuantityUnitModalSheet.Draw(Modifier, createQuantityUnitSheetCoordinator, quantityState)
+			}
+
+			if(showTransferSheet) {
+				TransferItemStashModalSheet.Draw(Modifier, transferItemStashSheetCoordinator)
 			}
 		}
 	}
@@ -481,6 +496,7 @@ fun MainPreview() {
 		CreateTagSheetCoordinator(),
 		CreateQuantityUnitSheetCoordinator(),
 		CreateItemSheetCoordinator(),
-		stubContentFilterCallbacks
+		stubContentFilterCallbacks,
+		TransferItemStashSheetCoordinator(),
 	)
 }
