@@ -498,6 +498,6 @@ fun MainPreview() {
 		CreateQuantityUnitSheetCoordinator(),
 		CreateItemSheetCoordinator(),
 		stubContentFilterCallbacks,
-		stubTransferItemStashSheetCoordinator,
+		TransferItemStashSheetCoordinator(),
 	)
 }

@@ -111,7 +111,7 @@ object TransferItemStashModalSheet {
 private fun TransferItemStashModalSheetPreview() {
 	AppTheme {
 		TransferItemStashModalSheet.DrawContent(
-			stubTransferItemStashSheetCoordinator,
+			TransferItemStashSheetCoordinator(),
 		)
 	}
 }

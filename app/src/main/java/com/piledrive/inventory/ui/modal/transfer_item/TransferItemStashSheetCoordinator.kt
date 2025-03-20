@@ -9,7 +9,7 @@ import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinato
 import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinatorImpl
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 
-interface TransferItemStashSheetCoordinator : ModalSheetCoordinatorImpl {
+interface TransferItemStashSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
 	val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
 	val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
 
@@ -26,16 +26,18 @@ interface TransferItemStashSheetCoordinator : ModalSheetCoordinatorImpl {
 	val onDismiss: () -> Unit
 }
 
-val stubTransferItemStashSheetCoordinator = object : TransferItemStashSheetCoordinator {
+val stubTransferItemStashSheetCoordinator = object : TransferItemStashSheetCoordinatorImpl {
 	override val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> =
 		ReadOnlyDropdownCoordinatorGeneric()
 	override val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> =
 		ReadOnlyDropdownCoordinatorGeneric()
+
 	override val activeItemState: State<Item?> = mutableStateOf(null)
 	override val optionPoolState: State<List<StashForItemAtLocation>> = mutableStateOf(listOf())
 	override val fromLocationState: State<String?> = mutableStateOf(null)
 	override val toLocationState: State<String?> = mutableStateOf(null)
 	override val amountDifference: State<Double> = mutableStateOf(0.0)
+
 	override val reloadOptions: (itemId: String) -> List<StashForItemAtLocation> = { listOf() }
 	override val showSheetForItem: (forItem: Item) -> Unit = {}
 	override val onCommitStashTransfer: (fromStashId: String, updatedFromAmount: Double, toStashId: String, updatedToAmount: Double) -> Unit = {_, _, _, _ ->}
@@ -43,32 +45,34 @@ val stubTransferItemStashSheetCoordinator = object : TransferItemStashSheetCoord
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
 }
 
-class TransferItemStashSheetCoordinator2(
+class TransferItemStashSheetCoordinator(
 	initialShowSheetValue: Boolean = false,
 	initialItemValue: Item? = null,
 	initialFromLocationValue: String? = null,
 	initialToLocationValue: String? = null,
 	initialAmountDifferenceValue: Double = 0.0,
 
-	val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> = ReadOnlyDropdownCoordinatorGeneric(),
-	val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> = ReadOnlyDropdownCoordinatorGeneric(),
+	override val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> = ReadOnlyDropdownCoordinatorGeneric(),
+	override val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> = ReadOnlyDropdownCoordinatorGeneric(),
 
-	val reloadOptions: (itemId: String) -> List<StashForItemAtLocation> = { listOf() },
+	override val reloadOptions: (itemId: String) -> List<StashForItemAtLocation> = { listOf() },
+	override val onCommitStashTransfer: (fromStashId: String, updatedFromAmount: Double, toStashId: String, updatedToAmount: Double) -> Unit = { _, _, _, _ -> }
+) : TransferItemStashSheetCoordinatorImpl {
+	private val _showSheetState: MutableState<Boolean> = mutableStateOf(initialShowSheetValue)
+	override val showSheetState: State<Boolean> = _showSheetState
 
-	val onCommitStashTransfer: (fromStashId: String, updatedFromAmount: Double, toStashId: String, updatedToAmount: Double) -> Unit = { _, _, _, _ -> }
-) : ModalSheetCoordinator(initialShowSheetValue) {
 	private val _activeItemState: MutableState<Item?> = mutableStateOf(initialItemValue)
-	val activeItemState: State<Item?> = _activeItemState
+	override val activeItemState: State<Item?> = _activeItemState
 	private val _optionPoolState: MutableState<List<StashForItemAtLocation>> = mutableStateOf(listOf())
-	val optionPoolState: State<List<StashForItemAtLocation>> = _optionPoolState
+	override val optionPoolState: State<List<StashForItemAtLocation>> = _optionPoolState
 	private val _fromLocationState: MutableState<String?> = mutableStateOf(initialFromLocationValue)
-	val fromLocationState: State<String?> = _fromLocationState
+	override val fromLocationState: State<String?> = _fromLocationState
 	private val _toLocationState: MutableState<String?> = mutableStateOf(initialToLocationValue)
-	val toLocationState: State<String?> = _toLocationState
+	override val toLocationState: State<String?> = _toLocationState
 	private val _amountDifference: MutableState<Double> = mutableStateOf(initialAmountDifferenceValue)
-	val amountDifference: State<Double> = _amountDifference
+	override val amountDifference: State<Double> = _amountDifference
 
-	fun showSheetForItem(forItem: Item) {
+	override val showSheetForItem: (forItem: Item) -> Unit = { forItem ->
 		_optionPoolState.value = reloadOptions(forItem.id)
 		fromLocationDropdownCoordinator.udpateOptionsPool(_optionPoolState.value)
 		toLocationDropdownCoordinator.udpateOptionsPool(_optionPoolState.value)
@@ -91,5 +95,9 @@ class TransferItemStashSheetCoordinator2(
 
 	fun changeTransferAmount(amount: Double) {
 		_amountDifference.value = amount
+	}
+
+	override val onDismiss: () -> Unit = {
+		_showSheetState.value = false
 	}
 }
