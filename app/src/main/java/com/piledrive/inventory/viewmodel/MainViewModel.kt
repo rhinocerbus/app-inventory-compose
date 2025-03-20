@@ -1,7 +1,11 @@
 package com.piledrive.inventory.viewmodel
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
@@ -324,15 +328,51 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	val transferFromLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<Location>()
-	val transferToLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<Location>()
-	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
-		stashesStateSource = itemStashesContentState,
-		itemStateSource = itemsContentState,
-		locationsStateSource = userLocationContentState,
-		fromLocationDropdownCoordinator = transferFromLocationCoordinator,
-		toLocationDropdownCoordinator = transferToLocationCoordinator,
-		reloadOptions = { itemId ->
+	/* recursive typing error dues to properties cross-referencing each other
+	private val transferFromLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>(
+		externalOnOptionSelected = {
+			val thing: String = it!!.location.id
+			transferItemStashSheetCoordinator.changeFromLocation(thing)
+		}
+	)
+	private val transferToLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>(
+		externalOnOptionSelected = {
+			val thing: String = it!!.location.id
+			transferItemStashSheetCoordinator.changeToLocation(thing)
+		}
+	)*/
+	private val transferFromLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>()
+	private val transferToLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>()
+
+	val transferItemStashSheetCoordinator = object : TransferItemStashSheetCoordinator {
+
+		private val _showSheetState: MutableState<Boolean> = mutableStateOf(false)
+		override val showSheetState: State<Boolean>
+			get() = _showSheetState
+
+
+		private val _activeItemState: MutableState<Item?> = mutableStateOf(null)
+		override val activeItemState: State<Item?>
+			get() = _activeItemState
+		private val _optionPoolState: MutableState<List<StashForItemAtLocation>> = mutableStateOf(listOf())
+		override val optionPoolState: State<List<StashForItemAtLocation>>
+			get() = _optionPoolState
+		private val _fromLocationState: MutableState<String?> = mutableStateOf(null)
+		override val fromLocationState: State<String?>
+			get() = _fromLocationState
+		private val _toLocationState: MutableState<String?> = mutableStateOf(null)
+		override val toLocationState: State<String?>
+			get() = _toLocationState
+		private val _amountDifference: MutableState<Double> = mutableStateOf(0.0)
+		override val amountDifference: State<Double>
+			get() = _amountDifference
+
+		override val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
+			get() = transferFromLocationCoordinator
+		override val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
+			get() = transferToLocationCoordinator
+
+		override val reloadOptions: (itemId: String) -> List<StashForItemAtLocation> = { itemId ->
 			val items = itemsContent.data.items
 			val quantityUnits = quantityUnitsContent.data.allUnits
 			val stashes = itemStashesContent.data.itemStashes
@@ -344,17 +384,43 @@ class MainViewModel @Inject constructor(
 			stashesForItem.forEach { stash ->
 				val atLocation = locations.firstOrNull { it.id == stash.locationId } ?: run { return@forEach }
 				val withUnit = quantityUnits.firstOrNull { it.id == rootItem.unitId } ?: run { return@forEach }
-				compiledData.add(StashForItemAtLocation(stash = stash, location = atLocation, item = rootItem, quantityUnit = withUnit))
+				compiledData.add(
+					StashForItemAtLocation(
+						stash = stash,
+						location = atLocation,
+						item = rootItem,
+						quantityUnit = withUnit
+					)
+				)
 			}
-			return@TransferItemStashSheetCoordinator compiledData
-		},
-		onCommitStashTransfer = { fId, fA, tId, tA ->
-			viewModelScope.launch {
-				itemStashesRepo.updateStashQuantity(fId, fA)
-				itemStashesRepo.updateStashQuantity(tId, tA)
-			}
+			compiledData
 		}
-	)
+
+		override val showSheetForItem: (forItem: Item) -> Unit = { forItem ->
+			val options = reloadOptions(forItem.id)
+			fromLocationDropdownCoordinator.udpateOptionsPool(options)
+			toLocationDropdownCoordinator.udpateOptionsPool(options)
+
+			_activeItemState.value = forItem
+			_fromLocationState.value = null
+			_toLocationState.value = null
+			_amountDifference.value = 0.0
+
+			_showSheetState.value = true
+		}
+
+		override val onCommitStashTransfer: (fromStashId: String, updatedFromAmount: Double, toStashId: String, updatedToAmount: Double) -> Unit =
+			{ fId, fA, tId, tA ->
+				viewModelScope.launch {
+					itemStashesRepo.updateStashQuantity(fId, fA)
+					itemStashesRepo.updateStashQuantity(tId, tA)
+				}
+			}
+
+		override val onDismiss: () -> Unit = {
+			_showSheetState.value = false
+		}
+	}
 
 
 	/////////////////////////////////////////////////

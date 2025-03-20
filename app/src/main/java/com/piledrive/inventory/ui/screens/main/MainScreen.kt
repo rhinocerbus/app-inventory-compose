@@ -61,6 +61,7 @@ import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashModalSheet
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
+import com.piledrive.inventory.ui.modal.transfer_item.stubTransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
@@ -497,6 +498,6 @@ fun MainPreview() {
 		CreateQuantityUnitSheetCoordinator(),
 		CreateItemSheetCoordinator(),
 		stubContentFilterCallbacks,
-		TransferItemStashSheetCoordinator(),
+		stubTransferItemStashSheetCoordinator,
 	)
 }

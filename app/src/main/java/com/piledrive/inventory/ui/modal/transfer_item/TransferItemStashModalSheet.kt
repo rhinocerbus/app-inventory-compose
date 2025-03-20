@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.piledrive.inventory.data.model.Location
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownTextFieldGeneric
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
@@ -84,14 +83,14 @@ object TransferItemStashModalSheet {
 								text = "From location"
 							)
 						},
-						selectionToValueMutator = { it.name },
+						selectionToValueMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
 					)
 				}
 
 				Row(
 					modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
 				) {
-					ReadOnlyDropdownTextFieldGeneric<Location>(
+					ReadOnlyDropdownTextFieldGeneric(
 						modifier = Modifier.weight(1f),
 						coordinator = coordinator.toLocationDropdownCoordinator,
 						label = {
@@ -99,7 +98,7 @@ object TransferItemStashModalSheet {
 								text = "To location"
 							)
 						},
-						selectionToValueMutator = { it.name },
+						selectionToValueMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
 					)
 				}
 			}
@@ -112,7 +111,7 @@ object TransferItemStashModalSheet {
 private fun TransferItemStashModalSheetPreview() {
 	AppTheme {
 		TransferItemStashModalSheet.DrawContent(
-			TransferItemStashSheetCoordinator(),
+			stubTransferItemStashSheetCoordinator,
 		)
 	}
 }
