@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -30,10 +31,9 @@ import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
-import com.piledrive.lib_compose_components.ui.coordinators.DropdownOption
 import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinator
-import com.piledrive.lib_compose_components.ui.coordinators.ReadOnlyDropdownCoordinator
-import com.piledrive.lib_compose_components.ui.dropdown.ReadOnlyDropdownTextField
+import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
+import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownTextFieldGeneric
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
@@ -48,13 +48,6 @@ val stubTransferItemStashCallbacks = object : TransferItemStashCallbacks {
 		{ _, _, _, _ -> }
 }
 
-class LocationDropdownOption() : DropdownOption<Location> {
-	override val id: Long
-		get() = TODO("Not yet implemented")
-	override val textValue: String?
-		get() = TODO("Not yet implemented")
-}
-
 class TransferItemStashSheetCoordinator(
 	initialShowSheetValue: Boolean = false,
 	initialItemValue: Item? = null,
@@ -66,8 +59,8 @@ class TransferItemStashSheetCoordinator(
 	val itemState: StateFlow<ItemContentState> = previewItemsContentFlow(),
 	val locationsState: StateFlow<LocationContentState> = previewLocationContentFlow(),
 
-	val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinator<String> = ReadOnlyDropdownCoordinator(),
-	val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinator<String> = ReadOnlyDropdownCoordinator(),
+	val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<Location> = ReadOnlyDropdownCoordinatorGeneric(),
+	val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<Location> = ReadOnlyDropdownCoordinatorGeneric(),
 
 	val callbacks: TransferItemStashCallbacks = stubTransferItemStashCallbacks
 ) : ModalSheetCoordinator(initialShowSheetValue) {
@@ -162,28 +155,30 @@ object TransferItemStashModalSheet {
 						text = "from:"
 					)*/
 
-					ReadOnlyDropdownTextField(
+					ReadOnlyDropdownTextFieldGeneric(
 						modifier = Modifier.weight(1f),
 						coordinator = coordinator.fromLocationDropdownCoordinator,
 						label = {
 							Text(
 								text = "From location"
 							)
-						}
+						},
+						selectionToValueMutator = { it.name },
 					)
 				}
 
 				Row(
 					modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
 				) {
-					ReadOnlyDropdownTextField(
+					ReadOnlyDropdownTextFieldGeneric<Location>(
 						modifier = Modifier.weight(1f),
-						coordinator = coordinator.fromLocationDropdownCoordinator,
+						coordinator = coordinator.toLocationDropdownCoordinator,
 						label = {
 							Text(
 								text = "To location"
 							)
-						}
+						},
+						selectionToValueMutator = { it.name },
 					)
 				}
 			}

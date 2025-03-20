@@ -21,6 +21,8 @@ import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.QuantityUnitsRepo
 import com.piledrive.inventory.repo.TagsRepo
+import com.piledrive.inventory.ui.modal.TransferItemStashCallbacks
+import com.piledrive.inventory.ui.modal.TransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -29,6 +31,7 @@ import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
+import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -320,6 +323,26 @@ class MainViewModel @Inject constructor(
 			itemStashesRepo.updateStashQuantity(stashId, quantity)
 		}
 	}
+
+	val transferFromLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<Location>()
+	val transferToLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<Location>()
+	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
+		stashesState = itemStashesContentState,
+		itemState = itemsContentState,
+		locationsState = userLocationContentState,
+		fromLocationDropdownCoordinator = transferFromLocationCoordinator,
+		toLocationDropdownCoordinator = transferToLocationCoordinator,
+		callbacks = object : TransferItemStashCallbacks {
+			override val onCommitStashTransfer: (fromStashId: String, updatedFromAmount: Double, toStashId: String, updatedToAmount: Double) -> Unit =
+				{ fId, fA, tId, tA ->
+					viewModelScope.launch {
+						itemStashesRepo.updateStashQuantity(fId, fA)
+						itemStashesRepo.updateStashQuantity(tId, tA)
+					}
+				}
+		}
+	)
+
 
 	/////////////////////////////////////////////////
 	//  endregion
