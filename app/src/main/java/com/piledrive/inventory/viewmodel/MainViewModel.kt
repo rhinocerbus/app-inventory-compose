@@ -21,6 +21,7 @@ import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.QuantityUnitsRepo
 import com.piledrive.inventory.repo.TagsRepo
+import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -321,6 +322,19 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
+	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
+		itemsSource = itemsContentState,
+		unitsSource = quantityUnitsContentState,
+		locationsSource = userLocationContentState,
+		stashesSource = itemStashesContentState,
+		onCommitStashTransfer = { fromStash, toStash ->
+			viewModelScope.launch {
+				itemStashesRepo.performTransfer(fromStash, toStash)
+			}
+		}
+	)
+
+
 	/////////////////////////////////////////////////
 	//  endregion
 
@@ -356,14 +370,14 @@ class MainViewModel @Inject constructor(
 
 		val stashesForLocation = if (currLocation.id == STATIC_ID_LOCATION_ALL) {
 			val consolidatedMap = mutableMapOf<String, StashForItem>()
-			stashesByLocationMap.values.forEach { items ->
-				items.forEach { item ->
-					val oldStash = consolidatedMap[item.item.id]
+			stashesByLocationMap.values.forEach { s4is ->
+				s4is.forEach { s4i ->
+					val oldStash = consolidatedMap[s4i.item.id]
 					if (oldStash != null) {
-						consolidatedMap[item.item.id] =
-							oldStash.copy(stash = oldStash.stash.copy(amount = oldStash.stash.amount + item.stash.amount))
+						consolidatedMap[s4i.item.id] =
+							oldStash.copy(stash = oldStash.stash.copy(amount = oldStash.stash.amount + s4i.stash.amount))
 					} else {
-						consolidatedMap[item.item.id] = item
+						consolidatedMap[s4i.item.id] = s4i
 					}
 				}
 			}
