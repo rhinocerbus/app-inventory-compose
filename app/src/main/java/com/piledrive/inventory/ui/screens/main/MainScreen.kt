@@ -38,12 +38,10 @@ import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
-import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.stubContentFilterCallbacks
-import com.piledrive.inventory.ui.modal.AddItemStashCallbacks
 import com.piledrive.inventory.ui.modal.CreateItemCallbacks
 import com.piledrive.inventory.ui.modal.CreateItemModalSheet
 import com.piledrive.inventory.ui.modal.CreateItemSheetCoordinator
@@ -58,6 +56,7 @@ import com.piledrive.inventory.ui.modal.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateTagCallbacks
 import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.stubCreateItemStashSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashModalSheet
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.transfer_item.stubTransferItemStashSheetCoordinator
@@ -109,10 +108,17 @@ object MainScreen : NavRoute {
 		)
 
 		val createItemStashCoordinator = CreateItemStashSheetCoordinator(
-			createItemStashCallbacks = object : AddItemStashCallbacks {
-				override val onAddItemToLocation: (slug: StashSlug) -> Unit = {
-					viewModel.addNewItemStash(it)
-				}
+			viewModel.itemStashesContentState,
+			viewModel.itemsContentState,
+			viewModel.userLocationContentState,
+			onAddItemToLocation = {
+				viewModel.addNewItemStash(it)
+			},
+			onLaunchCreateItem = {
+				createItemCoordinator.showSheetState.value = true
+			},
+			onLaunchCreateLocation = {
+				createLocationCoordinator.showSheetState.value = true
 			}
 		)
 
@@ -275,7 +281,7 @@ object MainScreen : NavRoute {
 							"no items in ${locationContent.data.currentLocation.name}"
 						)
 						Button(onClick = {
-							createItemStashSheetCoordinator.showSheetState.value = true
+							createItemStashSheetCoordinator.onShow()
 						}) {
 							Text("add item")
 						}
@@ -300,11 +306,6 @@ object MainScreen : NavRoute {
 				CreateItemStashModalSheet.Draw(
 					Modifier,
 					createItemStashSheetCoordinator,
-					createItemCoordinator,
-					createLocationCoordinator,
-					stashState,
-					itemState,
-					locationState
 				)
 			}
 
@@ -366,7 +367,7 @@ object MainScreen : NavRoute {
 			) {
 				DropdownMenuItem(
 					text = { Text("Add item") }, onClick = {
-						createItemStashSheetCoordinator.showSheetState.value = true
+						createItemStashSheetCoordinator.onShow()
 						showMenu = false
 					}
 				)
@@ -487,7 +488,7 @@ fun MainPreview() {
 		previewItemsContentFlow(),
 		previewItemStashesContentFlow(),
 		MainContentListCoordinator(),
-		CreateItemStashSheetCoordinator(),
+		stubCreateItemStashSheetCoordinator,
 		CreateLocationModalSheetCoordinator(),
 		CreateTagSheetCoordinator(),
 		CreateQuantityUnitSheetCoordinator(),
