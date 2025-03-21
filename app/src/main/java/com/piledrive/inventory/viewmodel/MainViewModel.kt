@@ -327,10 +327,9 @@ class MainViewModel @Inject constructor(
 		unitsSource = quantityUnitsContentState,
 		locationsSource = userLocationContentState,
 		stashesSource = itemStashesContentState,
-		onCommitStashTransfer = { fId, fA, tId, tA ->
+		onCommitStashTransfer = { fromStash, toStash ->
 			viewModelScope.launch {
-				itemStashesRepo.updateStashQuantity(fId, fA)
-				itemStashesRepo.updateStashQuantity(tId, tA)
+				itemStashesRepo.performTransfer(fromStash, toStash)
 			}
 		}
 	)

@@ -35,7 +35,7 @@ interface TransferItemStashSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
 	val unitsSource: StateFlow<QuantityUnitContentState>
 
 	val showSheetForItem: (forItem: Item) -> Unit
-	val onCommitStashTransfer: (fromStashId: String, updatedFromAmount: Double, toStashId: String, updatedToAmount: Double) -> Unit
+	val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit
 
 	val onDismiss: () -> Unit
 	fun changeTransferAmount(amount: Double)
@@ -59,8 +59,8 @@ val stubTransferItemStashSheetCoordinator = object : TransferItemStashSheetCoord
 	override val unitsSource: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
 
 	override val showSheetForItem: (forItem: Item) -> Unit = {}
-	override val onCommitStashTransfer: (fromStashId: String, updatedFromAmount: Double, toStashId: String, updatedToAmount: Double) -> Unit =
-		{ _, _, _, _ -> }
+	override val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit =
+		{ _, _ -> }
 	override val onDismiss: () -> Unit = {}
 
 	override fun changeTransferAmount(amount: Double) {}
@@ -80,7 +80,7 @@ class TransferItemStashSheetCoordinator(
 	override val locationsSource: StateFlow<LocationContentState>,
 	override val stashesSource: StateFlow<ItemStashContentState>,
 
-	override val onCommitStashTransfer: (fromStashId: String, updatedFromAmount: Double, toStashId: String, updatedToAmount: Double) -> Unit = { _, _, _, _ -> }
+	override val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit = { _, _ -> }
 ) : TransferItemStashSheetCoordinatorImpl {
 	private val _showSheetState: MutableState<Boolean> = mutableStateOf(initialShowSheetValue)
 	override val showSheetState: State<Boolean> = _showSheetState
@@ -167,13 +167,11 @@ class TransferItemStashSheetCoordinator(
 	override fun submitTransfer() {
 		val fromStash = fromLocationDropdownCoordinator.selectedOptionState.value?.stash ?: throw IllegalStateException("missing data for transfer: from stash")
 		val toStash = toLocationDropdownCoordinator.selectedOptionState.value?.stash ?: throw IllegalStateException("missing data for transfer: from stash")
-		val updatedFromAmount = fromStash.amount - amountDifference.value
-		val updatedToAmount = toStash.amount + amountDifference.value
+		val updatedFromStash = fromStash.copy(amount = fromStash.amount - amountDifference.value)
+		val updatedToStash = toStash.copy(amount = toStash.amount + amountDifference.value)
 		onCommitStashTransfer(
-			fromStash.id,
-			updatedFromAmount,
-			toStash.id,
-			updatedToAmount
+			updatedFromStash,
+			updatedToStash
 		)
 	}
 
