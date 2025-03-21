@@ -2,29 +2,17 @@
 
 package com.piledrive.inventory.ui.screens.main
 
-import android.text.TextPaint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,19 +23,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.StashForItem
+import com.piledrive.inventory.ui.shared.AmountAdjuster
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
-import com.piledrive.lib_compose_components.ui.util.MeasureTextWidth
 
 interface MainStashContentListCallbacks {
 	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit
@@ -135,52 +121,18 @@ object MainStashContentList {
 			) {
 				Row(verticalAlignment = Alignment.CenterVertically) {
 					Text(modifier = Modifier.weight(1f), text = item.name)
-
 					Gap(8.dp)
-					Text("(${unit.label})")
-					Gap(8.dp)
-
-					IconButton(
-						onClick = {
-							qtyValue -= 1.0
-							callbacks.onItemStashQuantityUpdated(stash.id, qtyValue)
-						},
-						enabled = qtyValue > 0 && !readOnly
-					) {
-						Icon(Icons.Default.KeyboardArrowDown, "decrement item stash amount")
-					}
-
-					val amountW =
-						MeasureTextWidth("00.00", MaterialTheme.typography.bodySmall, TextPaint())
-
-					OutlinedTextField(
-						modifier = Modifier
-							.width(amountW.dp)
-							.focusable(!readOnly),
-						value = "$qtyValue",
-						onValueChange = {
-							if (it.toDouble() < 0) {
-								//err
-							} else {
-								qtyValue = it.toDouble()
-								callbacks.onItemStashQuantityUpdated(stash.id, qtyValue)
-							}
-						},
-						textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-						keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-						singleLine = true,
-						readOnly = readOnly
+					AmountAdjuster(
+						Modifier,
+						unit = unit,
+						qtyValue = qtyValue,
+						increment = 1.0,
+						readOnly = readOnly,
+						onQtyChange = {
+							qtyValue = it
+							callbacks.onItemStashQuantityUpdated(stash.id, it)
+						}
 					)
-
-					IconButton(
-						onClick = {
-							qtyValue += 1.0
-							callbacks.onItemStashQuantityUpdated(stash.id, qtyValue)
-						},
-						enabled = !readOnly
-					) {
-						Icon(Icons.Default.KeyboardArrowUp, "increment item stash amount")
-					}
 				}
 
 				Gap(4.dp)
