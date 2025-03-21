@@ -39,6 +39,7 @@ interface TransferItemStashSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
 
 	val onDismiss: () -> Unit
 	fun changeTransferAmount(amount: Double)
+	fun submitTransfer()
 }
 
 val stubTransferItemStashSheetCoordinator = object : TransferItemStashSheetCoordinatorImpl {
@@ -63,6 +64,7 @@ val stubTransferItemStashSheetCoordinator = object : TransferItemStashSheetCoord
 	override val onDismiss: () -> Unit = {}
 
 	override fun changeTransferAmount(amount: Double) {}
+	override fun submitTransfer() {}
 
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
 }
@@ -160,6 +162,19 @@ class TransferItemStashSheetCoordinator(
 		_amountDifference.value = clampedAmount
 		val endAmount = startAmount - clampedAmount
 		_modifiedAmount.value = endAmount
+	}
+
+	override fun submitTransfer() {
+		val fromStash = fromLocationDropdownCoordinator.selectedOptionState.value?.stash ?: throw IllegalStateException("missing data for transfer: from stash")
+		val toStash = toLocationDropdownCoordinator.selectedOptionState.value?.stash ?: throw IllegalStateException("missing data for transfer: from stash")
+		val updatedFromAmount = fromStash.amount - amountDifference.value
+		val updatedToAmount = toStash.amount + amountDifference.value
+		onCommitStashTransfer(
+			fromStash.id,
+			updatedFromAmount,
+			toStash.id,
+			updatedToAmount
+		)
 	}
 
 	override val onDismiss: () -> Unit = {
