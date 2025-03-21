@@ -4,7 +4,6 @@ package com.piledrive.inventory.ui.modal.transfer_item
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetDefaults
@@ -55,7 +54,7 @@ object TransferItemStashModalSheet {
 	) {
 		val fromStash = coordinator.fromLocationDropdownCoordinator.selectedOptionState.value
 		val toStash = coordinator.toLocationDropdownCoordinator.selectedOptionState.value
-		val activeItem = coordinator.activeItemState.value ?: throw IllegalStateException("")
+		val activeItem = coordinator.activeItemState.value
 		val qtyValue = coordinator.amountDifference.value
 
 		Surface(
@@ -64,50 +63,46 @@ object TransferItemStashModalSheet {
 			Column(
 				modifier = Modifier
 					.fillMaxWidth()
-					.padding(12.dp),
+					.padding(16.dp),
+				horizontalAlignment = Alignment.CenterHorizontally
 			) {
 				Text(
-					modifier = Modifier.align(Alignment.CenterHorizontally),
-					text = "Transferring ${activeItem.name}"
+					text = "Transferring ${activeItem?.name ?: "<unset>"}"
 				)
 
 				Gap(12.dp)
 
-				Row(
-					modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
-				) {
-					/*Text(
-						text = "from:"
-					)*/
+				ReadOnlyDropdownTextFieldGeneric(
+					modifier = Modifier.fillMaxWidth(),
+					coordinator = coordinator.fromLocationDropdownCoordinator,
+					label = {
+						Text(
+							text = "From location"
+						)
+					},
+					selectionToValueMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
+				)
 
-					ReadOnlyDropdownTextFieldGeneric(
-						modifier = Modifier.weight(1f),
-						coordinator = coordinator.fromLocationDropdownCoordinator,
-						label = {
-							Text(
-								text = "From location"
-							)
-						},
-						selectionToValueMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
-					)
-				}
+				Gap(12.dp)
 
-				Row(
-					modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
-				) {
-					ReadOnlyDropdownTextFieldGeneric(
-						modifier = Modifier.weight(1f),
-						coordinator = coordinator.toLocationDropdownCoordinator,
-						label = {
-							Text(
-								text = "To location"
-							)
-						},
-						selectionToValueMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
-					)
-				}
+				ReadOnlyDropdownTextFieldGeneric(
+					modifier = Modifier.fillMaxWidth(),
+					coordinator = coordinator.toLocationDropdownCoordinator,
+					label = {
+						Text(
+							text = "To location"
+						)
+					},
+					selectionToValueMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
+				)
 
 				Gap(16.dp)
+
+				Text(
+					text = "Amount to move"
+				)
+				
+				Gap(12.dp)
 
 				AmountAdjuster(
 					Modifier,

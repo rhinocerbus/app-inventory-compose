@@ -153,7 +153,10 @@ object MainStashContentList {
 				) {
 					DropdownMenuItem(
 						text = { Text("Transfer to...") },
-						onClick = { callbacks.onStartStashTransfer(item) }
+						onClick = {
+							callbacks.onStartStashTransfer(item)
+							coordinator.onChangeMenuForItemId(null)
+						}
 					)
 				}
 			}
