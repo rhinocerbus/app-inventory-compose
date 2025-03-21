@@ -9,7 +9,9 @@ import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
+import com.piledrive.inventory.data.model.STATIC_ID_NEW_FROM_TRANSFER
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
+import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
@@ -342,22 +344,48 @@ class MainViewModel @Inject constructor(
 	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
 		fromLocationDropdownCoordinator = transferFromLocationCoordinator,
 		toLocationDropdownCoordinator = transferToLocationCoordinator,
-		reloadOptions = { itemId: String ->
+		reloadFromOptions = { itemId: String ->
 			val items = itemsContent.data.items
 			val quantityUnits = quantityUnitsContent.data.allUnits
 			val stashes = itemStashesContent.data.itemStashes
 			val locations = userLocationsContent.data.userLocations
 
 			val rootItem = items.firstOrNull { it.id == itemId } ?: throw IllegalStateException("no item by given id")
-			val compiledData = mutableListOf<StashForItemAtLocation>()
+			val withUnit = quantityUnits.firstOrNull { it.id == rootItem.unitId } ?: throw IllegalStateException("no unit for item")
 			val stashesForItem = stashes.filter { it.itemId == itemId }
+
+			val compiledData = mutableListOf<StashForItemAtLocation>()
 			stashesForItem.forEach { stash ->
+				if(stash.amount == 0.0) return@forEach
 				val atLocation = locations.firstOrNull { it.id == stash.locationId } ?: run { return@forEach }
-				val withUnit = quantityUnits.firstOrNull { it.id == rootItem.unitId } ?: run { return@forEach }
 				compiledData.add(
 					StashForItemAtLocation(
 						stash = stash,
 						location = atLocation,
+						item = rootItem,
+						quantityUnit = withUnit
+					)
+				)
+			}
+			compiledData
+		},
+		reloadToOptions = { itemId: String ->
+			val items = itemsContent.data.items
+			val quantityUnits = quantityUnitsContent.data.allUnits
+			val stashes = itemStashesContent.data.itemStashes
+			val locations = userLocationsContent.data.userLocations
+
+			val rootItem = items.firstOrNull { it.id == itemId } ?: throw IllegalStateException("no item by given id")
+			val withUnit = quantityUnits.firstOrNull { it.id == rootItem.unitId } ?: throw IllegalStateException("no unit for item")
+			val stashesForItem = stashes.filter { it.itemId == itemId }
+
+			val compiledData = mutableListOf<StashForItemAtLocation>()
+			locations.forEach { location ->
+				val stashForLoc = stashesForItem.firstOrNull { it.locationId == location.id }
+				compiledData.add(
+					StashForItemAtLocation(
+						stash = stashForLoc ?: Stash(STATIC_ID_NEW_FROM_TRANSFER, "", rootItem.id, location.id, 0.0),
+						location = location,
 						item = rootItem,
 						quantityUnit = withUnit
 					)
