@@ -61,6 +61,7 @@ import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashModalSheet
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
+import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.transfer_item.stubTransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
 import com.piledrive.inventory.ui.state.ItemContentState
@@ -176,7 +177,7 @@ object MainScreen : NavRoute {
 		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
 		contentFilterCallbacks: ContentFilterCallbacks,
-		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinator
+		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinatorImpl
 	) {
 		Scaffold(
 			topBar = {
@@ -229,7 +230,7 @@ object MainScreen : NavRoute {
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
 		createItemCoordinator: CreateItemSheetCoordinator,
-		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinator
+		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinatorImpl
 	) {
 		val showItemStashSheet: Boolean by remember { createItemStashSheetCoordinator.showSheetState }
 		val showLocationSheet: Boolean by remember { createLocationCoordinator.showSheetState }
@@ -498,6 +499,6 @@ fun MainPreview() {
 		CreateQuantityUnitSheetCoordinator(),
 		CreateItemSheetCoordinator(),
 		stubContentFilterCallbacks,
-		TransferItemStashSheetCoordinator(),
+		stubTransferItemStashSheetCoordinator,
 	)
 }

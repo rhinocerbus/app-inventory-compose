@@ -9,15 +9,12 @@ import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
-import com.piledrive.inventory.data.model.STATIC_ID_NEW_FROM_TRANSFER
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
-import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.StashForItem
-import com.piledrive.inventory.data.model.composite.StashForItemAtLocation
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemStashesRepo
 import com.piledrive.inventory.repo.ItemsRepo
@@ -33,7 +30,6 @@ import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -326,73 +322,11 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	/* recursive typing error dues to properties cross-referencing each other
-	private val transferFromLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>(
-		externalOnOptionSelected = {
-			val thing: String = it!!.location.id
-			transferItemStashSheetCoordinator.changeFromLocation(thing)
-		}
-	)
-	private val transferToLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>(
-		externalOnOptionSelected = {
-			val thing: String = it!!.location.id
-			transferItemStashSheetCoordinator.changeToLocation(thing)
-		}
-	)*/
-	private val transferFromLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>()
-	private val transferToLocationCoordinator = ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>()
 	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
-		fromLocationDropdownCoordinator = transferFromLocationCoordinator,
-		toLocationDropdownCoordinator = transferToLocationCoordinator,
-		reloadFromOptions = { itemId: String ->
-			val items = itemsContent.data.items
-			val quantityUnits = quantityUnitsContent.data.allUnits
-			val stashes = itemStashesContent.data.itemStashes
-			val locations = userLocationsContent.data.userLocations
-
-			val rootItem = items.firstOrNull { it.id == itemId } ?: throw IllegalStateException("no item by given id")
-			val withUnit = quantityUnits.firstOrNull { it.id == rootItem.unitId } ?: throw IllegalStateException("no unit for item")
-			val stashesForItem = stashes.filter { it.itemId == itemId }
-
-			val compiledData = mutableListOf<StashForItemAtLocation>()
-			stashesForItem.forEach { stash ->
-				if(stash.amount == 0.0) return@forEach
-				val atLocation = locations.firstOrNull { it.id == stash.locationId } ?: run { return@forEach }
-				compiledData.add(
-					StashForItemAtLocation(
-						stash = stash,
-						location = atLocation,
-						item = rootItem,
-						quantityUnit = withUnit
-					)
-				)
-			}
-			compiledData
-		},
-		reloadToOptions = { itemId: String ->
-			val items = itemsContent.data.items
-			val quantityUnits = quantityUnitsContent.data.allUnits
-			val stashes = itemStashesContent.data.itemStashes
-			val locations = userLocationsContent.data.userLocations
-
-			val rootItem = items.firstOrNull { it.id == itemId } ?: throw IllegalStateException("no item by given id")
-			val withUnit = quantityUnits.firstOrNull { it.id == rootItem.unitId } ?: throw IllegalStateException("no unit for item")
-			val stashesForItem = stashes.filter { it.itemId == itemId }
-
-			val compiledData = mutableListOf<StashForItemAtLocation>()
-			locations.forEach { location ->
-				val stashForLoc = stashesForItem.firstOrNull { it.locationId == location.id }
-				compiledData.add(
-					StashForItemAtLocation(
-						stash = stashForLoc ?: Stash(STATIC_ID_NEW_FROM_TRANSFER, "", rootItem.id, location.id, 0.0),
-						location = location,
-						item = rootItem,
-						quantityUnit = withUnit
-					)
-				)
-			}
-			compiledData
-		},
+		itemsSource = itemsContentState,
+		unitsSource = quantityUnitsContentState,
+		locationsSource = userLocationContentState,
+		stashesSource = itemStashesContentState,
 		onCommitStashTransfer = { fId, fA, tId, tA ->
 			viewModelScope.launch {
 				itemStashesRepo.updateStashQuantity(fId, fA)
@@ -437,14 +371,14 @@ class MainViewModel @Inject constructor(
 
 		val stashesForLocation = if (currLocation.id == STATIC_ID_LOCATION_ALL) {
 			val consolidatedMap = mutableMapOf<String, StashForItem>()
-			stashesByLocationMap.values.forEach { items ->
-				items.forEach { item ->
-					val oldStash = consolidatedMap[item.item.id]
+			stashesByLocationMap.values.forEach { s4is ->
+				s4is.forEach { s4i ->
+					val oldStash = consolidatedMap[s4i.item.id]
 					if (oldStash != null) {
-						consolidatedMap[item.item.id] =
-							oldStash.copy(stash = oldStash.stash.copy(amount = oldStash.stash.amount + item.stash.amount))
+						consolidatedMap[s4i.item.id] =
+							oldStash.copy(stash = oldStash.stash.copy(amount = oldStash.stash.amount + s4i.stash.amount))
 					} else {
-						consolidatedMap[item.item.id] = item
+						consolidatedMap[s4i.item.id] = s4i
 					}
 				}
 			}
