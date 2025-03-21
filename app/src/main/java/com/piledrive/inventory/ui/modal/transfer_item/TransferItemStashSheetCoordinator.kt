@@ -82,6 +82,9 @@ class TransferItemStashSheetCoordinator(
 
 	override val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit = { _, _ -> }
 ) : TransferItemStashSheetCoordinatorImpl {
+
+	private var toOptionsPool = mutableListOf<StashForItemAtLocation>()
+
 	private val _showSheetState: MutableState<Boolean> = mutableStateOf(initialShowSheetValue)
 	override val showSheetState: State<Boolean> = _showSheetState
 
@@ -89,9 +92,14 @@ class TransferItemStashSheetCoordinator(
 
 	override val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> =
 		ReadOnlyDropdownCoordinatorGeneric(
-			externalOnOptionSelected = {
+			externalOnOptionSelected = { opt ->
 				_modifiedAmount.value = 0.0
 				_amountDifference.value = 0.0
+				val filtered = toOptionsPool.filter { it.stash.id != opt?.stash?.id }
+				toLocationDropdownCoordinator.udpateOptionsPool(filtered)
+				if(opt?.stash?.id == toLocationDropdownCoordinator.selectedOptionState.value?.stash?.id) {
+					toLocationDropdownCoordinator.onOptionSelected(null)
+				}
 			}
 		)
 	override val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> =
@@ -153,7 +161,8 @@ class TransferItemStashSheetCoordinator(
 				)
 			)
 		}
-		toLocationDropdownCoordinator.udpateOptionsPool(toStashes)
+		toOptionsPool = toStashes
+		toLocationDropdownCoordinator.udpateOptionsPool(toOptionsPool.filter { it.stash.id != fromLocationDropdownCoordinator.selectedOptionState.value?.stash?.id })
 	}
 
 	override fun changeTransferAmount(amount: Double) {
@@ -173,6 +182,7 @@ class TransferItemStashSheetCoordinator(
 			updatedFromStash,
 			updatedToStash
 		)
+		onDismiss()
 	}
 
 	override val onDismiss: () -> Unit = {

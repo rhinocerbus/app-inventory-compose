@@ -101,7 +101,7 @@ object TransferItemStashModalSheet {
 				Text(
 					text = "Amount to move"
 				)
-				
+
 				Gap(12.dp)
 
 				AmountAdjuster(
