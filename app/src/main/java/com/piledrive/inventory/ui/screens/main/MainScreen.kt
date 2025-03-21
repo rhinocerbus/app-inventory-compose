@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
@@ -60,19 +59,18 @@ import com.piledrive.inventory.ui.modal.CreateTagCallbacks
 import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashModalSheet
-import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.transfer_item.stubTransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
+import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
+import com.piledrive.inventory.ui.screens.main.content.MainStashContentList
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
-import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
-import com.piledrive.inventory.ui.util.previewLocalizedContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
@@ -135,14 +133,15 @@ object MainScreen : NavRoute {
 			}
 		}
 
-		val stashesListCallbacks = object : MainStashContentListCallbacks {
-			override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit = { stashId, qty ->
+		val listContentCoordinator = MainContentListCoordinator(
+			viewModel.locationStashesContentState,
+			onItemStashQuantityUpdated = { stashId, qty ->
 				viewModel.updateStashQuantity(stashId, qty)
+			},
+			onStartStashTransfer = { item, locId ->
+				viewModel.transferItemStashSheetCoordinator.showSheetForItem(item)
 			}
-			override val onStartStashTransfer: (item: Item) -> Unit = {
-				viewModel.transferItemStashSheetCoordinator.showSheetForItem(it)
-			}
-		}
+		)
 
 		drawContent(
 			viewModel.userLocationContentState,
@@ -150,8 +149,7 @@ object MainScreen : NavRoute {
 			viewModel.quantityUnitsContentState,
 			viewModel.itemsContentState,
 			viewModel.itemStashesContentState,
-			viewModel.locationStashesContentState,
-			stashesListCallbacks,
+			listContentCoordinator,
 			createItemStashCoordinator,
 			createLocationCoordinator,
 			createTagCoordinator,
@@ -169,8 +167,7 @@ object MainScreen : NavRoute {
 		quantityState: StateFlow<QuantityUnitContentState>,
 		itemState: StateFlow<ItemContentState>,
 		itemStashState: StateFlow<ItemStashContentState>,
-		localizedStashesContent: StateFlow<LocalizedContentState>,
-		stashesListCallbacks: MainStashContentListCallbacks,
+		listContentCoordinator: MainContentListCoordinator,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
@@ -193,8 +190,7 @@ object MainScreen : NavRoute {
 					quantityState,
 					itemState,
 					itemStashState,
-					localizedStashesContent,
-					stashesListCallbacks,
+					listContentCoordinator,
 					createItemStashSheetCoordinator,
 					createLocationCoordinator,
 					createTagCoordinator,
@@ -223,8 +219,7 @@ object MainScreen : NavRoute {
 		quantityState: StateFlow<QuantityUnitContentState>,
 		itemState: StateFlow<ItemContentState>,
 		stashState: StateFlow<ItemStashContentState>,
-		localizedStashesContent: StateFlow<LocalizedContentState>,
-		stashesListCallbacks: MainStashContentListCallbacks,
+		listContentCoordinator: MainContentListCoordinator,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
@@ -241,7 +236,7 @@ object MainScreen : NavRoute {
 
 		val tagContent = tagState.collectAsState().value
 		val locationContent = locationState.collectAsState().value
-		val itemStashContent = localizedStashesContent.collectAsState().value
+		val itemStashContent = listContentCoordinator.stashContentFlow.collectAsState().value
 		val forLocation = itemStashContent.data.currentLocationItemStashContent
 
 		Column(
@@ -264,6 +259,7 @@ object MainScreen : NavRoute {
 					}
 				}
 
+				// move to main content composable since we want to add location anyways for baked-in starting point
 				forLocation.isEmpty() -> {
 					if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
 						Text(
@@ -291,8 +287,7 @@ object MainScreen : NavRoute {
 						modifier = Modifier.fillMaxSize(),
 						currLocationId = locationContent.data.currentLocation.id,
 						currTagId = tagContent.data.currentTag.id,
-						stashes = forLocation,
-						stashesListCallbacks
+						listContentCoordinator
 					)
 
 					if (locationContent.isLoading) {
@@ -337,7 +332,7 @@ object MainScreen : NavRoute {
 				CreateQuantityUnitModalSheet.Draw(Modifier, createQuantityUnitSheetCoordinator, quantityState)
 			}
 
-			if(showTransferSheet) {
+			if (showTransferSheet) {
 				TransferItemStashModalSheet.Draw(Modifier, transferItemStashSheetCoordinator)
 			}
 		}
@@ -491,8 +486,7 @@ fun MainPreview() {
 		previewQuantityUnitsContentFlow(),
 		previewItemsContentFlow(),
 		previewItemStashesContentFlow(),
-		previewLocalizedContentFlow(),
-		stubMainStashContentListCallbacks,
+		MainContentListCoordinator(),
 		CreateItemStashSheetCoordinator(),
 		CreateLocationModalSheetCoordinator(),
 		CreateTagSheetCoordinator(),

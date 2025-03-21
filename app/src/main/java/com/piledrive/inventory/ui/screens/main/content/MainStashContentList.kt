@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalFoundationApi::class)
 
-package com.piledrive.inventory.ui.screens.main
+package com.piledrive.inventory.ui.screens.main.content
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -17,6 +17,7 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.remember
@@ -25,25 +26,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.StashForItem
 import com.piledrive.inventory.ui.shared.AmountAdjuster
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
-import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
-
-interface MainStashContentListCallbacks {
-	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit
-	val onStartStashTransfer: (item: Item) -> Unit
-}
-
-val stubMainStashContentListCallbacks = object : MainStashContentListCallbacks {
-	override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit = { _, _ -> }
-	override val onStartStashTransfer: (item: Item) -> Unit = {}
-}
 
 object MainStashContentList {
 	@Composable
@@ -51,11 +40,10 @@ object MainStashContentList {
 		modifier: Modifier = Modifier,
 		currLocationId: String,
 		currTagId: String,
-		stashes: List<StashForItem>,
-		callbacks: MainStashContentListCallbacks
+		coordinator: MainContentListCoordinator
 	) {
-		val itemDropdownCoordinator = ListItemOverflowMenuCoordinator()
-		DrawContent(modifier, currLocationId, currTagId, stashes, callbacks, itemDropdownCoordinator)
+		val stashes = coordinator.stashContentFlow.collectAsState().value.data.currentLocationItemStashContent
+		DrawContent(modifier, currLocationId, currTagId, stashes, coordinator)
 	}
 
 	@Composable
@@ -64,8 +52,7 @@ object MainStashContentList {
 		currLocationId: String,
 		currTagId: String,
 		stashes: List<StashForItem>,
-		callbacks: MainStashContentListCallbacks,
-		itemDropdownCoordinator: ListItemOverflowMenuCoordinator
+		coordinator: MainContentListCoordinator,
 	) {
 		Surface(
 			modifier = modifier,
@@ -83,8 +70,7 @@ object MainStashContentList {
 					ItemStashListItem(
 						Modifier,
 						stash,
-						callbacks,
-						itemDropdownCoordinator,
+						coordinator,
 						currLocationId == STATIC_ID_LOCATION_ALL,
 					)
 				}
@@ -96,8 +82,7 @@ object MainStashContentList {
 	fun ItemStashListItem(
 		modifier: Modifier = Modifier,
 		stashForItem: StashForItem,
-		callbacks: MainStashContentListCallbacks,
-		coordinator: ListItemOverflowMenuCoordinator,
+		coordinator: MainContentListCoordinator,
 		readOnly: Boolean
 	) {
 		val item = stashForItem.item
@@ -111,7 +96,7 @@ object MainStashContentList {
 			modifier = modifier
 				.combinedClickable(
 					onClick = {},
-					onLongClick = { coordinator.onChangeMenuForItemId(stash.id) }
+					onLongClick = { coordinator.onShowMenuForItemId(stash.id) }
 				)
 				.fillMaxWidth()
 		) {
@@ -130,7 +115,7 @@ object MainStashContentList {
 						readOnly = readOnly,
 						onQtyChange = {
 							qtyValue = it
-							callbacks.onItemStashQuantityUpdated(stash.id, it)
+							coordinator.onItemStashQuantityUpdated(stash.id, it)
 						}
 					)
 				}
@@ -149,13 +134,12 @@ object MainStashContentList {
 			if (coordinator.showMenuForId.value == stash.id) {
 				DropdownMenu(
 					expanded = true,
-					onDismissRequest = { coordinator.onChangeMenuForItemId(null) }
+					onDismissRequest = { coordinator.onDismiss() }
 				) {
 					DropdownMenuItem(
 						text = { Text("Transfer to...") },
 						onClick = {
-							callbacks.onStartStashTransfer(item)
-							coordinator.onChangeMenuForItemId(null)
+							coordinator.startStashTransfer(item, null)
 						}
 					)
 				}
@@ -173,8 +157,7 @@ private fun MainStashContentListPreview() {
 			"",
 			"",
 			ContentForLocation.generateSampleSet().currentLocationItemStashContent,
-			stubMainStashContentListCallbacks,
-			ListItemOverflowMenuCoordinator()
+			MainContentListCoordinator()
 		)
 	}
 }
