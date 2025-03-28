@@ -1,11 +1,10 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
-package com.piledrive.inventory.ui.modal
+package com.piledrive.inventory.ui.modal.create_item
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,7 +26,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +37,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
-import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
+import com.piledrive.inventory.ui.modal.CreateQuantityUnitSheetCoordinator
+import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagsContentState
@@ -53,32 +52,12 @@ import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
 
-interface CreateItemCallbacks {
-	//val onShowCreate: () -> Unit
-	val onAddItem: (item: ItemSlug) -> Unit
-}
-
-val stubCreateItemCallbacks = object : CreateItemCallbacks {
-	//override val onShowCreate: () -> Unit = {}
-	override val onAddItem: (item: ItemSlug) -> Unit = { }
-}
-
-class CreateItemSheetCoordinator(
-	val showSheetState: MutableState<Boolean> = mutableStateOf(false),
-	val createItemCallbacks: CreateItemCallbacks = stubCreateItemCallbacks,
-	val modalSheetCallbacks: ModalSheetCallbacks = object : ModalSheetCallbacks {
-		override val onDismissed: () -> Unit = {
-			showSheetState.value = false
-		}
-	}
-)
-
 object CreateItemModalSheet {
 
 	@Composable
 	fun Draw(
 		modifier: Modifier = Modifier,
-		coordinator: CreateItemSheetCoordinator,
+		coordinator: CreateItemSheetCoordinatorImpl,
 		quantitySheetCoordinator: CreateQuantityUnitSheetCoordinator,
 		tagSheetCoordinator: CreateTagSheetCoordinator,
 		itemState: StateFlow<ItemContentState>,
@@ -98,7 +77,7 @@ object CreateItemModalSheet {
 		ModalBottomSheet(
 			modifier = Modifier.fillMaxWidth(),
 			onDismissRequest = {
-				coordinator.modalSheetCallbacks.onDismissed()
+				coordinator.onDismiss()
 			},
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
@@ -128,7 +107,7 @@ object CreateItemModalSheet {
 
 	@Composable
 	internal fun DrawContent(
-		coordinator: CreateItemSheetCoordinator,
+		coordinator: CreateItemSheetCoordinatorImpl,
 		quantitySheetCoordinator: CreateQuantityUnitSheetCoordinator,
 		tagSheetCoordinator: CreateTagSheetCoordinator,
 		itemState: StateFlow<ItemContentState>,
@@ -202,8 +181,8 @@ object CreateItemModalSheet {
 								unitId = selectedQuantityUnit ?: QuantityUnit.DEFAULT_ID_BAGS,
 								tagIds = selectedTags,
 							)
-							coordinator.createItemCallbacks.onAddItem(item)
-							coordinator.showSheetState.value = false
+							coordinator.onAddItem(item)
+							coordinator.onDismiss()
 						}
 					) {
 						Icon(Icons.Default.Done, contentDescription = "add new location")
@@ -294,7 +273,7 @@ object CreateItemModalSheet {
 private fun CreateItemSheetPreview() {
 	AppTheme {
 		CreateItemModalSheet.DrawContent(
-			CreateItemSheetCoordinator(),
+			stubCreateItemSheetCoordinator,
 			CreateQuantityUnitSheetCoordinator(),
 			CreateTagSheetCoordinator(),
 			previewItemsContentFlow(),

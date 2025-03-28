@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.StashSlug
+import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinatorImpl
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocationContentState
@@ -61,7 +62,7 @@ class CreateItemStashSheetCoordinator(
 	val onAddItemToLocation: (slug: StashSlug) -> Unit,
 	val onLaunchCreateItem: () -> Unit,
 	val onLaunchCreateLocation: () -> Unit,
-) : ModalSheetCoordinator() {
+) : ModalSheetCoordinator(), CreateItemSheetCoordinatorImpl {
 	val onShow: () -> Unit = _onShow
 }
 

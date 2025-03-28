@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.QuantityUnitSlug
@@ -42,9 +41,6 @@ import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.stubContentFilterCallbacks
-import com.piledrive.inventory.ui.modal.CreateItemCallbacks
-import com.piledrive.inventory.ui.modal.CreateItemModalSheet
-import com.piledrive.inventory.ui.modal.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateItemStashModalSheet
 import com.piledrive.inventory.ui.modal.CreateItemStashSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateLocationCallbacks
@@ -56,6 +52,9 @@ import com.piledrive.inventory.ui.modal.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.CreateTagCallbacks
 import com.piledrive.inventory.ui.modal.CreateTagModalSheet
 import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_item.CreateItemModalSheet
+import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.stubCreateItemStashSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashModalSheet
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinatorImpl
@@ -100,11 +99,7 @@ object MainScreen : NavRoute {
 		)
 
 		val createItemCoordinator = CreateItemSheetCoordinator(
-			createItemCallbacks = object : CreateItemCallbacks {
-				override val onAddItem: (item: ItemSlug) -> Unit = {
-					viewModel.addNewItem(it)
-				}
-			}
+			onAddItem = { viewModel.addNewItem(it) }
 		)
 
 		val createItemStashCoordinator = CreateItemStashSheetCoordinator(
@@ -115,7 +110,7 @@ object MainScreen : NavRoute {
 				viewModel.addNewItemStash(it)
 			},
 			onLaunchCreateItem = {
-				createItemCoordinator.showSheetState.value = true
+				createItemCoordinator.showSheet()
 			},
 			onLaunchCreateLocation = {
 				createLocationCoordinator.showSheetState.value = true
@@ -178,7 +173,7 @@ object MainScreen : NavRoute {
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
-		createItemCoordinator: CreateItemSheetCoordinator,
+		createItemCoordinator: CreateItemSheetCoordinatorImpl,
 		contentFilterCallbacks: ContentFilterCallbacks,
 		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinatorImpl
 	) {
@@ -230,7 +225,7 @@ object MainScreen : NavRoute {
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
 		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
-		createItemCoordinator: CreateItemSheetCoordinator,
+		createItemCoordinator: CreateItemSheetCoordinatorImpl,
 		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinatorImpl
 	) {
 		val showItemStashSheet: Boolean by remember { createItemStashSheetCoordinator.showSheetState }
@@ -346,7 +341,7 @@ object MainScreen : NavRoute {
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
 		createLocationCoordinator: CreateLocationModalSheetCoordinator,
 		createTagCoordinator: CreateTagSheetCoordinator,
-		createItemCoordinator: CreateItemSheetCoordinator
+		createItemCoordinator: CreateItemSheetCoordinatorImpl
 	) {
 		/*
 			box added to satisfy dropdown requirement for a sibling wrapped in a parent to anchor
@@ -492,7 +487,7 @@ fun MainPreview() {
 		CreateLocationModalSheetCoordinator(),
 		CreateTagSheetCoordinator(),
 		CreateQuantityUnitSheetCoordinator(),
-		CreateItemSheetCoordinator(),
+		CreateItemSheetCoordinatorImpl(),
 		stubContentFilterCallbacks,
 		stubTransferItemStashSheetCoordinator,
 	)
