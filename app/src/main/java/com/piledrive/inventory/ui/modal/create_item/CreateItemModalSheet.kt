@@ -37,8 +37,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
-import com.piledrive.inventory.ui.modal.CreateQuantityUnitSheetCoordinator
-import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinatorImpl
+import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinatorImpl
+import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagsContentState
@@ -58,8 +61,8 @@ object CreateItemModalSheet {
 	fun Draw(
 		modifier: Modifier = Modifier,
 		coordinator: CreateItemSheetCoordinatorImpl,
-		quantitySheetCoordinator: CreateQuantityUnitSheetCoordinator,
-		tagSheetCoordinator: CreateTagSheetCoordinator,
+		quantitySheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
+		tagSheetCoordinator: CreateTagSheetCoordinatorImpl,
 		itemState: StateFlow<ItemContentState>,
 		quantityContentState: StateFlow<QuantityUnitContentState>,
 		tagsContentState: StateFlow<TagsContentState>
@@ -108,8 +111,8 @@ object CreateItemModalSheet {
 	@Composable
 	internal fun DrawContent(
 		coordinator: CreateItemSheetCoordinatorImpl,
-		quantitySheetCoordinator: CreateQuantityUnitSheetCoordinator,
-		tagSheetCoordinator: CreateTagSheetCoordinator,
+		quantitySheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
+		tagSheetCoordinator: CreateTagSheetCoordinatorImpl,
 		itemState: StateFlow<ItemContentState>,
 		quantityContentState: StateFlow<QuantityUnitContentState>,
 		tagsContentState: StateFlow<TagsContentState>,
@@ -195,7 +198,7 @@ object CreateItemModalSheet {
 				ChipGroup {
 					SuggestionChip(
 						onClick = {
-							quantitySheetCoordinator.showSheetState.value = true
+							quantitySheetCoordinator.showSheet()
 						},
 						label = { Text("Add") },
 						icon = { Icon(Icons.Default.Add, "add new quantity unit") }
@@ -234,7 +237,7 @@ object CreateItemModalSheet {
 						SuggestionChip(
 							onClick = {
 								// todo - add single-fire launch param to tag sheet, with callback to flag as selected here
-								tagSheetCoordinator.showSheetState.value = true
+								tagSheetCoordinator.showSheet()
 							},
 							label = { Text("Add") },
 							icon = { Icon(Icons.Default.Add, "add new tag") }
@@ -274,8 +277,8 @@ private fun CreateItemSheetPreview() {
 	AppTheme {
 		CreateItemModalSheet.DrawContent(
 			stubCreateItemSheetCoordinator,
-			CreateQuantityUnitSheetCoordinator(),
-			CreateTagSheetCoordinator(),
+			stubCreateQuantityUnitSheetCoordinator,
+			stubCreateTagSheetCoordinator,
 			previewItemsContentFlow(),
 			previewQuantityUnitsContentFlow(),
 			previewTagsContentFlow(),

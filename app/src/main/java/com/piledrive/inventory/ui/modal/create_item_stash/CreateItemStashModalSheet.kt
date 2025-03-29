@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
-package com.piledrive.inventory.ui.modal
+package com.piledrive.inventory.ui.modal.create_item_stash
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -39,48 +39,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
-import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.StashSlug
-import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinatorImpl
-import com.piledrive.inventory.ui.state.ItemContentState
-import com.piledrive.inventory.ui.state.ItemStashContentState
-import com.piledrive.inventory.ui.state.LocationContentState
-import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
-import com.piledrive.inventory.ui.util.previewItemsContentFlow
-import com.piledrive.inventory.ui.util.previewLocationContentFlow
-import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinator
 import com.piledrive.lib_compose_components.ui.coordinators.SearchCoordinator
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
-import kotlinx.coroutines.flow.StateFlow
 
-
-class CreateItemStashSheetCoordinator(
-	val stashesSourceFlow: StateFlow<ItemStashContentState>,
-	val itemsSourceFlow: StateFlow<ItemContentState>,
-	val locationsSourceFlow: StateFlow<LocationContentState>,
-	val onAddItemToLocation: (slug: StashSlug) -> Unit,
-	val onLaunchCreateItem: () -> Unit,
-	val onLaunchCreateLocation: () -> Unit,
-) : ModalSheetCoordinator(), CreateItemSheetCoordinatorImpl {
-	val onShow: () -> Unit = _onShow
-}
-
-val stubCreateItemStashSheetCoordinator = CreateItemStashSheetCoordinator(
-	stashesSourceFlow = previewItemStashesContentFlow(),
-	itemsSourceFlow = previewItemsContentFlow(),
-	locationsSourceFlow = previewLocationContentFlow(listOf(Location(id = "", createdAt = "", name = "Pantry"))),
-	onAddItemToLocation = { },
-	onLaunchCreateItem = { },
-	onLaunchCreateLocation = { }
-)
 
 object CreateItemStashModalSheet {
 
 	@Composable
 	fun Draw(
 		modifier: Modifier = Modifier,
-		coordinator: CreateItemStashSheetCoordinator,
+		coordinator: CreateItemStashSheetCoordinatorImpl,
 	) {
 		val itemsPool = coordinator.itemsSourceFlow.collectAsState().value
 		val searchCoordinator = SearchCoordinator<Item>(
@@ -105,9 +75,14 @@ object CreateItemStashModalSheet {
 			skipPartiallyExpanded = true
 		)
 
-		ModalBottomSheet(modifier = Modifier.fillMaxWidth(), onDismissRequest = {
-			coordinator.onDismiss()
-		}, sheetState = sheetState, dragHandle = { BottomSheetDefaults.DragHandle() }) {
+		ModalBottomSheet(
+			modifier = Modifier.fillMaxWidth(),
+			onDismissRequest = {
+				coordinator.onDismiss()
+			},
+			sheetState = sheetState,
+			dragHandle = { BottomSheetDefaults.DragHandle() }
+		) {
 			DrawContent(
 				coordinator,
 				// doesn't need to be hoisted, only used in scope of the modal
@@ -125,7 +100,7 @@ object CreateItemStashModalSheet {
 
 	@Composable
 	internal fun DrawContent(
-		coordinator: CreateItemStashSheetCoordinator,
+		coordinator: CreateItemStashSheetCoordinatorImpl,
 		searchCoordinator: SearchCoordinator<Item>,
 		selectedLocations: List<String>,
 		onLocationToggle: (String, Boolean) -> Unit
@@ -229,7 +204,7 @@ object CreateItemStashModalSheet {
 								val stashSlug = StashSlug(selectedItem!!.id, loc, 0.0)
 								coordinator.onAddItemToLocation(stashSlug)
 							}
-							coordinator.onDismiss
+							coordinator.onDismiss()
 						}) {
 						Icon(Icons.Default.Done, contentDescription = "add item to locations")
 					}

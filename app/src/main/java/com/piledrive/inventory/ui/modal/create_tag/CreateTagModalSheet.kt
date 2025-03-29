@@ -1,11 +1,10 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
-package com.piledrive.inventory.ui.modal
+package com.piledrive.inventory.ui.modal.create_tag
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,25 +41,6 @@ import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import kotlinx.coroutines.flow.StateFlow
 
-interface CreateTagCallbacks {
-	//val onShowCreate: () -> Unit
-	val onAddTag: (slug: TagSlug) -> Unit
-}
-
-val stubCreateTagCallbacks = object : CreateTagCallbacks {
-	//override val onShowCreate: () -> Unit = {}
-	override val onAddTag: (slug: TagSlug) -> Unit = {}
-}
-
-class CreateTagSheetCoordinator(
-	val showSheetState: MutableState<Boolean> = mutableStateOf(false),
-	val createTagCallbacks: CreateTagCallbacks = stubCreateTagCallbacks,
-	val modalSheetCallbacks: ModalSheetCallbacks = object : ModalSheetCallbacks {
-		override val onDismissed: () -> Unit = {
-			showSheetState.value = false
-		}
-	}
-)
 
 /*
 	todo - consider:
@@ -72,7 +52,7 @@ object CreateTagModalSheet {
 	@Composable
 	fun Draw(
 		modifier: Modifier = Modifier,
-		coordinator: CreateTagSheetCoordinator,
+		coordinator: CreateTagSheetCoordinatorImpl,
 		tagsContentState: StateFlow<TagsContentState>
 	) {
 		val sheetState = rememberModalBottomSheetState(
@@ -81,7 +61,7 @@ object CreateTagModalSheet {
 		ModalBottomSheet(
 			modifier = Modifier.fillMaxWidth(),
 			onDismissRequest = {
-				coordinator.modalSheetCallbacks.onDismissed()
+				coordinator.onDismiss()
 			},
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
@@ -92,7 +72,7 @@ object CreateTagModalSheet {
 
 	@Composable
 	internal fun DrawContent(
-		coordinator: CreateTagSheetCoordinator,
+		coordinator: CreateTagSheetCoordinatorImpl,
 		tagsContentState: StateFlow<TagsContentState>
 	) {
 
@@ -154,8 +134,8 @@ object CreateTagModalSheet {
 							    form-level viewmodel, feels like clutter in the main VM
 							 */
 							val slug = TagSlug(name = formState.currentValue)
-							coordinator.createTagCallbacks.onAddTag(slug)
-							coordinator.showSheetState.value = false
+							coordinator.onAddTag(slug)
+							coordinator.onDismiss()
 						}
 					) {
 						Icon(Icons.Default.Done, contentDescription = "add new location")
@@ -187,7 +167,7 @@ object CreateTagModalSheet {
 private fun CreateTagSheetPreview() {
 	AppTheme {
 		CreateTagModalSheet.DrawContent(
-			CreateTagSheetCoordinator(),
+			stubCreateTagSheetCoordinator,
 			previewTagsContentFlow()
 		)
 	}

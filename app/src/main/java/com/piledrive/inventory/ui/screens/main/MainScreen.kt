@@ -34,28 +34,31 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.piledrive.inventory.data.model.Location
-import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.Tag
-import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.ui.callbacks.ContentFilterCallbacks
 import com.piledrive.inventory.ui.callbacks.stubContentFilterCallbacks
-import com.piledrive.inventory.ui.modal.CreateItemStashModalSheet
-import com.piledrive.inventory.ui.modal.CreateItemStashSheetCoordinator
-import com.piledrive.inventory.ui.modal.CreateLocationCallbacks
-import com.piledrive.inventory.ui.modal.CreateLocationModalSheet
-import com.piledrive.inventory.ui.modal.CreateLocationModalSheetCoordinator
-import com.piledrive.inventory.ui.modal.CreateQuantityUnitCallbacks
-import com.piledrive.inventory.ui.modal.CreateQuantityUnitModalSheet
-import com.piledrive.inventory.ui.modal.CreateQuantityUnitSheetCoordinator
-import com.piledrive.inventory.ui.modal.CreateTagCallbacks
-import com.piledrive.inventory.ui.modal.CreateTagModalSheet
-import com.piledrive.inventory.ui.modal.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitModalSheet
+import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinatorImpl
+import com.piledrive.inventory.ui.modal.create_tag.CreateTagModalSheet
+import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_item.CreateItemModalSheet
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinatorImpl
-import com.piledrive.inventory.ui.modal.stubCreateItemStashSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_item.stubCreateItemSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_item_stash.CreateItemStashModalSheet
+import com.piledrive.inventory.ui.modal.create_item_stash.CreateItemStashSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_item_stash.CreateItemStashSheetCoordinatorImpl
+import com.piledrive.inventory.ui.modal.create_item_stash.stubCreateItemStashSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheet
+import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinatorImpl
+import com.piledrive.inventory.ui.modal.create_location.stubCreateLocationModalSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinatorImpl
+import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashModalSheet
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.transfer_item.stubTransferItemStashSheetCoordinator
@@ -83,18 +86,14 @@ object MainScreen : NavRoute {
 		viewModel: MainViewModel,
 	) {
 		val createLocationCoordinator = CreateLocationModalSheetCoordinator(
-			createLocationCallbacks = object : CreateLocationCallbacks {
-				override val onAddLocation: (slug: LocationSlug) -> Unit = {
-					viewModel.addNewLocation(it)
-				}
+			onAddLocation = {
+				viewModel.addNewLocation(it)
 			}
 		)
 
 		val createTagCoordinator = CreateTagSheetCoordinator(
-			createTagCallbacks = object : CreateTagCallbacks {
-				override val onAddTag: (slug: TagSlug) -> Unit = {
-					viewModel.addNewTag(it)
-				}
+			onAddTag = {
+				viewModel.addNewTag(it)
 			}
 		)
 
@@ -113,15 +112,13 @@ object MainScreen : NavRoute {
 				createItemCoordinator.showSheet()
 			},
 			onLaunchCreateLocation = {
-				createLocationCoordinator.showSheetState.value = true
+				createLocationCoordinator.showSheet()
 			}
 		)
 
 		val createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-			createQuantityUnitCallbacks = object : CreateQuantityUnitCallbacks {
-				override val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit = {
-					viewModel.addNewQuantityUnit(it)
-				}
+			onAddQuantityUnit = {
+				viewModel.addNewQuantityUnit(it)
 			}
 		)
 
@@ -169,10 +166,10 @@ object MainScreen : NavRoute {
 		itemState: StateFlow<ItemContentState>,
 		itemStashState: StateFlow<ItemStashContentState>,
 		listContentCoordinator: MainContentListCoordinator,
-		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
-		createLocationCoordinator: CreateLocationModalSheetCoordinator,
-		createTagCoordinator: CreateTagSheetCoordinator,
-		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
+		createItemStashSheetCoordinator: CreateItemStashSheetCoordinatorImpl,
+		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
+		createTagCoordinator: CreateTagSheetCoordinatorImpl,
+		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
 		createItemCoordinator: CreateItemSheetCoordinatorImpl,
 		contentFilterCallbacks: ContentFilterCallbacks,
 		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinatorImpl
@@ -221,10 +218,10 @@ object MainScreen : NavRoute {
 		itemState: StateFlow<ItemContentState>,
 		stashState: StateFlow<ItemStashContentState>,
 		listContentCoordinator: MainContentListCoordinator,
-		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
-		createLocationCoordinator: CreateLocationModalSheetCoordinator,
-		createTagCoordinator: CreateTagSheetCoordinator,
-		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinator,
+		createItemStashSheetCoordinator: CreateItemStashSheetCoordinatorImpl,
+		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
+		createTagCoordinator: CreateTagSheetCoordinatorImpl,
+		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
 		createItemCoordinator: CreateItemSheetCoordinatorImpl,
 		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinatorImpl
 	) {
@@ -267,7 +264,7 @@ object MainScreen : NavRoute {
 							"no items anywhere"
 						)
 						Button(onClick = {
-							createLocationCoordinator.showSheetState.value = true
+							createLocationCoordinator.showSheet()
 						}) {
 							Text("add item")
 						}
@@ -276,7 +273,7 @@ object MainScreen : NavRoute {
 							"no items in ${locationContent.data.currentLocation.name}"
 						)
 						Button(onClick = {
-							createItemStashSheetCoordinator.onShow()
+							createItemStashSheetCoordinator.showSheet()
 						}) {
 							Text("add item")
 						}
@@ -338,9 +335,9 @@ object MainScreen : NavRoute {
 	@Composable
 	fun DrawAddContentFab(
 		modifier: Modifier = Modifier,
-		createItemStashSheetCoordinator: CreateItemStashSheetCoordinator,
-		createLocationCoordinator: CreateLocationModalSheetCoordinator,
-		createTagCoordinator: CreateTagSheetCoordinator,
+		createItemStashSheetCoordinator: CreateItemStashSheetCoordinatorImpl,
+		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
+		createTagCoordinator: CreateTagSheetCoordinatorImpl,
 		createItemCoordinator: CreateItemSheetCoordinatorImpl
 	) {
 		/*
@@ -362,19 +359,19 @@ object MainScreen : NavRoute {
 			) {
 				DropdownMenuItem(
 					text = { Text("Add item") }, onClick = {
-						createItemStashSheetCoordinator.onShow()
+						createItemStashSheetCoordinator.showSheet()
 						showMenu = false
 					}
 				)
 				DropdownMenuItem(
 					text = { Text("Add location") }, onClick = {
-						createLocationCoordinator.showSheetState.value = true
+						createLocationCoordinator.showSheet()
 						showMenu = false
 					}
 				)
 				DropdownMenuItem(
 					text = { Text("Add tag") }, onClick = {
-						createTagCoordinator.showSheetState.value = true
+						createTagCoordinator.showSheet()
 						showMenu = false
 					}
 				)
@@ -459,14 +456,14 @@ object MainScreen : NavRoute {
 
 	@Composable
 	fun ColumnScope.DrawEmptyLocationsState(
-		createLocationCoordinator: CreateLocationModalSheetCoordinator,
+		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
 	) {
 		// empty
 		Text(
 			"no locations :("
 		)
 		Button(onClick = {
-			createLocationCoordinator.showSheetState.value = true
+			createLocationCoordinator.showSheet()
 		}) {
 			Text("add location")
 		}
@@ -484,10 +481,10 @@ fun MainPreview() {
 		previewItemStashesContentFlow(),
 		MainContentListCoordinator(),
 		stubCreateItemStashSheetCoordinator,
-		CreateLocationModalSheetCoordinator(),
-		CreateTagSheetCoordinator(),
-		CreateQuantityUnitSheetCoordinator(),
-		CreateItemSheetCoordinatorImpl(),
+		stubCreateLocationModalSheetCoordinator,
+		stubCreateTagSheetCoordinator,
+		stubCreateQuantityUnitSheetCoordinator,
+		stubCreateItemSheetCoordinator,
 		stubContentFilterCallbacks,
 		stubTransferItemStashSheetCoordinator,
 	)

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
-package com.piledrive.inventory.ui.modal
+package com.piledrive.inventory.ui.modal.create_unit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -46,27 +46,6 @@ import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import kotlinx.coroutines.flow.StateFlow
 
-interface CreateQuantityUnitCallbacks {
-	//val onShowCreate: () -> Unit
-	val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit
-}
-
-val stubCreateQuantityUnitCallbacks = object : CreateQuantityUnitCallbacks {
-	//override val onShowCreate: () -> Unit = {}
-	override val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit = {}
-}
-
-class CreateQuantityUnitSheetCoordinator(
-	val showSheetState: MutableState<Boolean> = mutableStateOf(false),
-	val createQuantityUnitCallbacks: CreateQuantityUnitCallbacks = stubCreateQuantityUnitCallbacks,
-	val modalSheetCallbacks: ModalSheetCallbacks = object : ModalSheetCallbacks {
-		override val onDismissed: () -> Unit = {
-			showSheetState.value = false
-		}
-	},
-	val selectedMeasurement: MutableState<QuantityType> = mutableStateOf(QuantityType.WHOLE)
-)
-
 /*
 	todo - consider:
 	 	-- reporting back what was added for ex: nested sheets (add item -> set unit)
@@ -76,7 +55,7 @@ object CreateQuantityUnitModalSheet {
 	@Composable
 	fun Draw(
 		modifier: Modifier = Modifier,
-		coordinator: CreateQuantityUnitSheetCoordinator,
+		coordinator: CreateQuantityUnitSheetCoordinatorImpl,
 		unitsContentState: StateFlow<QuantityUnitContentState>
 	) {
 		val sheetState = rememberModalBottomSheetState(
@@ -85,7 +64,7 @@ object CreateQuantityUnitModalSheet {
 		ModalBottomSheet(
 			modifier = Modifier.fillMaxWidth(),
 			onDismissRequest = {
-				coordinator.modalSheetCallbacks.onDismissed()
+				coordinator.onDismiss()
 			},
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
@@ -96,7 +75,7 @@ object CreateQuantityUnitModalSheet {
 
 	@Composable
 	internal fun DrawContent(
-		coordinator: CreateQuantityUnitSheetCoordinator,
+		coordinator: CreateQuantityUnitSheetCoordinatorImpl,
 		unitsContentState: StateFlow<QuantityUnitContentState>
 	) {
 
@@ -215,8 +194,8 @@ object CreateQuantityUnitModalSheet {
 								label = labelFieldState.currentValue,
 								type = coordinator.selectedMeasurement.value
 							)
-							coordinator.createQuantityUnitCallbacks.onAddQuantityUnit(slug)
-							coordinator.showSheetState.value = false
+							coordinator.onAddQuantityUnit(slug)
+							coordinator.onDismiss()
 						}
 					) {
 						Icon(Icons.Default.Done, contentDescription = "add new location")
@@ -274,7 +253,7 @@ object CreateQuantityUnitModalSheet {
 private fun CreateQuantityUnitSheetPreview() {
 	AppTheme {
 		CreateQuantityUnitModalSheet.DrawContent(
-			CreateQuantityUnitSheetCoordinator(),
+			stubCreateQuantityUnitSheetCoordinator,
 			previewQuantityUnitsContentFlow()
 		)
 	}
