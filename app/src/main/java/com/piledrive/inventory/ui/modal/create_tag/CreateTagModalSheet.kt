@@ -22,24 +22,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.TagSlug
-import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import com.piledrive.lib_compose_components.ui.spacer.Gap
-import kotlinx.coroutines.flow.StateFlow
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 
 
 /*
@@ -53,7 +48,6 @@ object CreateTagModalSheet {
 	fun Draw(
 		modifier: Modifier = Modifier,
 		coordinator: CreateTagSheetCoordinatorImpl,
-		tagsContentState: StateFlow<TagsContentState>
 	) {
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
@@ -66,17 +60,16 @@ object CreateTagModalSheet {
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
 		) {
-			DrawContent(coordinator, tagsContentState)
+			DrawContent(coordinator)
 		}
 	}
 
 	@Composable
 	internal fun DrawContent(
 		coordinator: CreateTagSheetCoordinatorImpl,
-		tagsContentState: StateFlow<TagsContentState>
 	) {
 
-		val tags = tagsContentState.collectAsState().value
+		val tags = coordinator.tagsContentState.collectAsState().value
 
 		Surface(
 			modifier = Modifier
@@ -148,7 +141,7 @@ object CreateTagModalSheet {
 				if (tags.data.userTags.isEmpty()) {
 					Text("No added tags yet")
 				} else {
-					ChipGroup{
+					ChipGroup {
 						tags.data.userTags.forEach {
 							SuggestionChip(
 								onClick = {},
@@ -168,7 +161,6 @@ private fun CreateTagSheetPreview() {
 	AppTheme {
 		CreateTagModalSheet.DrawContent(
 			stubCreateTagSheetCoordinator,
-			previewTagsContentFlow()
 		)
 	}
 }

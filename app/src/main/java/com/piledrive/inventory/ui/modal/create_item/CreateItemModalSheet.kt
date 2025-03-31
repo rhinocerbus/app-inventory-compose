@@ -37,23 +37,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
-import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinatorImpl
-import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
-import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinatorImpl
-import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
-import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
-import com.piledrive.inventory.ui.state.ItemContentState
-import com.piledrive.inventory.ui.state.QuantityUnitContentState
-import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.inventory.ui.util.previewItemsContentFlow
-import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
-import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
-import kotlinx.coroutines.flow.StateFlow
 
 object CreateItemModalSheet {
 
@@ -61,11 +49,6 @@ object CreateItemModalSheet {
 	fun Draw(
 		modifier: Modifier = Modifier,
 		coordinator: CreateItemSheetCoordinatorImpl,
-		quantitySheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
-		tagSheetCoordinator: CreateTagSheetCoordinatorImpl,
-		itemState: StateFlow<ItemContentState>,
-		quantityContentState: StateFlow<QuantityUnitContentState>,
-		tagsContentState: StateFlow<TagsContentState>
 	) {
 		var selectedQuantityUnit: String? by remember { mutableStateOf(null) }
 		var selectedTags by remember { mutableStateOf(listOf<String>()) }
@@ -87,11 +70,6 @@ object CreateItemModalSheet {
 		) {
 			DrawContent(
 				coordinator,
-				quantitySheetCoordinator,
-				tagSheetCoordinator,
-				itemState,
-				quantityContentState,
-				tagsContentState,
 				selectedQuantityUnit,
 				selectedTags,
 				onQuantityUnitChange = {
@@ -111,18 +89,13 @@ object CreateItemModalSheet {
 	@Composable
 	internal fun DrawContent(
 		coordinator: CreateItemSheetCoordinatorImpl,
-		quantitySheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
-		tagSheetCoordinator: CreateTagSheetCoordinatorImpl,
-		itemState: StateFlow<ItemContentState>,
-		quantityContentState: StateFlow<QuantityUnitContentState>,
-		tagsContentState: StateFlow<TagsContentState>,
 		selectedQuantityUnit: String?,
 		selectedTags: List<String>,
 		onQuantityUnitChange: (String) -> Unit,
 		onTagToggle: (String, Boolean) -> Unit
 	) {
-		val quantityUnits = quantityContentState.collectAsState().value
-		val tags = tagsContentState.collectAsState().value
+		val quantityUnits = coordinator.quantityContentState.collectAsState().value
+		val tags = coordinator.tagsContentState.collectAsState().value
 
 		Surface(
 			modifier = Modifier
@@ -133,7 +106,7 @@ object CreateItemModalSheet {
 					mainValidator = Validators.Required(errMsg = "Item name required"),
 					externalValidators = listOf(
 						Validators.Custom(runCheck = { nameIn ->
-							itemState.value.data.items.firstOrNull { it.name.equals(nameIn, true) } == null
+							coordinator.itemState.value.data.items.firstOrNull { it.name.equals(nameIn, true) } == null
 						}, "Item with that name already exists")
 					)
 				)
@@ -198,7 +171,7 @@ object CreateItemModalSheet {
 				ChipGroup {
 					SuggestionChip(
 						onClick = {
-							quantitySheetCoordinator.showSheet()
+							coordinator.onLaunchAddUnit()
 						},
 						label = { Text("Add") },
 						icon = { Icon(Icons.Default.Add, "add new quantity unit") }
@@ -237,7 +210,7 @@ object CreateItemModalSheet {
 						SuggestionChip(
 							onClick = {
 								// todo - add single-fire launch param to tag sheet, with callback to flag as selected here
-								tagSheetCoordinator.showSheet()
+								coordinator.onLaunchAddTag()
 							},
 							label = { Text("Add") },
 							icon = { Icon(Icons.Default.Add, "add new tag") }
@@ -277,11 +250,6 @@ private fun CreateItemSheetPreview() {
 	AppTheme {
 		CreateItemModalSheet.DrawContent(
 			stubCreateItemSheetCoordinator,
-			stubCreateQuantityUnitSheetCoordinator,
-			stubCreateTagSheetCoordinator,
-			previewItemsContentFlow(),
-			previewQuantityUnitsContentFlow(),
-			previewTagsContentFlow(),
 			null,
 			listOf(),
 			onQuantityUnitChange = {},

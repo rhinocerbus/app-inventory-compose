@@ -21,7 +21,14 @@ import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.QuantityUnitsRepo
 import com.piledrive.inventory.repo.TagsRepo
+import com.piledrive.inventory.ui.bars.MainFilterAppBarCoordinator
+import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_item_stash.CreateItemStashSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
+import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -30,6 +37,7 @@ import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
+import com.piledrive.lib_compose_components.ui.coordinators.MenuCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -403,6 +411,81 @@ class MainViewModel @Inject constructor(
 			_locationStashesContentState.value = locationStashesContent
 		}
 	}
+
+	/////////////////////////////////////////////////
+	//  endregion
+
+
+	//  region UI Coordinators
+	/////////////////////////////////////////////////
+
+	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
+		locationState = userLocationContentState,
+		onAddLocation = {
+			addNewLocation(it)
+		}
+	)
+
+	val createTagCoordinator = CreateTagSheetCoordinator(
+		userTagsContentState,
+		onAddTag = {
+			addNewTag(it)
+		}
+	)
+
+	val createItemCoordinator = CreateItemSheetCoordinator(
+		itemState = itemsContentState,
+		quantityContentState = quantityUnitsContentState,
+		tagsContentState = userTagsContentState,
+		onAddItem = { addNewItem(it) },
+		onLaunchAddTag = { createTagCoordinator.showSheet() },
+		onLaunchAddUnit = { createQuantityUnitSheetCoordinator.showSheet() }
+	)
+
+	val createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+		quantityUnitsContentState,
+		onAddQuantityUnit = {
+			addNewQuantityUnit(it)
+		}
+	)
+
+	val createItemStashCoordinator = CreateItemStashSheetCoordinator(
+		itemStashesContentState,
+		itemsContentState,
+		userLocationContentState,
+		onAddItemToLocation = {
+			addNewItemStash(it)
+		},
+		onLaunchCreateItem = {
+			createItemCoordinator.showSheet()
+		},
+		onLaunchCreateLocation = {
+			createLocationCoordinator.showSheet()
+		}
+	)
+
+	val listContentCoordinator = MainContentListCoordinator(
+		locationStashesContentState,
+		onItemStashQuantityUpdated = { stashId, qty ->
+			updateStashQuantity(stashId, qty)
+		},
+		onStartStashTransfer = { item, locId ->
+			transferItemStashSheetCoordinator.showSheetForItem(item)
+		}
+	)
+
+	val filterAppBarCoordinator = MainFilterAppBarCoordinator(
+		locationState = _userLocationContentState,
+		tagState = userTagsContentState,
+		onLocationChanged = {
+			changeLocation(it)
+		},
+		onTagChanged = {
+			changeTag(it)
+		},
+		locationMenuCoordinator = MenuCoordinator(),
+		tagMenuCoordinator = MenuCoordinator()
+	)
 
 	/////////////////////////////////////////////////
 	//  endregion

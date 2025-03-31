@@ -25,13 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.LocationSlug
-import com.piledrive.inventory.ui.state.LocationContentState
-import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
-import kotlinx.coroutines.flow.StateFlow
 
 
 object CreateLocationModalSheet {
@@ -40,7 +37,6 @@ object CreateLocationModalSheet {
 	fun Draw(
 		modifier: Modifier = Modifier,
 		coordinator: CreateLocationModalSheetCoordinatorImpl,
-		locationState: StateFlow<LocationContentState>,
 	) {
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
@@ -53,14 +49,13 @@ object CreateLocationModalSheet {
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
 		) {
-			DrawContent(coordinator = coordinator, locationState)
+			DrawContent(coordinator = coordinator)
 		}
 	}
 
 	@Composable
 	internal fun DrawContent(
 		coordinator: CreateLocationModalSheetCoordinatorImpl,
-		locationState: StateFlow<LocationContentState>,
 	) {
 		Surface(
 			modifier = Modifier
@@ -71,7 +66,7 @@ object CreateLocationModalSheet {
 					mainValidator = Validators.Required(errMsg = "Location name required"),
 					externalValidators = listOf(
 						Validators.Custom<String>(runCheck = { nameIn ->
-							locationState.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } == null
+							coordinator.locationState.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } == null
 						}, "Location with that name exists")
 					)
 				)
@@ -131,7 +126,6 @@ private fun CreateLocationSheetPreview() {
 	AppTheme {
 		CreateLocationModalSheet.DrawContent(
 			coordinator = stubCreateLocationModalSheetCoordinator,
-			previewLocationContentFlow()
 		)
 	}
 }

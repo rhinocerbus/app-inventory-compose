@@ -56,7 +56,6 @@ object CreateQuantityUnitModalSheet {
 	fun Draw(
 		modifier: Modifier = Modifier,
 		coordinator: CreateQuantityUnitSheetCoordinatorImpl,
-		unitsContentState: StateFlow<QuantityUnitContentState>
 	) {
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
@@ -69,17 +68,16 @@ object CreateQuantityUnitModalSheet {
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
 		) {
-			DrawContent(coordinator, unitsContentState)
+			DrawContent(coordinator)
 		}
 	}
 
 	@Composable
 	internal fun DrawContent(
 		coordinator: CreateQuantityUnitSheetCoordinatorImpl,
-		unitsContentState: StateFlow<QuantityUnitContentState>
 	) {
 
-		val units = unitsContentState.collectAsState().value
+		val units = coordinator.unitsContentState.collectAsState().value
 
 		Surface(
 			modifier = Modifier
@@ -254,7 +252,6 @@ private fun CreateQuantityUnitSheetPreview() {
 	AppTheme {
 		CreateQuantityUnitModalSheet.DrawContent(
 			stubCreateQuantityUnitSheetCoordinator,
-			previewQuantityUnitsContentFlow()
 		)
 	}
 }
