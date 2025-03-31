@@ -38,11 +38,11 @@ object MainStashContentList {
 	@Composable
 	fun Draw(
 		modifier: Modifier = Modifier,
-		currLocationId: String,
-		currTagId: String,
-		coordinator: MainContentListCoordinator
+		coordinator: MainContentListCoordinatorImpl
 	) {
 		val stashes = coordinator.stashContentFlow.collectAsState().value.data.currentLocationItemStashContent
+		val currLocationId = coordinator.tagState.collectAsState().value.data.currentTag.id
+		val currTagId = coordinator.tagState.collectAsState().value.data.currentTag.id
 		DrawContent(modifier, currLocationId, currTagId, stashes, coordinator)
 	}
 
@@ -52,7 +52,7 @@ object MainStashContentList {
 		currLocationId: String,
 		currTagId: String,
 		stashes: List<StashForItem>,
-		coordinator: MainContentListCoordinator,
+		coordinator: MainContentListCoordinatorImpl,
 	) {
 		Surface(
 			modifier = modifier,
@@ -82,7 +82,7 @@ object MainStashContentList {
 	fun ItemStashListItem(
 		modifier: Modifier = Modifier,
 		stashForItem: StashForItem,
-		coordinator: MainContentListCoordinator,
+		coordinator: MainContentListCoordinatorImpl,
 		readOnly: Boolean
 	) {
 		val item = stashForItem.item
@@ -96,7 +96,7 @@ object MainStashContentList {
 			modifier = modifier
 				.combinedClickable(
 					onClick = {},
-					onLongClick = { coordinator.onShowMenuForItemId(stash.id) }
+					onLongClick = { coordinator.itemMenuCoordinator.onShowMenuForItemId(stash.id) }
 				)
 				.fillMaxWidth()
 		) {
@@ -131,10 +131,10 @@ object MainStashContentList {
 				}
 			}
 
-			if (coordinator.showMenuForId.value == stash.id) {
+			if (coordinator.itemMenuCoordinator.showMenuForId.value == stash.id) {
 				DropdownMenu(
 					expanded = true,
-					onDismissRequest = { coordinator.onDismiss() }
+					onDismissRequest = { coordinator.itemMenuCoordinator.onDismiss() }
 				) {
 					DropdownMenuItem(
 						text = { Text("Transfer to...") },
@@ -157,7 +157,7 @@ private fun MainStashContentListPreview() {
 			"",
 			"",
 			ContentForLocation.generateSampleSet().currentLocationItemStashContent,
-			MainContentListCoordinator()
+			stubMainContentListCoordinator
 		)
 	}
 }

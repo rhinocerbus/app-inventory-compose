@@ -29,6 +29,7 @@ import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
+import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinatorImpl
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -37,6 +38,7 @@ import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
+import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
 import com.piledrive.lib_compose_components.ui.coordinators.MenuCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -466,6 +468,9 @@ class MainViewModel @Inject constructor(
 
 	val listContentCoordinator = MainContentListCoordinator(
 		locationStashesContentState,
+		locationState = userLocationContentState,
+		tagState = userTagsContentState,
+		itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
 		onItemStashQuantityUpdated = { stashId, qty ->
 			updateStashQuantity(stashId, qty)
 		},

@@ -55,8 +55,9 @@ import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashModalShee
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.transfer_item.stubTransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
-import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
+import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinatorImpl
 import com.piledrive.inventory.ui.screens.main.content.MainStashContentList
+import com.piledrive.inventory.ui.screens.main.content.stubMainContentListCoordinator
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocationContentState
@@ -101,7 +102,7 @@ object MainScreen : NavRoute {
 		quantityState: StateFlow<QuantityUnitContentState>,
 		itemState: StateFlow<ItemContentState>,
 		itemStashState: StateFlow<ItemStashContentState>,
-		listContentCoordinator: MainContentListCoordinator,
+		listContentCoordinator: MainContentListCoordinatorImpl,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinatorImpl,
 		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
 		createTagCoordinator: CreateTagSheetCoordinatorImpl,
@@ -153,7 +154,7 @@ object MainScreen : NavRoute {
 		quantityState: StateFlow<QuantityUnitContentState>,
 		itemState: StateFlow<ItemContentState>,
 		stashState: StateFlow<ItemStashContentState>,
-		listContentCoordinator: MainContentListCoordinator,
+		listContentCoordinator: MainContentListCoordinatorImpl,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinatorImpl,
 		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
 		createTagCoordinator: CreateTagSheetCoordinatorImpl,
@@ -219,8 +220,6 @@ object MainScreen : NavRoute {
 				else -> {
 					MainStashContentList.Draw(
 						modifier = Modifier.fillMaxSize(),
-						currLocationId = locationContent.data.currentLocation.id,
-						currTagId = tagContent.data.currentTag.id,
 						listContentCoordinator
 					)
 
@@ -340,7 +339,7 @@ fun MainPreview() {
 		previewQuantityUnitsContentFlow(),
 		previewItemsContentFlow(),
 		previewItemStashesContentFlow(),
-		MainContentListCoordinator(),
+		stubMainContentListCoordinator,
 		stubCreateItemStashSheetCoordinator,
 		stubCreateLocationModalSheetCoordinator,
 		stubCreateTagSheetCoordinator,
