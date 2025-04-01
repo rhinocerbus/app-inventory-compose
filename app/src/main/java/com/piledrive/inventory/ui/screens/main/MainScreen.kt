@@ -53,6 +53,7 @@ import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinato
 import com.piledrive.inventory.ui.screens.main.content.MainStashContentList
 import com.piledrive.inventory.ui.screens.main.content.stubMainContentListCoordinator
 import com.piledrive.inventory.viewmodel.MainViewModel
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 
 object MainScreen : NavRoute {
 	override val routeValue: String = "home"
@@ -234,14 +235,16 @@ object MainScreen : NavRoute {
 @Preview
 @Composable
 fun MainPreview() {
-	MainScreen.drawContent(
-		stubMainContentListCoordinator,
-		stubCreateItemStashSheetCoordinator,
-		stubCreateLocationModalSheetCoordinator,
-		stubCreateTagSheetCoordinator,
-		stubCreateQuantityUnitSheetCoordinator,
-		stubCreateItemSheetCoordinator,
-		stubMainFilterAppBarCoordinator,
-		stubTransferItemStashSheetCoordinator,
-	)
+	AppTheme {
+		MainScreen.drawContent(
+			stubMainContentListCoordinator,
+			stubCreateItemStashSheetCoordinator,
+			stubCreateLocationModalSheetCoordinator,
+			stubCreateTagSheetCoordinator,
+			stubCreateQuantityUnitSheetCoordinator,
+			stubCreateItemSheetCoordinator,
+			stubMainFilterAppBarCoordinator,
+			stubTransferItemStashSheetCoordinator,
+		)
+	}
 }
