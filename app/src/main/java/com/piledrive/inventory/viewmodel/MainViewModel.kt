@@ -21,7 +21,15 @@ import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.QuantityUnitsRepo
 import com.piledrive.inventory.repo.TagsRepo
+import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinator
+import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_item_stash.CreateItemStashSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
+import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
+import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinatorImpl
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -30,6 +38,9 @@ import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
+import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
+import com.piledrive.lib_compose_components.ui.coordinators.MenuCoordinator
+import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -122,6 +133,10 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userLocationContentState.value = userLocationsContent
+						filterAppBarCoordinator.locationsDropdownCoordinator.udpateOptionsPool(flatLocations)
+						if(filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
+							filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
+						}
 					}
 				}
 			}
@@ -173,6 +188,10 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userTagsContentState.value = userTagsContent
+						filterAppBarCoordinator.tagsDropdownCoordinator.udpateOptionsPool(flatTags)
+						if(filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
+							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
+						}
 					}
 					rebuildItemsWithTags()
 				}
@@ -403,6 +422,88 @@ class MainViewModel @Inject constructor(
 			_locationStashesContentState.value = locationStashesContent
 		}
 	}
+
+	/////////////////////////////////////////////////
+	//  endregion
+
+
+	//  region UI Coordinators
+	/////////////////////////////////////////////////
+
+	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
+		locationState = userLocationContentState,
+		onAddLocation = {
+			addNewLocation(it)
+		}
+	)
+
+	val createTagCoordinator = CreateTagSheetCoordinator(
+		userTagsContentState,
+		onAddTag = {
+			addNewTag(it)
+		}
+	)
+
+	val createItemCoordinator = CreateItemSheetCoordinator(
+		itemState = itemsContentState,
+		quantityContentState = quantityUnitsContentState,
+		tagsContentState = userTagsContentState,
+		onAddItem = { addNewItem(it) },
+		onLaunchAddTag = { createTagCoordinator.showSheet() },
+		onLaunchAddUnit = { createQuantityUnitSheetCoordinator.showSheet() }
+	)
+
+	val createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+		quantityUnitsContentState,
+		onAddQuantityUnit = {
+			addNewQuantityUnit(it)
+		}
+	)
+
+	val createItemStashCoordinator = CreateItemStashSheetCoordinator(
+		itemStashesContentState,
+		itemsContentState,
+		userLocationContentState,
+		onAddItemToLocation = {
+			addNewItemStash(it)
+		},
+		onLaunchCreateItem = {
+			createItemCoordinator.showSheet()
+		},
+		onLaunchCreateLocation = {
+			createLocationCoordinator.showSheet()
+		}
+	)
+
+	val listContentCoordinator = MainContentListCoordinator(
+		locationStashesContentState,
+		locationState = userLocationContentState,
+		tagState = userTagsContentState,
+		itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
+		onItemStashQuantityUpdated = { stashId, qty ->
+			updateStashQuantity(stashId, qty)
+		},
+		onStartStashTransfer = { item, locId ->
+			transferItemStashSheetCoordinator.showSheetForItem(item)
+		}
+	)
+
+	val filterAppBarCoordinator = MainFilterAppBarCoordinator(
+		locationState = _userLocationContentState,
+		tagState = userTagsContentState,
+		locationsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
+			externalOnOptionSelected = {
+				it ?: return@ReadOnlyDropdownCoordinatorGeneric
+				changeLocation(it)
+			}
+		),
+		tagsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
+			externalOnOptionSelected = {
+				it ?: return@ReadOnlyDropdownCoordinatorGeneric
+				changeTag(it)
+			}
+		),
+	)
 
 	/////////////////////////////////////////////////
 	//  endregion

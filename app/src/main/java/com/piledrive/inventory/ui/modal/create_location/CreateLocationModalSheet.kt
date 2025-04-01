@@ -1,9 +1,8 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.piledrive.inventory.ui.modal
+package com.piledrive.inventory.ui.modal.create_location
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,57 +19,24 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.LocationSlug
-import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.state.LocationContentState
-import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
-import kotlinx.coroutines.flow.StateFlow
 
-interface CreateLocationCallbacks {
-	//val onShowCreate: () -> Unit
-	val onAddLocation: (slug: LocationSlug) -> Unit
-}
-
-val stubCreateLocationCallbacks = object : CreateLocationCallbacks {
-	//override val onShowCreate: () -> Unit = {}
-	override val onAddLocation: (slug: LocationSlug) -> Unit = {}
-}
-
-/*
- todo - integrate show somehow, but with optional params
- - was considering adding to modalsheetcallbacks but that boxes-in or otherwise makes params a pain
- - class-level callback would work i guess
- -- might make modalsheetcallbacks pointless
- more to be seen when making a few versions of this per sheet
- */
-class CreateLocationModalSheetCoordinator(
-	val showSheetState: MutableState<Boolean> = mutableStateOf(false),
-	val createLocationCallbacks: CreateLocationCallbacks = stubCreateLocationCallbacks,
-	val modalSheetCallbacks: ModalSheetCallbacks = object : ModalSheetCallbacks {
-		override val onDismissed: () -> Unit = {
-			showSheetState.value = false
-		}
-	}
-)
 
 object CreateLocationModalSheet {
 
 	@Composable
 	fun Draw(
 		modifier: Modifier = Modifier,
-		coordinator: CreateLocationModalSheetCoordinator,
-		locationState: StateFlow<LocationContentState>,
+		coordinator: CreateLocationModalSheetCoordinatorImpl,
 	) {
 		val sheetState = rememberModalBottomSheetState(
 			skipPartiallyExpanded = true
@@ -78,19 +44,18 @@ object CreateLocationModalSheet {
 		ModalBottomSheet(
 			modifier = Modifier.fillMaxWidth(),
 			onDismissRequest = {
-				coordinator.modalSheetCallbacks.onDismissed()
+				coordinator.onDismiss()
 			},
 			sheetState = sheetState,
 			dragHandle = { BottomSheetDefaults.DragHandle() }
 		) {
-			DrawContent(coordinator = coordinator, locationState)
+			DrawContent(coordinator = coordinator)
 		}
 	}
 
 	@Composable
 	internal fun DrawContent(
-		coordinator: CreateLocationModalSheetCoordinator,
-		locationState: StateFlow<LocationContentState>,
+		coordinator: CreateLocationModalSheetCoordinatorImpl,
 	) {
 		Surface(
 			modifier = Modifier
@@ -101,7 +66,7 @@ object CreateLocationModalSheet {
 					mainValidator = Validators.Required(errMsg = "Location name required"),
 					externalValidators = listOf(
 						Validators.Custom<String>(runCheck = { nameIn ->
-							locationState.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } == null
+							coordinator.locationState.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } == null
 						}, "Location with that name exists")
 					)
 				)
@@ -144,8 +109,8 @@ object CreateLocationModalSheet {
 								form-level viewmodel, feels like clutter in the main VM
 						 */
 						val slug = LocationSlug(name = formState.currentValue)
-						coordinator.createLocationCallbacks.onAddLocation(slug)
-						coordinator.showSheetState.value = false
+						coordinator.onAddLocation(slug)
+						coordinator.onDismiss()
 					}
 				) {
 					Icon(Icons.Default.Done, contentDescription = "add new location")
@@ -160,8 +125,7 @@ object CreateLocationModalSheet {
 private fun CreateLocationSheetPreview() {
 	AppTheme {
 		CreateLocationModalSheet.DrawContent(
-			coordinator = CreateLocationModalSheetCoordinator(),
-			previewLocationContentFlow()
+			coordinator = stubCreateLocationModalSheetCoordinator,
 		)
 	}
 }
