@@ -1,7 +1,9 @@
 package com.piledrive.inventory.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.piledrive.inventory.data.enums.SortOrder
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
@@ -29,7 +31,6 @@ import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
-import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinatorImpl
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -39,7 +40,6 @@ import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
-import com.piledrive.lib_compose_components.ui.coordinators.MenuCoordinator
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -133,7 +133,7 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userLocationContentState.value = userLocationsContent
-						filterAppBarCoordinator.locationsDropdownCoordinator.udpateOptionsPool(flatLocations)
+						filterAppBarCoordinator.locationsDropdownCoordinator.updateOptionsPool(flatLocations)
 						if(filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
 							filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
 						}
@@ -188,7 +188,7 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userTagsContentState.value = userTagsContent
-						filterAppBarCoordinator.tagsDropdownCoordinator.udpateOptionsPool(flatTags)
+						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(flatTags)
 						if(filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
 							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
 						}
@@ -488,6 +488,7 @@ class MainViewModel @Inject constructor(
 		}
 	)
 
+	private val _sortDesc = MutableStateFlow(false)
 	val filterAppBarCoordinator = MainFilterAppBarCoordinator(
 		locationState = _userLocationContentState,
 		tagState = userTagsContentState,
@@ -503,6 +504,11 @@ class MainViewModel @Inject constructor(
 				changeTag(it)
 			}
 		),
+		sortDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
+			selectedOptionState = mutableStateOf(SortOrder.DEFAULT),
+			dropdownOptionsState = mutableStateOf(SortOrder.entries)
+		),
+		sortDescendingState = _sortDesc
 	)
 
 	/////////////////////////////////////////////////
