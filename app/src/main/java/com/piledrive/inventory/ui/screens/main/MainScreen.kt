@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,12 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
-import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBar
-import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinatorImpl
-import com.piledrive.inventory.ui.screens.main.bars.stubMainFilterAppBarCoordinator
 import com.piledrive.inventory.ui.modal.create_item.CreateItemModalSheet
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.create_item.stubCreateItemSheetCoordinator
@@ -55,21 +46,13 @@ import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashModalShee
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.transfer_item.stubTransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.nav.NavRoute
+import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBar
+import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinatorImpl
+import com.piledrive.inventory.ui.screens.main.bars.stubMainFilterAppBarCoordinator
 import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinatorImpl
 import com.piledrive.inventory.ui.screens.main.content.MainStashContentList
 import com.piledrive.inventory.ui.screens.main.content.stubMainContentListCoordinator
-import com.piledrive.inventory.ui.state.ItemContentState
-import com.piledrive.inventory.ui.state.ItemStashContentState
-import com.piledrive.inventory.ui.state.LocationContentState
-import com.piledrive.inventory.ui.state.QuantityUnitContentState
-import com.piledrive.inventory.ui.state.TagsContentState
-import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
-import com.piledrive.inventory.ui.util.previewItemsContentFlow
-import com.piledrive.inventory.ui.util.previewLocationContentFlow
-import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
-import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.inventory.viewmodel.MainViewModel
-import kotlinx.coroutines.flow.StateFlow
 
 object MainScreen : NavRoute {
 	override val routeValue: String = "home"
@@ -79,11 +62,6 @@ object MainScreen : NavRoute {
 		viewModel: MainViewModel,
 	) {
 		drawContent(
-			viewModel.userLocationContentState,
-			viewModel.userTagsContentState,
-			viewModel.quantityUnitsContentState,
-			viewModel.itemsContentState,
-			viewModel.itemStashesContentState,
 			viewModel.listContentCoordinator,
 			viewModel.createItemStashCoordinator,
 			viewModel.createLocationCoordinator,
@@ -97,11 +75,6 @@ object MainScreen : NavRoute {
 
 	@Composable
 	fun drawContent(
-		locationState: StateFlow<LocationContentState>,
-		tagState: StateFlow<TagsContentState>,
-		quantityState: StateFlow<QuantityUnitContentState>,
-		itemState: StateFlow<ItemContentState>,
-		itemStashState: StateFlow<ItemStashContentState>,
 		listContentCoordinator: MainContentListCoordinatorImpl,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinatorImpl,
 		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
@@ -120,7 +93,6 @@ object MainScreen : NavRoute {
 					modifier = Modifier
 						.padding(innerPadding)
 						.fillMaxSize(),
-					locationState,
 					listContentCoordinator,
 					createItemStashSheetCoordinator,
 					createLocationCoordinator,
@@ -145,7 +117,6 @@ object MainScreen : NavRoute {
 	@Composable
 	fun DrawBody(
 		modifier: Modifier = Modifier,
-		locationState: StateFlow<LocationContentState>,
 		listContentCoordinator: MainContentListCoordinatorImpl,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinatorImpl,
 		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
@@ -161,64 +132,18 @@ object MainScreen : NavRoute {
 		val showQuantityUnitSheet: Boolean by remember { createQuantityUnitSheetCoordinator.showSheetState }
 		val showTransferSheet: Boolean by remember { transferItemStashSheetCoordinator.showSheetState }
 
-		val locationContent = locationState.collectAsState().value
-		val itemStashContent = listContentCoordinator.stashContentFlow.collectAsState().value
-		val forLocation = itemStashContent.data.currentLocationItemStashContent
-
 		Column(
 			modifier = modifier,
 			verticalArrangement = Arrangement.Center,
 			horizontalAlignment = Alignment.CenterHorizontally
 		) {
-			when {
-				locationContent.data.userLocations.isEmpty() -> {
-					if (locationContent.hasLoaded) {
-						// empty
-						DrawEmptyLocationsState(createLocationCoordinator)
-					} else {
-						// main spinner
-						CircularProgressIndicator(
-							modifier = Modifier
-								.padding(8.dp, 16.dp)
-								.zIndex(1f)
-						)
-					}
-				}
 
-				// move to main content composable since we want to add location anyways for baked-in starting point
-				forLocation.isEmpty() -> {
-					if (locationContent.data.currentLocation.id == STATIC_ID_LOCATION_ALL) {
-						Text(
-							"no items anywhere"
-						)
-						Button(onClick = {
-							createLocationCoordinator.showSheet()
-						}) {
-							Text("add item")
-						}
-					} else {
-						Text(
-							"no items in ${locationContent.data.currentLocation.name}"
-						)
-						Button(onClick = {
-							createItemStashSheetCoordinator.showSheet()
-						}) {
-							Text("add item")
-						}
-					}
-				}
-
-				else -> {
-					MainStashContentList.Draw(
-						modifier = Modifier.fillMaxSize(),
-						listContentCoordinator
-					)
-
-					if (locationContent.isLoading) {
-						// secondary spinner?
-					}
-				}
-			}
+			MainStashContentList.Draw(
+				modifier = Modifier,
+				coordinator = listContentCoordinator,
+				onLaunchCreateLocation = { createLocationCoordinator.showSheet() },
+				onLaunchCreateItemStash = { createItemStashSheetCoordinator.showSheet() }
+			)
 
 			if (showItemStashSheet) {
 				CreateItemStashModalSheet.Draw(
@@ -304,32 +229,12 @@ object MainScreen : NavRoute {
 	fun ColumnScope.DrawLocationItems(modifier: Modifier = Modifier) {
 		LazyColumn() { }
 	}
-
-	@Composable
-	fun ColumnScope.DrawEmptyLocationsState(
-		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
-	) {
-		// empty
-		Text(
-			"no locations :("
-		)
-		Button(onClick = {
-			createLocationCoordinator.showSheet()
-		}) {
-			Text("add location")
-		}
-	}
 }
 
 @Preview
 @Composable
 fun MainPreview() {
 	MainScreen.drawContent(
-		previewLocationContentFlow(),
-		previewTagsContentFlow(),
-		previewQuantityUnitsContentFlow(),
-		previewItemsContentFlow(),
-		previewItemStashesContentFlow(),
 		stubMainContentListCoordinator,
 		stubCreateItemStashSheetCoordinator,
 		stubCreateLocationModalSheetCoordinator,
