@@ -21,7 +21,7 @@ import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.QuantityUnitsRepo
 import com.piledrive.inventory.repo.TagsRepo
-import com.piledrive.inventory.ui.bars.MainFilterAppBarCoordinator
+import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinator
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_item_stash.CreateItemStashSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
@@ -40,6 +40,7 @@ import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
 import com.piledrive.lib_compose_components.ui.coordinators.MenuCoordinator
+import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -132,6 +133,10 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userLocationContentState.value = userLocationsContent
+						filterAppBarCoordinator.locationsDropdownCoordinator.udpateOptionsPool(flatLocations)
+						if(filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
+							filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
+						}
 					}
 				}
 			}
@@ -183,6 +188,10 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userTagsContentState.value = userTagsContent
+						filterAppBarCoordinator.tagsDropdownCoordinator.udpateOptionsPool(flatTags)
+						if(filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
+							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
+						}
 					}
 					rebuildItemsWithTags()
 				}
@@ -482,14 +491,18 @@ class MainViewModel @Inject constructor(
 	val filterAppBarCoordinator = MainFilterAppBarCoordinator(
 		locationState = _userLocationContentState,
 		tagState = userTagsContentState,
-		onLocationChanged = {
-			changeLocation(it)
-		},
-		onTagChanged = {
-			changeTag(it)
-		},
-		locationMenuCoordinator = MenuCoordinator(),
-		tagMenuCoordinator = MenuCoordinator()
+		locationsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
+			externalOnOptionSelected = {
+				it ?: return@ReadOnlyDropdownCoordinatorGeneric
+				changeLocation(it)
+			}
+		),
+		tagsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
+			externalOnOptionSelected = {
+				it ?: return@ReadOnlyDropdownCoordinatorGeneric
+				changeTag(it)
+			}
+		),
 	)
 
 	/////////////////////////////////////////////////

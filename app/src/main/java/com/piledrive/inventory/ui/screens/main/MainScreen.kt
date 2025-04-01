@@ -33,9 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
-import com.piledrive.inventory.ui.bars.MainFilterAppBar
-import com.piledrive.inventory.ui.bars.MainFilterAppBarCoordinatorImpl
-import com.piledrive.inventory.ui.bars.stubMainFilterAppBarCoordinator
+import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBar
+import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinatorImpl
+import com.piledrive.inventory.ui.screens.main.bars.stubMainFilterAppBarCoordinator
 import com.piledrive.inventory.ui.modal.create_item.CreateItemModalSheet
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.create_item.stubCreateItemSheetCoordinator
@@ -121,10 +121,6 @@ object MainScreen : NavRoute {
 						.padding(innerPadding)
 						.fillMaxSize(),
 					locationState,
-					tagState,
-					quantityState,
-					itemState,
-					itemStashState,
 					listContentCoordinator,
 					createItemStashSheetCoordinator,
 					createLocationCoordinator,
@@ -150,10 +146,6 @@ object MainScreen : NavRoute {
 	fun DrawBody(
 		modifier: Modifier = Modifier,
 		locationState: StateFlow<LocationContentState>,
-		tagState: StateFlow<TagsContentState>,
-		quantityState: StateFlow<QuantityUnitContentState>,
-		itemState: StateFlow<ItemContentState>,
-		stashState: StateFlow<ItemStashContentState>,
 		listContentCoordinator: MainContentListCoordinatorImpl,
 		createItemStashSheetCoordinator: CreateItemStashSheetCoordinatorImpl,
 		createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
@@ -169,7 +161,6 @@ object MainScreen : NavRoute {
 		val showQuantityUnitSheet: Boolean by remember { createQuantityUnitSheetCoordinator.showSheetState }
 		val showTransferSheet: Boolean by remember { transferItemStashSheetCoordinator.showSheetState }
 
-		val tagContent = tagState.collectAsState().value
 		val locationContent = locationState.collectAsState().value
 		val itemStashContent = listContentCoordinator.stashContentFlow.collectAsState().value
 		val forLocation = itemStashContent.data.currentLocationItemStashContent
