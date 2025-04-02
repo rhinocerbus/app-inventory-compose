@@ -400,17 +400,30 @@ class MainViewModel @Inject constructor(
 		}
 
 		val sort = filterAppBarCoordinator.sortDropdownCoordinator.selectedOptionState.value ?: SortOrder.DEFAULT
+		val sortDesc = filterAppBarCoordinator.sortDescendingState.value
 		val sorted = when (sort) {
 			SortOrder.NAME -> {
-				unsortedByTag.sortedBy { it.item.name }
+				if (sortDesc) {
+					unsortedByTag.sortedByDescending { it.item.name }
+				} else {
+					unsortedByTag.sortedBy { it.item.name }
+				}
 			}
 
 			SortOrder.LAST_ADDED -> {
-				unsortedByTag.sortedBy { it.item.name }
+				if (sortDesc) {
+					unsortedByTag.sortedByDescending { it.stash.createdAt }
+				} else {
+					unsortedByTag.sortedBy { it.item.createdAt }
+				}
 			}
 
 			SortOrder.LAST_UPDATED -> {
-				unsortedByTag.sortedBy { it.item.name }
+				if (sortDesc) {
+					unsortedByTag.sortedByDescending { it.item.name }
+				} else {
+					unsortedByTag.sortedBy { it.item.name }
+				}
 			}
 		}
 
@@ -503,7 +516,6 @@ class MainViewModel @Inject constructor(
 		}
 	)
 
-	private val _sortDesc = MutableStateFlow(false)
 	val filterAppBarCoordinator = MainFilterAppBarCoordinator(
 		locationState = _userLocationContentState,
 		tagState = userTagsContentState,
@@ -531,13 +543,15 @@ class MainViewModel @Inject constructor(
 			selectedOptionState = mutableStateOf(SortOrder.DEFAULT),
 			dropdownOptionsState = mutableStateOf(SortOrder.entries),
 			externalOnOptionSelected = {
-
+				viewModelScope.launch {
+					rebuildItemsWithTags()
+				}
 			},
 			showSelectedState = true,
 			optionIdForSelectedCheck = { it.name },
 			optionTextMutator = { "${it.name}" }
 		),
-		sortDescendingState = _sortDesc
+		sortDesc = false
 	)
 
 	/////////////////////////////////////////////////

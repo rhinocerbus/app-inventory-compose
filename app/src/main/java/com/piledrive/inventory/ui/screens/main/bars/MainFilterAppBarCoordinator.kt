@@ -9,6 +9,7 @@ import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import com.piledrive.lib_compose_components.ui.util.previewBooleanFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 
@@ -19,6 +20,7 @@ interface MainFilterAppBarCoordinatorImpl {
 	val locationsDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<Location>
 	val sortDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<SortOrder>
 	val sortDescendingState: StateFlow<Boolean>
+	fun toggleSortOrder(sortDesc: Boolean)
 }
 
 class MainFilterAppBarCoordinator(
@@ -27,8 +29,16 @@ class MainFilterAppBarCoordinator(
 	override val tagsDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<Tag>,
 	override val locationsDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<Location>,
 	override val sortDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<SortOrder>,
-	override val sortDescendingState: StateFlow<Boolean>
+	sortDesc: Boolean
 ) : MainFilterAppBarCoordinatorImpl {
+	private val _sortDesc = MutableStateFlow(sortDesc)
+	override val sortDescendingState: StateFlow<Boolean> = _sortDesc
+
+	override fun toggleSortOrder(sortDesc: Boolean) {
+		_sortDesc.value = sortDesc
+		// need to trigger data refresh. most straight-forward way currently
+		sortDropdownCoordinator.onOptionSelected(sortDropdownCoordinator.selectedOptionState.value)
+	}
 }
 
 val stubMainFilterAppBarCoordinator = object : MainFilterAppBarCoordinatorImpl {
@@ -39,5 +49,6 @@ val stubMainFilterAppBarCoordinator = object : MainFilterAppBarCoordinatorImpl {
 		ReadOnlyDropdownCoordinatorGeneric()
 	override val sortDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<SortOrder> = ReadOnlyDropdownCoordinatorGeneric()
 	override val sortDescendingState: StateFlow<Boolean> = previewBooleanFlow(false)
+	override fun toggleSortOrder(sortDesc: Boolean) {}
 }
 

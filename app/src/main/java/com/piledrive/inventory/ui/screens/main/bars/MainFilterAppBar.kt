@@ -21,11 +21,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.piledrive.inventory.R
 import com.piledrive.inventory.data.enums.SortOrder
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.Tag
@@ -43,6 +46,7 @@ fun MainFilterAppBar(
 	modifier: Modifier = Modifier,
 	coordinator: MainFilterAppBarCoordinatorImpl
 ) {
+	val sortDesc = coordinator.sortDescendingState.collectAsState()
 	Surface(color = TopAppBarDefaults.topAppBarColors().containerColor) {
 		Column {
 			TopAppBar(
@@ -52,7 +56,11 @@ fun MainFilterAppBar(
 				actions = {
 				}
 			)
-			Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+			Row(
+				Modifier
+					.fillMaxWidth()
+					.padding(horizontal = 12.dp)
+			) {
 				ReadOnlyDropdownTextFieldGeneric<Location>(
 					modifier = Modifier.weight(0.5f),
 					innerTextFieldModifier = Modifier.wrapContentWidth(),
@@ -67,7 +75,9 @@ fun MainFilterAppBar(
 				Gap(8.dp)
 				SortButton(
 					modifier = Modifier.size(48.dp),
-					coordinator.sortDropdownCoordinator
+					coordinator = coordinator.sortDropdownCoordinator,
+					sortDesc = sortDesc.value,
+					onToggle = { coordinator.toggleSortOrder(it) }
 				)
 			}
 		}
@@ -75,9 +85,13 @@ fun MainFilterAppBar(
 }
 
 @Composable
-internal fun SortButton(modifier: Modifier, coordinator: ReadOnlyDropdownCoordinatorGeneric<SortOrder>) {
+internal fun SortButton(
+	modifier: Modifier,
+	coordinator: ReadOnlyDropdownCoordinatorGeneric<SortOrder>,
+	sortDesc: Boolean,
+	onToggle: (Boolean) -> Unit
+) {
 	Box {
-
 		val selectedOption = coordinator.selectedOptionState.value
 		val showOptions = coordinator.optionsExpandedState.value
 		val optionsPool = coordinator.dropdownOptionsState.value
@@ -88,10 +102,19 @@ internal fun SortButton(modifier: Modifier, coordinator: ReadOnlyDropdownCoordin
 				coordinator.onOptionsExpandedChanged(!showOptions)
 			}
 		) {
-			Icon(
-				ImageVector.vectorResource(selectedOption?.iconResId ?: -1),
-				contentDescription = "sort by ${selectedOption?.name}"
-			)
+			Row {
+				Icon(
+					ImageVector.vectorResource(selectedOption?.iconResId ?: -1),
+					contentDescription = "sort by ${selectedOption?.name}"
+				)
+				Icon(
+					ImageVector.vectorResource(R.drawable.baseline_sort_24),
+					contentDescription = "sort by ${selectedOption?.name}",
+					modifier = Modifier.graphicsLayer {
+						rotationX = if (sortDesc) 0f else 180f
+					},
+				)
+			}
 		}
 		DropdownMenu(
 			expanded = showOptions,
@@ -100,7 +123,13 @@ internal fun SortButton(modifier: Modifier, coordinator: ReadOnlyDropdownCoordin
 			optionsPool.forEach { option ->
 				val isSelected = option == coordinator.selectedOptionState.value
 				DropdownMenuItem(
-					onClick = { coordinator.onOptionSelected(option) },
+					onClick = {
+						if (isSelected) {
+							onToggle(!sortDesc)
+						} else {
+							coordinator.onOptionSelected(option)
+						}
+					},
 					text = {
 						Text("${coordinator.optionTextMutator(option)}")
 					},
@@ -129,7 +158,7 @@ fun MainFilterAppBarPreview() {
 				locationsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
 				tagsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
 				sortDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
-				sortDescendingState = previewBooleanFlow(false)
+				sortDesc = false
 			)
 		)
 	}
