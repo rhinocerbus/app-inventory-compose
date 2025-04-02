@@ -103,10 +103,17 @@ class TransferItemStashSheetCoordinator(
 				if (opt?.stash?.id == toLocationDropdownCoordinator.selectedOptionState.value?.stash?.id) {
 					toLocationDropdownCoordinator.onOptionSelected(null)
 				}
-			}
+			},
+			optionTextMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
+			excludeSelected = true,
+			optionIdForSelectedCheck = { it.location.id }
 		)
 	override val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> =
-		ReadOnlyDropdownCoordinatorGeneric()
+		ReadOnlyDropdownCoordinatorGeneric(
+			optionTextMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
+			excludeSelected = true,
+			optionIdForSelectedCheck = { it.location.id }
+		)
 
 
 	override val activeItemState: State<Item?> = _activeItemState

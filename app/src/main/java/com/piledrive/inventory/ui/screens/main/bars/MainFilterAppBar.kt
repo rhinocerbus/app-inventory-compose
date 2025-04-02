@@ -2,11 +2,15 @@
 
 package com.piledrive.inventory.ui.screens.main.bars
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +33,7 @@ import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownTextFieldGeneric
+import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import com.piledrive.lib_compose_components.ui.util.previewBooleanFlow
 
@@ -47,19 +52,19 @@ fun MainFilterAppBar(
 				actions = {
 				}
 			)
-			Row(Modifier.fillMaxWidth()) {
+			Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
 				ReadOnlyDropdownTextFieldGeneric<Location>(
 					modifier = Modifier.weight(0.5f),
 					innerTextFieldModifier = Modifier.wrapContentWidth(),
-					coordinator = coordinator.locationsDropdownCoordinator,
-					selectionToValueMutator = { "${it.name}" }
+					coordinator = coordinator.locationsDropdownCoordinator
 				)
+				Gap(8.dp)
 				ReadOnlyDropdownTextFieldGeneric<Tag>(
 					modifier = Modifier.weight(0.5f),
 					innerTextFieldModifier = Modifier.wrapContentWidth(),
 					coordinator = coordinator.tagsDropdownCoordinator,
-					selectionToValueMutator = { "${it.name}" }
 				)
+				Gap(8.dp)
 				SortButton(
 					modifier = Modifier.size(48.dp),
 					coordinator.sortDropdownCoordinator
@@ -71,29 +76,43 @@ fun MainFilterAppBar(
 
 @Composable
 internal fun SortButton(modifier: Modifier, coordinator: ReadOnlyDropdownCoordinatorGeneric<SortOrder>) {
-	val selectedOption = coordinator.selectedOptionState.value
-	val showOptions = coordinator.optionsExpandedState.value
-	val optionsPool = coordinator.dropdownOptionsState.value
+	Box {
 
-	IconButton(
-		modifier = modifier,
-		onClick = {
-			coordinator.onOptionsExpandedChanged(!showOptions)
-		}
-	) {
-		Icon(ImageVector.vectorResource(selectedOption?.iconResId ?: -1), contentDescription = "sort by ${selectedOption?.name}")
-	}
-	DropdownMenu(
-		expanded = showOptions,
-		onDismissRequest = { coordinator.onOptionsExpandedChanged(false) },
-	) {
-		optionsPool.forEach { option ->
-			DropdownMenuItem(
-				onClick = { coordinator.onOptionSelected(option) },
-				text = {
-					Text("${option.name}")
-				}
+		val selectedOption = coordinator.selectedOptionState.value
+		val showOptions = coordinator.optionsExpandedState.value
+		val optionsPool = coordinator.dropdownOptionsState.value
+
+		IconButton(
+			modifier = modifier,
+			onClick = {
+				coordinator.onOptionsExpandedChanged(!showOptions)
+			}
+		) {
+			Icon(
+				ImageVector.vectorResource(selectedOption?.iconResId ?: -1),
+				contentDescription = "sort by ${selectedOption?.name}"
 			)
+		}
+		DropdownMenu(
+			expanded = showOptions,
+			onDismissRequest = { coordinator.onOptionsExpandedChanged(false) },
+		) {
+			optionsPool.forEach { option ->
+				val isSelected = option == coordinator.selectedOptionState.value
+				DropdownMenuItem(
+					onClick = { coordinator.onOptionSelected(option) },
+					text = {
+						Text("${coordinator.optionTextMutator(option)}")
+					},
+					trailingIcon = {
+						if (isSelected) {
+							Icon(Icons.Default.Check, "${coordinator.optionTextMutator(option)} selected")
+						}
+					}
+					// can't change background color this way, just use icon for now i suppose
+					//colors = MenuDefaults.itemColors().copy()
+				)
+			}
 		}
 	}
 }
