@@ -155,9 +155,15 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	fun addNewLocation(slug: LocationSlug) {
+	private fun addNewLocation(slug: LocationSlug) {
 		viewModelScope.launch {
 			locationsRepo.addLocation(slug)
+		}
+	}
+
+	private fun updateLocation(location: Location) {
+		viewModelScope.launch {
+			locationsRepo.updateLocation(location)
 		}
 	}
 
@@ -457,6 +463,9 @@ class MainViewModel @Inject constructor(
 		locationState = userLocationContentState,
 		onAddLocation = {
 			addNewLocation(it)
+		},
+		onUpdateLocation = {
+			updateLocation(it)
 		}
 	)
 

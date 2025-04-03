@@ -1,9 +1,9 @@
 package com.piledrive.inventory.repo.datasource
 
 import android.content.ContentValues
-import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
+import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.repo.datasource.abstracts.LocationsSourceImpl
 import com.powersync.db.getString
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -42,5 +42,12 @@ class PowerSyncLocationsDataSource @Inject constructor(
 			put("name", slug.name)
 		}
 		powerSync.insert("locations", values, Location::class)
+	}
+
+	override suspend fun updateLocation(location: Location) {
+		val values = ContentValues().apply {
+			put("name", location.name)
+		}
+		powerSync.update("locations", values, whereValue = location.id, clazz = Location::class)
 	}
 }

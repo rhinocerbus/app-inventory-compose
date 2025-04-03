@@ -39,4 +39,10 @@ class SupaBaseLocationsDataSource @Inject constructor(
 			supaBase.addLocation(slug.name)
 		}
 	}
+
+	override suspend fun updateLocation(location: Location) {
+		withContext(Dispatchers.Default) {
+			//supaBase.()
+		}
+	}
 }

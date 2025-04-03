@@ -121,7 +121,11 @@ object CreateItemModalSheet {
 							!matchExisting || matchEdit
 						}, "Item with that name already exists")
 					)
-				)
+				).apply {
+					if(!initialText.isNullOrBlank()) {
+						this.check(initialText)
+					}
+				}
 			}
 
 			Column(
