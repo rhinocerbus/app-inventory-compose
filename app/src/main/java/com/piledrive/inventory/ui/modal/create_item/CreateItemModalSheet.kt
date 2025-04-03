@@ -50,8 +50,14 @@ object CreateItemModalSheet {
 		modifier: Modifier = Modifier,
 		coordinator: CreateItemSheetCoordinatorImpl,
 	) {
-		var selectedQuantityUnit: String? by remember { mutableStateOf(null) }
-		var selectedTags by remember { mutableStateOf(listOf<String>()) }
+		var selectedQuantityUnitId: String? by remember {
+			val id = coordinator.activeItemState.value?.quantityUnit?.id
+			mutableStateOf(id)
+		}
+		var selectedTagIds by remember {
+			val ids = coordinator.activeItemState.value?.tags?.map { it.id } ?: listOf<String>()
+			mutableStateOf(ids)
+		}
 		/*
 			or
 			val selectedTags = remember { mutableStateListOf<String>() }
@@ -70,16 +76,16 @@ object CreateItemModalSheet {
 		) {
 			DrawContent(
 				coordinator,
-				selectedQuantityUnit,
-				selectedTags,
+				selectedQuantityUnitId,
+				selectedTagIds,
 				onQuantityUnitChange = {
-					selectedQuantityUnit = it
+					selectedQuantityUnitId = it
 				},
 				onTagToggle = { id, update ->
-					selectedTags = if (update) {
-						selectedTags + id
+					selectedTagIds = if (update) {
+						selectedTagIds + id
 					} else {
-						selectedTags - id
+						selectedTagIds - id
 					}
 				}
 			)
@@ -94,8 +100,11 @@ object CreateItemModalSheet {
 		onQuantityUnitChange: (String) -> Unit,
 		onTagToggle: (String, Boolean) -> Unit
 	) {
-		val quantityUnits = coordinator.quantityContentState.collectAsState().value
-		val tags = coordinator.tagsContentState.collectAsState().value
+		val quantityUnitPool = coordinator.quantityContentState.collectAsState().value
+		val tagPool = coordinator.tagsContentState.collectAsState().value
+
+		val activeItem = coordinator.activeItemState.value
+		val initialText = remember { activeItem?.item?.name ?: "" }
 
 		Surface(
 			modifier = Modifier
@@ -103,10 +112,13 @@ object CreateItemModalSheet {
 		) {
 			val formState = remember {
 				TextFormFieldState(
+					initialValue = initialText,
 					mainValidator = Validators.Required(errMsg = "Item name required"),
 					externalValidators = listOf(
 						Validators.Custom(runCheck = { nameIn ->
-							coordinator.itemState.value.data.items.firstOrNull { it.name.equals(nameIn, true) } == null
+							val matchEdit = nameIn == activeItem?.item?.name
+							val matchExisting = coordinator.itemState.value.data.items.firstOrNull { it.name.equals(nameIn, true) } != null
+							!matchExisting || matchEdit
 						}, "Item with that name already exists")
 					)
 				)
@@ -152,12 +164,18 @@ object CreateItemModalSheet {
 							    requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
 							    form-level viewmodel, feels like clutter in the main VM
 							 */
-							val item = ItemSlug(
-								name = formState.currentValue,
-								unitId = selectedQuantityUnit ?: QuantityUnit.DEFAULT_ID_BAGS,
-								tagIds = selectedTags,
-							)
-							coordinator.onAddItem(item)
+							if (activeItem == null) {
+								val item = ItemSlug(
+									name = formState.currentValue,
+									unitId = selectedQuantityUnit ?: QuantityUnit.DEFAULT_ID_BAGS,
+									tagIds = selectedTags,
+								)
+								coordinator.onAddItem(item)
+							} else {
+								val updatedItem = activeItem.item.copy(name = formState.currentValue)
+								coordinator.onUpdateItem(updatedItem, selectedTags)
+							}
+
 							coordinator.onDismiss()
 						}
 					) {
@@ -177,7 +195,7 @@ object CreateItemModalSheet {
 						icon = { Icon(Icons.Default.Add, "add new quantity unit") }
 					)
 
-					quantityUnits.data.allUnits.forEach {
+					quantityUnitPool.data.allUnits.forEach {
 						val selected = selectedQuantityUnit == it.id
 						FilterChip(
 							selected = selected,
@@ -203,7 +221,7 @@ object CreateItemModalSheet {
 				Gap(12.dp)
 
 				Text("Item tags:")
-				if (tags.data.userTags.isEmpty()) {
+				if (tagPool.data.userTags.isEmpty()) {
 					Text("No added tags yet")
 				} else {
 					ChipGroup {
@@ -216,7 +234,7 @@ object CreateItemModalSheet {
 							icon = { Icon(Icons.Default.Add, "add new tag") }
 						)
 
-						tags.data.userTags.forEach {
+						tagPool.data.userTags.forEach {
 							val selected = selectedTags.contains(it.id)
 							FilterChip(
 								selected = selected,
