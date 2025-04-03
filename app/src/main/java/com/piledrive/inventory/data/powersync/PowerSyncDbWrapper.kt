@@ -128,4 +128,19 @@ class PowerSyncDbWrapper(val db: PowerSyncDatabase) {
 		val result = db.execute(cmd, things)
 		Timber.d("<< result: $result")
 	}
+
+	suspend fun delete(
+		table: String,
+		whereClause: String = "WHERE id = ?",
+		whereValue: String,
+		clazz: KClass<out SupaBaseModel>
+	) {
+		Timber.d("> performing DELETE from $table")
+
+		val cmd = "DELETE FROM $table $whereClause"
+		Timber.d(cmd)
+		val things = listOf(whereValue)
+		val result = db.execute(cmd, things)
+		Timber.d("<< result: $result")
+	}
 }
