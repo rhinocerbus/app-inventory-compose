@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.enums.SortOrder
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
@@ -261,9 +262,15 @@ class MainViewModel @Inject constructor(
 	private val _itemsContentState = MutableStateFlow<ItemContentState>(itemsContent)
 	val itemsContentState: StateFlow<ItemContentState> = _itemsContentState
 
-	fun addNewItem(item: ItemSlug) {
+	private fun addNewItem(item: ItemSlug) {
 		viewModelScope.launch {
 			itemsRepo.addItem(item)
+		}
+	}
+
+	private fun updateItem(item: Item, tagIds: List<String>) {
+		viewModelScope.launch {
+			itemsRepo.updateItem(item, tagIds)
 		}
 	}
 
@@ -465,6 +472,7 @@ class MainViewModel @Inject constructor(
 		quantityContentState = quantityUnitsContentState,
 		tagsContentState = userTagsContentState,
 		onAddItem = { addNewItem(it) },
+		onUpdateItem = { item, tagIds -> updateItem(item, tagIds)},
 		onLaunchAddTag = { createTagCoordinator.showSheet() },
 		onLaunchAddUnit = { createQuantityUnitSheetCoordinator.showSheet() }
 	)
@@ -511,6 +519,9 @@ class MainViewModel @Inject constructor(
 		onItemStashQuantityUpdated = { stashId, qty ->
 			updateStashQuantity(stashId, qty)
 		},
+		onItemClicked = {
+			createItemCoordinator.showSheetForItem(it)
+		} ,
 		onStartStashTransfer = { item, locId ->
 			transferItemStashSheetCoordinator.showSheetForItem(item)
 		}
