@@ -473,6 +473,12 @@ class MainViewModel @Inject constructor(
 		userTagsContentState,
 		onAddTag = {
 			addNewTag(it)
+		},
+		onUpdateTag = {
+			/*
+				no-op on this screen 
+				should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
+			 */
 		}
 	)
 

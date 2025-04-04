@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,26 +33,30 @@ import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
+import com.piledrive.lib_compose_components.ui.appbar.TopAppBarWithOverflow
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownTextFieldGeneric
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
-import com.piledrive.lib_compose_components.ui.util.previewBooleanFlow
-
 
 @Composable
 fun MainFilterAppBar(
 	modifier: Modifier = Modifier,
-	coordinator: MainFilterAppBarCoordinatorImpl
+	coordinator: MainFilterAppBarCoordinatorImpl,
+	onLaunchManageTags: () -> Unit
 ) {
 	val sortDesc = coordinator.sortDescendingState.collectAsState()
 	Surface(color = TopAppBarDefaults.topAppBarColors().containerColor) {
 		Column {
-			TopAppBar(
+			TopAppBarWithOverflow.Draw(
 				title = {
 					Text("What do we have in: ")
 				},
-				actions = {
+				overflowActions = {
+					DropdownMenuItem(
+						text = { Text("Manage tags") },
+						onClick = { onLaunchManageTags() }
+					)
 				}
 			)
 			Row(
@@ -159,7 +162,8 @@ fun MainFilterAppBarPreview() {
 				tagsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
 				sortDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
 				sortDesc = false
-			)
+			),
+			onLaunchManageTags = {}
 		)
 	}
 }

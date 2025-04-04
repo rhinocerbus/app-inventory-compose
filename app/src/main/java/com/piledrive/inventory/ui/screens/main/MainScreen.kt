@@ -61,6 +61,7 @@ object MainScreen : NavRoute {
 	@Composable
 	fun draw(
 		viewModel: MainViewModel,
+		onLaunchManageTags: () -> Unit
 	) {
 		drawContent(
 			viewModel.listContentCoordinator,
@@ -70,7 +71,8 @@ object MainScreen : NavRoute {
 			viewModel.createQuantityUnitSheetCoordinator,
 			viewModel.createItemCoordinator,
 			viewModel.filterAppBarCoordinator,
-			viewModel.transferItemStashSheetCoordinator
+			viewModel.transferItemStashSheetCoordinator,
+			onLaunchManageTags
 		)
 	}
 
@@ -83,11 +85,12 @@ object MainScreen : NavRoute {
 		createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
 		createItemCoordinator: CreateItemSheetCoordinatorImpl,
 		filterBarCoordinator: MainFilterAppBarCoordinatorImpl,
-		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinatorImpl
+		transferItemStashSheetCoordinator: TransferItemStashSheetCoordinatorImpl,
+		onLaunchManageTags: () -> Unit
 	) {
 		Scaffold(
 			topBar = {
-				MainFilterAppBar(Modifier, filterBarCoordinator)
+				MainFilterAppBar(Modifier, filterBarCoordinator, onLaunchManageTags)
 			},
 			content = { innerPadding ->
 				DrawBody(
@@ -245,6 +248,7 @@ fun MainPreview() {
 			stubCreateItemSheetCoordinator,
 			stubMainFilterAppBarCoordinator,
 			stubTransferItemStashSheetCoordinator,
+			onLaunchManageTags = {}
 		)
 	}
 }

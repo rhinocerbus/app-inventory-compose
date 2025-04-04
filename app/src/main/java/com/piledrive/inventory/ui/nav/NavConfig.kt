@@ -9,7 +9,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.piledrive.inventory.ui.screens.main.MainScreen
+import com.piledrive.inventory.ui.screens.tags.ManageTagsScreen
 import com.piledrive.inventory.viewmodel.MainViewModel
+import com.piledrive.inventory.viewmodel.ManageTagsViewModel
 
 interface NavRoute {
 	val routeValue: String
@@ -33,18 +35,6 @@ fun RootNavHost() {
 		navController = navController,
 		startDestination = MainScreen.routeValue
 	) {
-		/*
-		val podcastCallbacks = object : PodcastCallbacks {
-			override val onPodcastOpen: (podcast: IPodcastData) -> Unit = { podcast ->
-				val toRoute = PodcastScreen.routeValue.replace("{${NavArgKeys.GUID.key}}", podcast.guid)
-				navController.navigate(toRoute)
-			}
-			override val onFollowToggled: (podcast: IPodcastData, status: PodcastFollowStatus) -> Unit = { _, _ -> }
-			override val onShowFullDescription: (podcast: IPodcastData) -> Unit = {}
-			override val onOpenShowSettings: (podcast: IPodcastData) -> Unit = {}
-		}
-*/
-
 		composable(route = MainScreen.routeValue) {
 			val viewModel: MainViewModel = hiltViewModel<MainViewModel>()
 			LaunchedEffect("load_content_on_launch") {
@@ -52,31 +42,21 @@ fun RootNavHost() {
 			}
 			MainScreen.draw(
 				viewModel,
-			)
-		}
-		/*
-		composable(route = PodcastScreen.routeValue) { navStackEntry ->
-			val podcastGuid = navStackEntry.arguments?.getString(NavArgKeys.GUID.key)
-				?: throw InvalidParameterException("no podcast guid provided for nav")
-			val podcastViewModel: PodcastViewModel = hiltViewModel<PodcastViewModel>()
-			//val vmOwner = LocalViewModelStoreOwner.current ?: return@composable
-			//val altPodcastViewModel: PodcastViewModel = hiltViewModel<PodcastViewModel>(vmOwner)
-			val playerViewModel = hiltViewModel<PlayerViewModel>()
-			LaunchedEffect("load_podcast_on_nav") {
-				podcastViewModel.loadPodcast(podcastGuid)
-			}
-			PodcastScreen.draw(
-				podcastViewModel,
-				playerViewModel,
-				podcastGuid,
-				onBack = { navController.navigateUp() },
-				onOpenPodcastSettings = { podcast ->
-					val toRoute = PodcastSettingsScreen.routeValue.replace("{${NavArgKeys.GUID.key}}", podcast.guid)
-					navController.navigate(toRoute)
+				onLaunchManageTags = {
+					navController.navigate(ManageTagsScreen.routeValue)
 				}
 			)
 		}
-		 */
+
+		composable(route = ManageTagsScreen.routeValue) {
+			val viewModel: ManageTagsViewModel = hiltViewModel<ManageTagsViewModel>()
+			LaunchedEffect("load_tags_content_on_launch") {
+				viewModel.reloadContent()
+			}
+			ManageTagsScreen.draw(
+				viewModel,
+			)
+		}
 	}
 }
 
