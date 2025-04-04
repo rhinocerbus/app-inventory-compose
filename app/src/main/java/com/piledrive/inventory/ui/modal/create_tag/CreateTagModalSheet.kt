@@ -68,8 +68,9 @@ object CreateTagModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateTagSheetCoordinatorImpl,
 	) {
-
 		val tags = coordinator.tagsContentState.collectAsState().value
+		val activeTag = coordinator.activeTagState.value
+		val initialText = remember { activeTag?.name ?: "" }
 
 		Surface(
 			modifier = Modifier
@@ -77,13 +78,21 @@ object CreateTagModalSheet {
 		) {
 			val formState = remember {
 				TextFormFieldState(
+					initialValue = initialText,
 					mainValidator = Validators.Required(errMsg = "Tag name required"),
 					externalValidators = listOf(
 						Validators.Custom<String>(runCheck = { nameIn ->
-							tags.data.allTags.firstOrNull { it.name.equals(nameIn, true) } == null
+							val matchEdit = nameIn == activeTag?.name
+							val matchExisting =
+								tags.data.allTags.firstOrNull { it.name.equals(nameIn, true) } != null
+							!matchExisting || matchEdit
 						}, errMsg = "Tag already exists")
 					)
-				)
+				).apply {
+					if(!initialText.isNullOrBlank()) {
+						this.check(initialText)
+					}
+				}
 			}
 
 			Column(
@@ -126,12 +135,17 @@ object CreateTagModalSheet {
 							    requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
 							    form-level viewmodel, feels like clutter in the main VM
 							 */
-							val slug = TagSlug(name = formState.currentValue)
-							coordinator.onAddTag(slug)
+							if(activeTag == null) {
+								val slug = TagSlug(name = formState.currentValue)
+								coordinator.onAddTag(slug)
+							} else {
+								val updatedTag = activeTag.copy(name = formState.currentValue)
+								coordinator.onUpdateTag(updatedTag)
+							}
 							coordinator.onDismiss()
 						}
 					) {
-						Icon(Icons.Default.Done, contentDescription = "add new location")
+						Icon(Icons.Default.Done, contentDescription = "add new tag")
 					}
 				}
 
