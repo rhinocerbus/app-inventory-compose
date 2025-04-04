@@ -43,4 +43,11 @@ class PowerSyncTagsDataSource @Inject constructor(
 		}
 		powerSync.insert("tags", values, Tag::class)
 	}
+
+	override suspend fun updateTag(tag: Tag) {
+		val values = ContentValues().apply {
+			put("name", tag.name)
+		}
+		powerSync.update("tags", values, whereValue = tag.id, clazz = Tag::class)
+	}
 }

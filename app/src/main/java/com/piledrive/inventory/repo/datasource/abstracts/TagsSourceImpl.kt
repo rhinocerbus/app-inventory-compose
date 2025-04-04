@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface TagsSourceImpl {
 	fun watchTags(): Flow<List<Tag>>
 	suspend fun addTag(slug: TagSlug)
+	suspend fun updateTag(tag: Tag)
 }
