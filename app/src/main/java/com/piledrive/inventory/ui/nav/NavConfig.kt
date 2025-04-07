@@ -8,10 +8,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.piledrive.inventory.ui.screens.items.ManageItemsScreen
 import com.piledrive.inventory.ui.screens.locations.ManageLocationsScreen
 import com.piledrive.inventory.ui.screens.main.MainScreen
 import com.piledrive.inventory.ui.screens.tags.ManageTagsScreen
 import com.piledrive.inventory.viewmodel.MainViewModel
+import com.piledrive.inventory.viewmodel.ManageItemsViewModel
 import com.piledrive.inventory.viewmodel.ManageLocationsViewModel
 import com.piledrive.inventory.viewmodel.ManageTagsViewModel
 
@@ -44,13 +46,25 @@ fun RootNavHost() {
 			}
 			MainScreen.draw(
 				viewModel,
-				onLaunchManageItems = {},
+				onLaunchManageItems = {
+					navController.navigate(ManageItemsScreen.routeValue)
+				},
 				onLaunchManageTags = {
 					navController.navigate(ManageTagsScreen.routeValue)
 				},
 				onLaunchManageLocations = {
 					navController.navigate(ManageLocationsScreen.routeValue)
 				}
+			)
+		}
+
+		composable(route = ManageItemsScreen.routeValue) {
+			val viewModel: ManageItemsViewModel = hiltViewModel<ManageItemsViewModel>()
+			LaunchedEffect("load_items_content_on_launch") {
+				viewModel.reloadContent()
+			}
+			ManageItemsScreen.draw(
+				viewModel,
 			)
 		}
 
