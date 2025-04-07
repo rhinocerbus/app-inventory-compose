@@ -45,6 +45,7 @@ fun MainFilterAppBar(
 	coordinator: MainFilterAppBarCoordinatorImpl,
 	onLaunchManageItems: () -> Unit,
 	onLaunchManageTags: () -> Unit,
+	onLaunchManageUnits: () -> Unit,
 	onLaunchManageLocations: () -> Unit,
 ) {
 	val sortDesc = coordinator.sortDescendingState.collectAsState()
@@ -62,6 +63,10 @@ fun MainFilterAppBar(
 					DropdownMenuItem(
 						text = { Text("Manage tags") },
 						onClick = { onLaunchManageTags() }
+					)
+					DropdownMenuItem(
+						text = { Text("Manage units") },
+						onClick = { onLaunchManageUnits() }
 					)
 					DropdownMenuItem(
 						text = { Text("Manage locations") },
@@ -175,6 +180,7 @@ fun MainFilterAppBarPreview() {
 			),
 			onLaunchManageItems = {},
 			onLaunchManageTags = {},
+			onLaunchManageUnits = {},
 			onLaunchManageLocations = {}
 		)
 	}

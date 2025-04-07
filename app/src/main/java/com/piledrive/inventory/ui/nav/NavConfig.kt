@@ -12,10 +12,12 @@ import com.piledrive.inventory.ui.screens.items.ManageItemsScreen
 import com.piledrive.inventory.ui.screens.locations.ManageLocationsScreen
 import com.piledrive.inventory.ui.screens.main.MainScreen
 import com.piledrive.inventory.ui.screens.tags.ManageTagsScreen
+import com.piledrive.inventory.ui.screens.units.ManageUnitsScreen
 import com.piledrive.inventory.viewmodel.MainViewModel
 import com.piledrive.inventory.viewmodel.ManageItemsViewModel
 import com.piledrive.inventory.viewmodel.ManageLocationsViewModel
 import com.piledrive.inventory.viewmodel.ManageTagsViewModel
+import com.piledrive.inventory.viewmodel.ManageUnitsViewModel
 
 interface NavRoute {
 	val routeValue: String
@@ -52,6 +54,9 @@ fun RootNavHost() {
 				onLaunchManageTags = {
 					navController.navigate(ManageTagsScreen.routeValue)
 				},
+				onLaunchManageUnits = {
+					navController.navigate(ManageUnitsScreen.routeValue)
+				},
 				onLaunchManageLocations = {
 					navController.navigate(ManageLocationsScreen.routeValue)
 				}
@@ -74,6 +79,16 @@ fun RootNavHost() {
 				viewModel.reloadContent()
 			}
 			ManageTagsScreen.draw(
+				viewModel,
+			)
+		}
+
+		composable(route = ManageUnitsScreen.routeValue) {
+			val viewModel: ManageUnitsViewModel = hiltViewModel<ManageUnitsViewModel>()
+			LaunchedEffect("load_units_content_on_launch") {
+				viewModel.reloadContent()
+			}
+			ManageUnitsScreen.draw(
 				viewModel,
 			)
 		}
