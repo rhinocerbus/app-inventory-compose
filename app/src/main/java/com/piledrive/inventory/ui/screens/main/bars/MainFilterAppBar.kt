@@ -43,7 +43,9 @@ import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 fun MainFilterAppBar(
 	modifier: Modifier = Modifier,
 	coordinator: MainFilterAppBarCoordinatorImpl,
-	onLaunchManageTags: () -> Unit
+	onLaunchManageItems: () -> Unit,
+	onLaunchManageTags: () -> Unit,
+	onLaunchManageLocations: () -> Unit,
 ) {
 	val sortDesc = coordinator.sortDescendingState.collectAsState()
 	Surface(color = TopAppBarDefaults.topAppBarColors().containerColor) {
@@ -54,8 +56,16 @@ fun MainFilterAppBar(
 				},
 				overflowActions = {
 					DropdownMenuItem(
+						text = { Text("Manage items") },
+						onClick = { onLaunchManageItems() }
+					)
+					DropdownMenuItem(
 						text = { Text("Manage tags") },
 						onClick = { onLaunchManageTags() }
+					)
+					DropdownMenuItem(
+						text = { Text("Manage locations") },
+						onClick = { onLaunchManageLocations() }
 					)
 				}
 			)
@@ -163,7 +173,9 @@ fun MainFilterAppBarPreview() {
 				sortDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
 				sortDesc = false
 			),
-			onLaunchManageTags = {}
+			onLaunchManageItems = {},
+			onLaunchManageTags = {},
+			onLaunchManageLocations = {}
 		)
 	}
 }
