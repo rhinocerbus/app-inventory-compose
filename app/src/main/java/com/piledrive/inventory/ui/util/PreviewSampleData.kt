@@ -43,6 +43,11 @@ fun previewItemsContentFlow(
 	return MutableStateFlow(ItemContentState(hasLoaded = true, isLoading = false))
 }
 
+fun previewUnitsContentFlow(
+): StateFlow<QuantityUnitContentState> {
+	return MutableStateFlow(QuantityUnitContentState(hasLoaded = true, isLoading = false))
+}
+
 fun previewFullItemsContentFlow(
 ): StateFlow<FullItemsContentState> {
 	return MutableStateFlow(FullItemsContentState(hasLoaded = true, isLoading = false))

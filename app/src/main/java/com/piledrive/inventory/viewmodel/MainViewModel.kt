@@ -497,6 +497,9 @@ class MainViewModel @Inject constructor(
 		quantityUnitsContentState,
 		onAddQuantityUnit = {
 			addNewQuantityUnit(it)
+		},
+		onUpdateQuantityUnit = {
+			// no-op on this screen
 		}
 	)
 

@@ -9,7 +9,6 @@ import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.FullItemsContent
-import com.piledrive.inventory.data.model.composite.StashForItem
 
 
 //  region location filter

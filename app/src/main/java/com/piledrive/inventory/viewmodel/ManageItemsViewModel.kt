@@ -188,12 +188,6 @@ class ManageItemsViewModel @Inject constructor(
 	private val _quantityUnitsContentState = MutableStateFlow<QuantityUnitContentState>(quantityUnitsContent)
 	val quantityUnitsContentState: StateFlow<QuantityUnitContentState> = _quantityUnitsContentState
 
-	fun addNewQuantityUnit(slug: QuantityUnitSlug) {
-		viewModelScope.launch {
-			quantityUnitsRepo.addQuantityUnit(slug)
-		}
-	}
-
 	private fun watchQuantityUnits() {
 		viewModelScope.launch {
 			withContext(Dispatchers.Default) {
@@ -208,6 +202,12 @@ class ManageItemsViewModel @Inject constructor(
 					rebuildItemsWithTags()
 				}
 			}
+		}
+	}
+
+	private fun addNewQuantityUnit(slug: QuantityUnitSlug) {
+		viewModelScope.launch {
+			quantityUnitsRepo.addQuantityUnit(slug)
 		}
 	}
 
@@ -308,6 +308,9 @@ class ManageItemsViewModel @Inject constructor(
 		quantityUnitsContentState,
 		onAddQuantityUnit = {
 			addNewQuantityUnit(it)
+		},
+		onUpdateQuantityUnit = {
+			// no-op on this screen
 		}
 	)
 
