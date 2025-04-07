@@ -107,7 +107,7 @@ class ManageUnitsViewModel @Inject constructor(
 	val contentCoordinator = ManageUnitsContentCoordinator(
 		unitState = unitsContentState,
 		onLaunchCreateUnit = { createQuantityUnitSheetCoordinator.showSheet() },
-		onUnitClicked = { createQuantityUnitSheetCoordinator.showSheet() }
+		onUnitClicked = { createQuantityUnitSheetCoordinator.showSheetForUnit(it) }
 	)
 
 	/////////////////////////////////////////////////
