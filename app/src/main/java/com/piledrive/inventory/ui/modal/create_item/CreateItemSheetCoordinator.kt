@@ -5,7 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
-import com.piledrive.inventory.data.model.composite.StashForItem
+import com.piledrive.inventory.data.model.composite.ItemWithTags
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagsContentState
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 
 interface CreateItemSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
-	val activeItemState: State<StashForItem?>
+	val activeItemState: State<ItemWithTags?>
 	val itemState: StateFlow<ItemContentState>
 	val quantityContentState: StateFlow<QuantityUnitContentState>
 	val tagsContentState: StateFlow<TagsContentState>
@@ -26,7 +26,7 @@ interface CreateItemSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
 	val onUpdateItem: (item: Item, tagIds: List<String>) -> Unit
 	val onLaunchAddTag: () -> Unit
 	val onLaunchAddUnit: () -> Unit
-	fun showSheetForItem(item: StashForItem)
+	fun showSheetForItem(item: ItemWithTags)
 }
 
 class CreateItemSheetCoordinator(
@@ -39,10 +39,10 @@ class CreateItemSheetCoordinator(
 	override val onLaunchAddUnit: () -> Unit
 ) : ModalSheetCoordinator(), CreateItemSheetCoordinatorImpl {
 
-	private val _activeItemState: MutableState<StashForItem?> = mutableStateOf(null)
-	override val activeItemState: State<StashForItem?> = _activeItemState
+	private val _activeItemState: MutableState<ItemWithTags?> = mutableStateOf(null)
+	override val activeItemState: State<ItemWithTags?> = _activeItemState
 
-	override fun showSheetForItem(item: StashForItem) {
+	override fun showSheetForItem(item: ItemWithTags) {
 		_activeItemState.value = item
 		_showSheetState.value = true
 	}
@@ -54,7 +54,7 @@ class CreateItemSheetCoordinator(
 }
 
 val stubCreateItemSheetCoordinator = object : CreateItemSheetCoordinatorImpl {
-	override val activeItemState: State<StashForItem?> = mutableStateOf(null)
+	override val activeItemState: State<ItemWithTags?> = mutableStateOf(null)
 	override val itemState: StateFlow<ItemContentState> = previewItemsContentFlow()
 	override val quantityContentState: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
 	override val tagsContentState: StateFlow<TagsContentState> = previewTagsContentFlow()
@@ -68,7 +68,7 @@ val stubCreateItemSheetCoordinator = object : CreateItemSheetCoordinatorImpl {
 	override fun showSheet() {
 	}
 
-	override fun showSheetForItem(item: StashForItem) {}
+	override fun showSheetForItem(item: ItemWithTags) {}
 
 	override fun onDismiss() {
 	}

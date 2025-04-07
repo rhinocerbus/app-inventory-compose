@@ -7,5 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface ItemsSourceImpl {
 	fun watchItems(): Flow<List<Item>>
 	suspend fun addItem(item: ItemSlug)
-	suspend fun updateItem(item: Item, tagIds: List<String>)
+	suspend fun updateItemWithTags(item: Item, tagIds: List<String>)
 }

@@ -17,6 +17,7 @@ import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.data.model.composite.ContentForLocation
+import com.piledrive.inventory.data.model.composite.ItemWithTags
 import com.piledrive.inventory.data.model.composite.StashForItem
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemStashesRepo
@@ -276,7 +277,7 @@ class MainViewModel @Inject constructor(
 
 	private fun updateItem(item: Item, tagIds: List<String>) {
 		viewModelScope.launch {
-			itemsRepo.updateItem(item, tagIds)
+			itemsRepo.updateItemWithTags(item, tagIds)
 		}
 	}
 
@@ -535,7 +536,7 @@ class MainViewModel @Inject constructor(
 			updateStashQuantity(stashId, qty)
 		},
 		onItemClicked = {
-			createItemCoordinator.showSheetForItem(it)
+			createItemCoordinator.showSheetForItem(ItemWithTags(it.item, it.tags, it.quantityUnit))
 		} ,
 		onStartStashTransfer = { item, locId ->
 			transferItemStashSheetCoordinator.showSheetForItem(item)

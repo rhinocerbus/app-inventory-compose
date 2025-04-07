@@ -89,7 +89,7 @@ class PowerSyncItemsDataSource @Inject constructor(
 		}
 	}
 
-	override suspend fun updateItem(item: Item, tagIds: List<String>) {
+	override suspend fun updateItemWithTags(item: Item, tagIds: List<String>) {
 		val values = ContentValues().apply {
 			put("name", item.name)
 			put("unit_id", item.unitId)

@@ -29,7 +29,7 @@ class ItemsRepo @Inject constructor(
 		//return supaBase.watchLocations()
 	}
 
-	override suspend fun updateItem(item: Item, tagIds: List<String>) {
-		powerSyncSource.updateItem(item, tagIds)
+	override suspend fun updateItemWithTags(item: Item, tagIds: List<String>) {
+		powerSyncSource.updateItemWithTags(item, tagIds)
 	}
 }

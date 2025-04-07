@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.composite.ContentForLocation
+import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -40,6 +41,11 @@ fun previewQuantityUnitsContentFlow(
 fun previewItemsContentFlow(
 ): StateFlow<ItemContentState> {
 	return MutableStateFlow(ItemContentState(hasLoaded = true, isLoading = false))
+}
+
+fun previewFullItemsContentFlow(
+): StateFlow<FullItemsContentState> {
+	return MutableStateFlow(FullItemsContentState(hasLoaded = true, isLoading = false))
 }
 
 fun previewItemStashesContentFlow(
