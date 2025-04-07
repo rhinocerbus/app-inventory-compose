@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.piledrive.inventory.data.model.QuantityType
+import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
@@ -16,12 +17,14 @@ import kotlinx.coroutines.flow.StateFlow
 interface CreateQuantityUnitSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
 	val unitsContentState: StateFlow<QuantityUnitContentState>
 	val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit
+	val onEditQuantityUnit: (unit: QuantityUnit) -> Unit
 	val selectedMeasurement: MutableState<QuantityType>
 }
 
 val stubCreateQuantityUnitSheetCoordinator = object : CreateQuantityUnitSheetCoordinatorImpl {
 	override val unitsContentState: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
 	override val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit = {}
+	override val onEditQuantityUnit: (unit: QuantityUnit) -> Unit = {}
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
 	override val selectedMeasurement: MutableState<QuantityType> = mutableStateOf(QuantityType.WHOLE)
 	override fun showSheet() {}
@@ -32,4 +35,5 @@ class CreateQuantityUnitSheetCoordinator(
 	override val unitsContentState: StateFlow<QuantityUnitContentState>,
 	override val selectedMeasurement: MutableState<QuantityType> = mutableStateOf(QuantityType.WHOLE),
 	override val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit,
+	override val onEditQuantityUnit: (unit: QuantityUnit) -> Unit
 ) : ModalSheetCoordinator(), CreateQuantityUnitSheetCoordinatorImpl
