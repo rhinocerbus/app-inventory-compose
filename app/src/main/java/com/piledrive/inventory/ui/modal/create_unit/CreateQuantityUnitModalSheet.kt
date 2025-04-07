@@ -22,7 +22,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,16 +34,12 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.piledrive.inventory.data.model.QuantityType
 import com.piledrive.inventory.data.model.QuantityUnitSlug
-import com.piledrive.inventory.ui.callbacks.ModalSheetCallbacks
-import com.piledrive.inventory.ui.state.QuantityUnitContentState
-import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.chips.ToggleChip
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
-import kotlinx.coroutines.flow.StateFlow
 
 /*
 	todo - consider:
@@ -76,8 +71,15 @@ object CreateQuantityUnitModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateQuantityUnitSheetCoordinatorImpl,
 	) {
+		val unitPool = coordinator.unitsContentState.collectAsState().value
+		val activeUnit = coordinator.activeUnitState.value
+		val initialText = remember { activeUnit?.name ?: "" }
 
-		val units = coordinator.unitsContentState.collectAsState().value
+		var selectedMeasurement = remember {
+			val type = coordinator.activeUnitState.value?.type ?: coordinator.selectedMeasurementState.value
+			mutableStateOf(type)
+		}
+
 
 		Surface(
 			modifier = Modifier
@@ -86,20 +88,30 @@ object CreateQuantityUnitModalSheet {
 			// todo - hoist out of here, finish making whole-form state, probably add to coordinator
 			val nameFieldState = remember {
 				TextFormFieldState(
+					initialValue = initialText,
 					mainValidator = Validators.Required(errMsg = "Unit name required"),
 					externalValidators = listOf(
 						Validators.Custom<String>(runCheck = { nameIn ->
-							units.data.allUnits.firstOrNull { it.name.equals(nameIn, true) } == null
+							val matchEdit = nameIn == activeUnit?.name
+							val matchExisting = unitPool.data.allUnits.firstOrNull { it.name.equals(nameIn, true) } != null
+							!matchExisting || matchEdit
 						}, errMsg = "Unit already exists")
 					)
-				)
+				).apply {
+					if (!initialText.isNullOrBlank()) {
+						this.check(initialText)
+					}
+				}
 			}
 			val labelFieldState = remember {
 				TextFormFieldState(
+					initialValue = initialText,
 					mainValidator = Validators.Required(errMsg = "Unit label required"),
 					externalValidators = listOf(
 						Validators.Custom<String>(runCheck = { nameIn ->
-							units.data.allUnits.firstOrNull { it.name.equals(nameIn, true) } == null
+							val matchEdit = nameIn == activeUnit?.label
+							val matchExisting = unitPool.data.allUnits.firstOrNull { it.label.equals(nameIn, true) } != null
+							!matchExisting || matchEdit
 						}, errMsg = "Label already exists")
 					)
 				)
@@ -187,12 +199,21 @@ object CreateQuantityUnitModalSheet {
 									requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
 									form-level viewmodel, feels like clutter in the main VM
 							 */
-							val slug = QuantityUnitSlug(
-								name = nameFieldState.currentValue,
-								label = labelFieldState.currentValue,
-								type = coordinator.selectedMeasurement.value
-							)
-							coordinator.onAddQuantityUnit(slug)
+							if (activeUnit == null) {
+								val slug = QuantityUnitSlug(
+									name = nameFieldState.currentValue,
+									label = labelFieldState.currentValue,
+									type = coordinator.selectedMeasurementState.value
+								)
+								coordinator.onAddQuantityUnit(slug)
+							} else {
+								val updatedUnit = activeUnit.copy(
+									name = nameFieldState.currentValue,
+									label = labelFieldState.currentValue,
+									type = selectedMeasurement.value
+								)
+								coordinator.onUpdateQuantityUnit(updatedUnit)
+							}
 							coordinator.onDismiss()
 						}
 					) {
@@ -207,7 +228,11 @@ object CreateQuantityUnitModalSheet {
 				}
 
 				Gap(8.dp)
-				HorizontalDivider(Modifier.fillMaxWidth(0.9f).align(Alignment.CenterHorizontally))
+				HorizontalDivider(
+					Modifier
+						.fillMaxWidth(0.9f)
+						.align(Alignment.CenterHorizontally)
+				)
 				Gap(8.dp)
 
 				Text("Measurement:")
@@ -217,23 +242,27 @@ object CreateQuantityUnitModalSheet {
 							return@forEach
 						}
 						ToggleChip(
-							onClick = { coordinator.selectedMeasurement.value = it },
+							onClick = { selectedMeasurement.value = it },
 							label = { Text(text = "${it.name}") },
-							selected = it == coordinator.selectedMeasurement.value
+							selected = it == selectedMeasurement.value
 						)
 					}
 				}
 
 				Gap(8.dp)
-				HorizontalDivider(Modifier.fillMaxWidth(0.9f).align(Alignment.CenterHorizontally))
+				HorizontalDivider(
+					Modifier
+						.fillMaxWidth(0.9f)
+						.align(Alignment.CenterHorizontally)
+				)
 				Gap(8.dp)
 
 				Text("Current units:")
-				if (units.data.allUnits.isEmpty()) {
+				if (unitPool.data.allUnits.isEmpty()) {
 					Text("No added units yet")
 				} else {
 					ChipGroup {
-						units.data.allUnits.forEach {
+						unitPool.data.allUnits.forEach {
 							SuggestionChip(
 								onClick = {},
 								label = { Text("${it.name} (${it.label})") },

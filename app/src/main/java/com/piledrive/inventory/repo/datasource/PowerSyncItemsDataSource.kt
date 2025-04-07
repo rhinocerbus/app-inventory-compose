@@ -2,6 +2,7 @@ package com.piledrive.inventory.repo.datasource
 
 import android.content.ContentValues
 import com.piledrive.inventory.data.model.Item
+import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
@@ -82,6 +83,23 @@ class PowerSyncItemsDataSource @Inject constructor(
 		item.tagIds.forEach {
 			val subVales = ContentValues().apply {
 				put("item_id", itemId.toString())
+				put("tag_id", it)
+			}
+			powerSync.insert("item_tags", subVales, Item::class)
+		}
+	}
+
+	override suspend fun updateItemWithTags(item: Item, tagIds: List<String>) {
+		val values = ContentValues().apply {
+			put("name", item.name)
+			put("unit_id", item.unitId)
+		}
+		powerSync.update("items", values, whereValue = item.id, clazz = Item::class)
+
+		powerSync.delete("item_tags", whereClause = "WHERE item_id = ?", whereValue = item.id, clazz = Item2Tag::class)
+		tagIds.forEach {
+			val subVales = ContentValues().apply {
+				put("item_id", item.id)
 				put("tag_id", it)
 			}
 			powerSync.insert("item_tags", subVales, Item::class)

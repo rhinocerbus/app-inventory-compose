@@ -1,7 +1,10 @@
 package com.piledrive.inventory.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.piledrive.inventory.data.enums.SortOrder
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
@@ -14,6 +17,7 @@ import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.data.model.composite.ContentForLocation
+import com.piledrive.inventory.data.model.composite.ItemWithTags
 import com.piledrive.inventory.data.model.composite.StashForItem
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemStashesRepo
@@ -21,15 +25,14 @@ import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.LocationsRepo
 import com.piledrive.inventory.repo.QuantityUnitsRepo
 import com.piledrive.inventory.repo.TagsRepo
-import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinator
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_item_stash.CreateItemStashSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
+import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinator
 import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
-import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinatorImpl
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -39,7 +42,6 @@ import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
-import com.piledrive.lib_compose_components.ui.coordinators.MenuCoordinator
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -133,8 +135,8 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userLocationContentState.value = userLocationsContent
-						filterAppBarCoordinator.locationsDropdownCoordinator.udpateOptionsPool(flatLocations)
-						if(filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
+						filterAppBarCoordinator.locationsDropdownCoordinator.updateOptionsPool(flatLocations)
+						if (filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
 							filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
 						}
 					}
@@ -154,9 +156,15 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	fun addNewLocation(slug: LocationSlug) {
+	private fun addNewLocation(slug: LocationSlug) {
 		viewModelScope.launch {
 			locationsRepo.addLocation(slug)
+		}
+	}
+
+	private fun updateLocation(location: Location) {
+		viewModelScope.launch {
+			locationsRepo.updateLocation(location)
 		}
 	}
 
@@ -188,8 +196,8 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userTagsContentState.value = userTagsContent
-						filterAppBarCoordinator.tagsDropdownCoordinator.udpateOptionsPool(flatTags)
-						if(filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
+						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(flatTags)
+						if (filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
 							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
 						}
 					}
@@ -261,9 +269,15 @@ class MainViewModel @Inject constructor(
 	private val _itemsContentState = MutableStateFlow<ItemContentState>(itemsContent)
 	val itemsContentState: StateFlow<ItemContentState> = _itemsContentState
 
-	fun addNewItem(item: ItemSlug) {
+	private fun addNewItem(item: ItemSlug) {
 		viewModelScope.launch {
 			itemsRepo.addItem(item)
+		}
+	}
+
+	private fun updateItem(item: Item, tagIds: List<String>) {
+		viewModelScope.launch {
+			itemsRepo.updateItemWithTags(item, tagIds)
 		}
 	}
 
@@ -341,18 +355,6 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
-		itemsSource = itemsContentState,
-		unitsSource = quantityUnitsContentState,
-		locationsSource = userLocationContentState,
-		stashesSource = itemStashesContentState,
-		onCommitStashTransfer = { fromStash, toStash ->
-			viewModelScope.launch {
-				itemStashesRepo.performTransfer(fromStash, toStash)
-			}
-		}
-	)
-
 
 	/////////////////////////////////////////////////
 	//  endregion
@@ -405,15 +407,43 @@ class MainViewModel @Inject constructor(
 			stashesByLocationMap[currLocation.id] ?: listOf()
 		}
 
-		val filteredByTag = if (currTag.id == STATIC_ID_TAG_ALL) {
+		val unsortedByTag = if (currTag.id == STATIC_ID_TAG_ALL) {
 			stashesForLocation
 		} else {
 			stashesForLocation.filter { it.tags.contains(currTag) }
 		}
 
+		val sort = filterAppBarCoordinator.sortDropdownCoordinator.selectedOptionState.value ?: SortOrder.DEFAULT
+		val sortDesc = filterAppBarCoordinator.sortDescendingState.value
+		val sorted = when (sort) {
+			SortOrder.NAME -> {
+				if (sortDesc) {
+					unsortedByTag.sortedByDescending { it.item.name }
+				} else {
+					unsortedByTag.sortedBy { it.item.name }
+				}
+			}
+
+			SortOrder.LAST_ADDED -> {
+				if (sortDesc) {
+					unsortedByTag.sortedByDescending { it.stash.createdAt }
+				} else {
+					unsortedByTag.sortedBy { it.item.createdAt }
+				}
+			}
+
+			SortOrder.LAST_UPDATED -> {
+				if (sortDesc) {
+					unsortedByTag.sortedByDescending { it.item.name }
+				} else {
+					unsortedByTag.sortedBy { it.item.name }
+				}
+			}
+		}
+
 		val content = ContentForLocation(
 			currLocation.id,
-			currentLocationItemStashContent = filteredByTag
+			currentLocationItemStashContent = sorted
 		)
 		locationStashesContent = locationStashesContent.copy(
 			data = content
@@ -434,6 +464,9 @@ class MainViewModel @Inject constructor(
 		locationState = userLocationContentState,
 		onAddLocation = {
 			addNewLocation(it)
+		},
+		onUpdateLocation = {
+			updateLocation(it)
 		}
 	)
 
@@ -441,6 +474,12 @@ class MainViewModel @Inject constructor(
 		userTagsContentState,
 		onAddTag = {
 			addNewTag(it)
+		},
+		onUpdateTag = {
+			/*
+				no-op on this screen 
+				should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
+			 */
 		}
 	)
 
@@ -449,6 +488,7 @@ class MainViewModel @Inject constructor(
 		quantityContentState = quantityUnitsContentState,
 		tagsContentState = userTagsContentState,
 		onAddItem = { addNewItem(it) },
+		onUpdateItem = { item, tagIds -> updateItem(item, tagIds)},
 		onLaunchAddTag = { createTagCoordinator.showSheet() },
 		onLaunchAddUnit = { createQuantityUnitSheetCoordinator.showSheet() }
 	)
@@ -457,6 +497,9 @@ class MainViewModel @Inject constructor(
 		quantityUnitsContentState,
 		onAddQuantityUnit = {
 			addNewQuantityUnit(it)
+		},
+		onUpdateQuantityUnit = {
+			// no-op on this screen
 		}
 	)
 
@@ -475,6 +518,18 @@ class MainViewModel @Inject constructor(
 		}
 	)
 
+	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
+		itemsSource = itemsContentState,
+		unitsSource = quantityUnitsContentState,
+		locationsSource = userLocationContentState,
+		stashesSource = itemStashesContentState,
+		onCommitStashTransfer = { fromStash, toStash ->
+			viewModelScope.launch {
+				itemStashesRepo.performTransfer(fromStash, toStash)
+			}
+		}
+	)
+
 	val listContentCoordinator = MainContentListCoordinator(
 		locationStashesContentState,
 		locationState = userLocationContentState,
@@ -483,6 +538,9 @@ class MainViewModel @Inject constructor(
 		onItemStashQuantityUpdated = { stashId, qty ->
 			updateStashQuantity(stashId, qty)
 		},
+		onItemClicked = {
+			createItemCoordinator.showSheetForItem(ItemWithTags(it.item, it.tags, it.quantityUnit))
+		} ,
 		onStartStashTransfer = { item, locId ->
 			transferItemStashSheetCoordinator.showSheetForItem(item)
 		}
@@ -495,14 +553,35 @@ class MainViewModel @Inject constructor(
 			externalOnOptionSelected = {
 				it ?: return@ReadOnlyDropdownCoordinatorGeneric
 				changeLocation(it)
-			}
+			},
+			excludeSelected = true,
+			showSelectedState = false,
+			optionTextMutator = { "${it.name}" },
+			optionIdForSelectedCheck = { it.id }
 		),
 		tagsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
 			externalOnOptionSelected = {
 				it ?: return@ReadOnlyDropdownCoordinatorGeneric
 				changeTag(it)
-			}
+			},
+			excludeSelected = true,
+			showSelectedState = false,
+			optionTextMutator = { "${it.name}" },
+			optionIdForSelectedCheck = { it.id }
 		),
+		sortDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
+			selectedOptionState = mutableStateOf(SortOrder.DEFAULT),
+			dropdownOptionsState = mutableStateOf(SortOrder.entries),
+			externalOnOptionSelected = {
+				viewModelScope.launch {
+					rebuildItemsWithTags()
+				}
+			},
+			showSelectedState = true,
+			optionIdForSelectedCheck = { it.name },
+			optionTextMutator = { "${it.name}" }
+		),
+		sortDesc = false
 	)
 
 	/////////////////////////////////////////////////

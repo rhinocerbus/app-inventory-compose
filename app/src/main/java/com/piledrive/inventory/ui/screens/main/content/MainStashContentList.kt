@@ -204,7 +204,7 @@ object MainStashContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = {},
+					onClick = {coordinator.onItemClicked(stashForItem)},
 					onLongClick = { coordinator.itemMenuCoordinator.onShowMenuForItemId(stash.id) }
 				)
 				.fillMaxWidth()

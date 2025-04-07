@@ -80,7 +80,6 @@ object TransferItemStashModalSheet {
 							text = "From location"
 						)
 					},
-					selectionToValueMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
 				)
 
 				Gap(12.dp)
@@ -93,7 +92,6 @@ object TransferItemStashModalSheet {
 							text = "To location"
 						)
 					},
-					selectionToValueMutator = { "${it.location.name} (${it.stash.amount} ${it.quantityUnit.label})" },
 				)
 
 				Gap(16.dp)

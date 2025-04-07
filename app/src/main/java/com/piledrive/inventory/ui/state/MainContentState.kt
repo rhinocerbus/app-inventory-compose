@@ -8,7 +8,7 @@ import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
 import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.ContentForLocation
-import com.piledrive.inventory.data.model.composite.StashForItem
+import com.piledrive.inventory.data.model.composite.FullItemsContent
 
 
 //  region location filter
@@ -96,6 +96,19 @@ data class ItemStashContentState(
 
 data class LocalizedContentState(
 	override val data: ContentForLocation = ContentForLocation(),
+	override val hasLoaded: Boolean = false,
+	override val isLoading: Boolean = true
+) : GenericContentState()
+
+/////////////////////////////////////////////////
+//  endregion
+
+
+//  region by-location items content
+/////////////////////////////////////////////////
+
+data class FullItemsContentState(
+	override val data: FullItemsContent = FullItemsContent(),
 	override val hasLoaded: Boolean = false,
 	override val isLoading: Boolean = true
 ) : GenericContentState()

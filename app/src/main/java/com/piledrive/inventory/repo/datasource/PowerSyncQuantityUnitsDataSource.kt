@@ -53,4 +53,13 @@ class PowerSyncQuantityUnitsDataSource @Inject constructor(
 		}
 		powerSync.insert("units", values, QuantityUnit::class)
 	}
+
+	override suspend fun editQuantityUnit(unit: QuantityUnit) {
+		val values = ContentValues().apply {
+			put("name", unit.name)
+			put("label", unit.label)
+			put("type", unit.type.name)
+		}
+		powerSync.update("units", values, whereValue = unit.id, clazz = QuantityUnit::class)
+	}
 }

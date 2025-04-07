@@ -57,19 +57,30 @@ object CreateLocationModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateLocationModalSheetCoordinatorImpl,
 	) {
+		val activeLocation = coordinator.activeLocationState.value
+		val initialText = remember { activeLocation?.name ?: "" }
+
 		Surface(
 			modifier = Modifier
 				.fillMaxWidth()
 		) {
 			val formState = remember {
 				TextFormFieldState(
+					initialValue = initialText,
 					mainValidator = Validators.Required(errMsg = "Location name required"),
 					externalValidators = listOf(
 						Validators.Custom<String>(runCheck = { nameIn ->
-							coordinator.locationState.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } == null
+							val matchEdit = nameIn == activeLocation?.name
+							val matchExisting =
+								coordinator.locationState.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } != null
+							!matchExisting || matchEdit
 						}, "Location with that name exists")
 					)
-				)
+				).apply {
+					if(!initialText.isNullOrBlank()) {
+						this.check(initialText)
+					}
+				}
 			}
 
 			Row(
@@ -108,8 +119,13 @@ object CreateLocationModalSheet {
 								requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
 								form-level viewmodel, feels like clutter in the main VM
 						 */
-						val slug = LocationSlug(name = formState.currentValue)
-						coordinator.onAddLocation(slug)
+						if (activeLocation == null) {
+							val slug = LocationSlug(name = formState.currentValue)
+							coordinator.onAddLocation(slug)
+						} else {
+							val updatedLocation = activeLocation.copy(name = formState.currentValue)
+							coordinator.onUpdateLocation(updatedLocation)
+						}
 						coordinator.onDismiss()
 					}
 				) {
