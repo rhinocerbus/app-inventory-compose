@@ -23,7 +23,7 @@ import org.junit.Test
  * This provides both a smaller parameter footprint for composables and makes callbacks & state interactions testable without
  * actual UI testing.
  */
-class CoordinatorUnitTests {
+class ModalCoordinatorUnitTests {
 	@Test
 	fun item_modal_coordinator_display_state_tests() {
 		val coordinator = CreateItemSheetCoordinator(
