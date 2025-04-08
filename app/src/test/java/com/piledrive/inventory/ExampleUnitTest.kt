@@ -1,6 +1,8 @@
 package com.piledrive.inventory
 
-import org.junit.Assert.assertEquals
+import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
+import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import org.junit.Test
 
 /**
@@ -10,7 +12,23 @@ import org.junit.Test
  */
 class ExampleUnitTest {
 	@Test
-	fun addition_isCorrect() {
-		assertEquals(4, 2 + 2)
+	fun modal_coordinator_display_state_tests() {
+		val coordinator = CreateLocationModalSheetCoordinator(
+			locationState = previewLocationContentFlow(),
+			onAddLocation = {},
+			onUpdateLocation = {}
+		)
+		assert(!coordinator.showSheetState.value)
+		assert(coordinator.activeEditDataState.value == null)
+		coordinator.showSheet()
+		assert(coordinator.showSheetState.value)
+		assert(coordinator.activeEditDataState.value == null)
+		coordinator.onDismiss()
+		assert(!coordinator.showSheetState.value)
+		coordinator.showSheetWithData(Location(id = "", createdAt = "", name = ""))
+		assert(coordinator.showSheetState.value)
+		assert(coordinator.activeEditDataState.value != null)
+		coordinator.onDismiss()
+		assert(!coordinator.showSheetState.value)
 	}
 }
