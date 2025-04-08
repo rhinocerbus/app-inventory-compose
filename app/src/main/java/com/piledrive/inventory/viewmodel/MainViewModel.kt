@@ -184,10 +184,8 @@ class MainViewModel @Inject constructor(
 			withContext(Dispatchers.Default) {
 				tagsRepo.watchTags().collect {
 					Timber.d("Tags received: $it")
-					val flatTags = listOf(TagOptions.defaultTag, *it.toTypedArray())
-					userTagsContent = TagsContentState(
+					userTagsContent = userTagsContent.copy(
 						data = TagOptions(
-							allTags = flatTags,
 							userTags = it,
 							currentTag = userTagsContent.data.currentTag
 						),
@@ -196,7 +194,7 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userTagsContentState.value = userTagsContent
-						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(flatTags)
+						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(userTagsContent.data.allTags)
 						if (filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
 							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
 						}

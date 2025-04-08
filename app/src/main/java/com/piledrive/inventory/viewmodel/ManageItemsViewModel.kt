@@ -141,12 +141,9 @@ class ManageItemsViewModel @Inject constructor(
 			withContext(Dispatchers.Default) {
 				tagsRepo.watchTags().collect {
 					Timber.d("Tags received: $it")
-					val flatTags = listOf(TagOptions.defaultTag, *it.toTypedArray())
-					userTagsContent = TagsContentState(
+					userTagsContent = userTagsContent.copy(
 						data = TagOptions(
-							allTags = flatTags,
 							userTags = it,
-							currentTag = userTagsContent.data.currentTag
 						),
 						hasLoaded = true,
 						isLoading = false

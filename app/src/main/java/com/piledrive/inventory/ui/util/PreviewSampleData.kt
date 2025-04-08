@@ -3,6 +3,7 @@ package com.piledrive.inventory.ui.util
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.inventory.ui.state.ItemContentState
@@ -11,6 +12,7 @@ import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
+import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,8 +31,15 @@ fun previewLocationContentFlow(
 }
 
 fun previewTagsContentFlow(
+	tags: List<Tag> = listOf()
 ): StateFlow<TagsContentState> {
-	return MutableStateFlow(TagsContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(
+		TagsContentState(
+			data = TagOptions(userTags = tags),
+			hasLoaded = true,
+			isLoading = false
+		)
+	)
 }
 
 fun previewQuantityUnitsContentFlow(

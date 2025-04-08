@@ -38,10 +38,13 @@ data class LocationContentState(
 /////////////////////////////////////////////////
 
 data class TagOptions(
-	val allTags: List<Tag> = listOf(defaultTag),
 	val userTags: List<Tag> = listOf(),
 	val currentTag: Tag = defaultTag
 ) {
+
+	val allTags: List<Tag>
+		get() = listOf(defaultTag, *userTags.toTypedArray())
+
 	companion object {
 		val defaultTag = Tag(STATIC_ID_TAG_ALL, "", "Everything")
 	}
