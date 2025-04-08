@@ -41,7 +41,7 @@ object ManageLocationsScreen : NavRoute {
 	) {
 		drawContent(
 			viewModel.contentCoordinator,
-			viewModel.createLocationCoordinator,
+			viewModel.contentCoordinator.createLocationCoordinator,
 		)
 	}
 

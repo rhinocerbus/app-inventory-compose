@@ -2,14 +2,18 @@ package com.piledrive.inventory
 
 import com.piledrive.inventory.data.model.composite.FullItemsContent
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.screens.items.content.ManageItemsContentCoordinator
+import com.piledrive.inventory.ui.screens.locations.content.ManageLocationsContentCoordinator
 import com.piledrive.inventory.ui.screens.tags.content.ManageTagsContentCoordinator
+import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.util.previewFullItemsContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
+import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.inventory.ui.util.previewUnitsContentFlow
 import org.junit.Test
@@ -65,5 +69,27 @@ class ScreenContentCoordinatorUnitTests {
 		coordinator.onTagClicked(sampleTag)
 		assert(coordinator.createTagCoordinator.showSheetState.value)
 		assert(coordinator.createTagCoordinator.activeEditDataState.value == sampleTag)
+	}
+
+	@Test
+	fun manage_locations_coordinator_actions_tests() {
+		val sampleSet = LocationOptions.generateSampleSet()
+		val sampleSource = previewLocationContentFlow(sampleSet)
+		val coordinator = ManageLocationsContentCoordinator(
+			locationState = sampleSource,
+			createLocationCoordinator = CreateLocationModalSheetCoordinator(
+				locationState = sampleSource,
+				onAddLocation = {},
+				onUpdateLocation = {}
+			)
+		)
+		assert(coordinator.locationState.value.data.userLocations == sampleSet)
+		coordinator.onLaunchCreateLocation()
+		assert(coordinator.createLocationCoordinator.showSheetState.value)
+		assert(coordinator.createLocationCoordinator.activeEditDataState.value == null)
+		val sampleLocation = sampleSet[0]
+		coordinator.onLocationClicked(sampleLocation)
+		assert(coordinator.createLocationCoordinator.showSheetState.value)
+		assert(coordinator.createLocationCoordinator.activeEditDataState.value == sampleLocation)
 	}
 }

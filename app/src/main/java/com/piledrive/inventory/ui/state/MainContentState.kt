@@ -21,6 +21,12 @@ data class LocationOptions(
 ) {
 	companion object {
 		val defaultLocation = Location(STATIC_ID_LOCATION_ALL, "", "Everywhere")
+		fun generateSampleSet(): List<Location> {
+			return listOf(
+				Location(id = "0", createdAt = "0", name = "Fridge"),
+				Location(id = "1", createdAt = "1", name = "Freezer"),
+			)
+		}
 	}
 }
 

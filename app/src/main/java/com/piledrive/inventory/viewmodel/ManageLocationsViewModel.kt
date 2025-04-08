@@ -101,20 +101,17 @@ class ManageLocationsViewModel @Inject constructor(
 	//  region UI Coordinators
 	/////////////////////////////////////////////////
 
-	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
-		locationState = userLocationContentState,
-		onAddLocation = {
-			addNewLocation(it)
-		},
-		onUpdateLocation = {
-			updateLocation(it)
-		}
-	)
-
 	val contentCoordinator = ManageLocationsContentCoordinator(
 		locationState = userLocationContentState,
-		onLaunchCreateLocation = {createLocationCoordinator.showSheet()},
-		onLocationClicked = {createLocationCoordinator.showSheetWithData(it)},
+		createLocationCoordinator = CreateLocationModalSheetCoordinator(
+			locationState = userLocationContentState,
+			onAddLocation = {
+				addNewLocation(it)
+			},
+			onUpdateLocation = {
+				updateLocation(it)
+			}
+		)
 	)
 
 	/////////////////////////////////////////////////
