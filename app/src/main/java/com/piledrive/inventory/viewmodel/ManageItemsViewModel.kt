@@ -317,7 +317,7 @@ class ManageItemsViewModel @Inject constructor(
 	val contentCoordinator = ManageItemsContentCoordinator(
 		itemState = fullItemsContentState,
 		onLaunchCreateItem = { createItemCoordinator.showSheet() },
-		onItemClicked = { createItemCoordinator.showSheetForItem(it) },
+		onItemClicked = { createItemCoordinator.showSheetWithData(it) },
 	)
 
 	/////////////////////////////////////////////////

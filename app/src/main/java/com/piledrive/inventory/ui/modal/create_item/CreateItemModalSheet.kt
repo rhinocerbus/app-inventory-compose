@@ -50,12 +50,13 @@ object CreateItemModalSheet {
 		modifier: Modifier = Modifier,
 		coordinator: CreateItemSheetCoordinatorImpl,
 	) {
+		val activeItem = coordinator.activeEditDataState.value
 		var selectedQuantityUnitId: String? by remember {
-			val id = coordinator.activeItemState.value?.quantityUnit?.id
+			val id = activeItem?.quantityUnit?.id
 			mutableStateOf(id)
 		}
 		var selectedTagIds by remember {
-			val ids = coordinator.activeItemState.value?.tags?.map { it.id } ?: listOf<String>()
+			val ids = activeItem?.tags?.map { it.id } ?: listOf<String>()
 			mutableStateOf(ids)
 		}
 		/*
@@ -103,7 +104,7 @@ object CreateItemModalSheet {
 		val quantityUnitPool = coordinator.quantityContentState.collectAsState().value
 		val tagPool = coordinator.tagsContentState.collectAsState().value
 
-		val activeItem = coordinator.activeItemState.value
+		val activeItem = coordinator.activeEditDataState.value
 		val initialText = remember { activeItem?.item?.name ?: "" }
 
 		Surface(

@@ -118,7 +118,7 @@ class ManageTagsViewModel @Inject constructor(
 			createTagCoordinator.showSheet()
 		},
 		onTagClicked = {
-			createTagCoordinator.showSheetForTag(it)
+			createTagCoordinator.showSheetWithData(it)
 		}
 	)
 

@@ -57,7 +57,7 @@ object CreateLocationModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateLocationModalSheetCoordinatorImpl,
 	) {
-		val activeLocation = coordinator.activeLocationState.value
+		val activeLocation = coordinator.activeEditDataState.value
 		val initialText = remember { activeLocation?.name ?: "" }
 
 		Surface(

@@ -67,7 +67,7 @@ class ManageUnitsViewModel @Inject constructor(
 
 	private fun updateQuantityUnit(unit: QuantityUnit) {
 		viewModelScope.launch {
-			unitsRepo.editQuantityUnit(unit)
+			unitsRepo.updateQuantityUnit(unit)
 		}
 	}
 
@@ -107,7 +107,7 @@ class ManageUnitsViewModel @Inject constructor(
 	val contentCoordinator = ManageUnitsContentCoordinator(
 		unitState = unitsContentState,
 		onLaunchCreateUnit = { createQuantityUnitSheetCoordinator.showSheet() },
-		onUnitClicked = { createQuantityUnitSheetCoordinator.showSheetForUnit(it) }
+		onUnitClicked = { createQuantityUnitSheetCoordinator.showSheetWithData(it) }
 	)
 
 	/////////////////////////////////////////////////

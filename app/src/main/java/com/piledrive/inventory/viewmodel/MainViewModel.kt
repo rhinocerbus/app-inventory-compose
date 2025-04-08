@@ -539,7 +539,7 @@ class MainViewModel @Inject constructor(
 			updateStashQuantity(stashId, qty)
 		},
 		onItemClicked = {
-			createItemCoordinator.showSheetForItem(ItemWithTags(it.item, it.tags, it.quantityUnit))
+			createItemCoordinator.showSheetWithData(ItemWithTags(it.item, it.tags, it.quantityUnit))
 		} ,
 		onStartStashTransfer = { item, locId ->
 			transferItemStashSheetCoordinator.showSheetForItem(item)

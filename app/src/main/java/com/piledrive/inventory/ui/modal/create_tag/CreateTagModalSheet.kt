@@ -69,7 +69,7 @@ object CreateTagModalSheet {
 		coordinator: CreateTagSheetCoordinatorImpl,
 	) {
 		val tags = coordinator.tagsContentState.collectAsState().value
-		val activeTag = coordinator.activeTagState.value
+		val activeTag = coordinator.activeEditDataState.value
 		val initialText = remember { activeTag?.name ?: "" }
 
 		Surface(
