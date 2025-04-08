@@ -278,43 +278,36 @@ class ManageItemsViewModel @Inject constructor(
 	//  region UI Coordinators
 	/////////////////////////////////////////////////
 
-	val createItemCoordinator = CreateItemSheetCoordinator(
-		itemState = itemsContentState,
-		quantityContentState = quantityUnitsContentState,
-		tagsContentState = userTagsContentState,
-		onAddItem = { addNewItem(it) },
-		onUpdateItem = { item, tagIds -> updateItem(item, tagIds) },
-		onLaunchAddTag = { createTagCoordinator.showSheet() },
-		onLaunchAddUnit = { createQuantityUnitSheetCoordinator.showSheet() }
-	)
-
-	val createTagCoordinator = CreateTagSheetCoordinator(
-		userTagsContentState,
-		onAddTag = {
-			addNewTag(it)
-		},
-		onUpdateTag = {
-			/*
-				no-op on this screen
-				should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
-			 */
-		}
-	)
-
-	val createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-		quantityUnitsContentState,
-		onAddQuantityUnit = {
-			addNewQuantityUnit(it)
-		},
-		onUpdateQuantityUnit = {
-			// no-op on this screen
-		}
-	)
-
 	val contentCoordinator = ManageItemsContentCoordinator(
 		itemState = fullItemsContentState,
-		onLaunchCreateItem = { createItemCoordinator.showSheet() },
-		onItemClicked = { createItemCoordinator.showSheetWithData(it) },
+		createItemCoordinator = CreateItemSheetCoordinator(
+			itemState = itemsContentState,
+			quantityContentState = quantityUnitsContentState,
+			tagsContentState = userTagsContentState,
+			createTagCoordinator = CreateTagSheetCoordinator(
+				userTagsContentState,
+				onAddTag = {
+					addNewTag(it)
+				},
+				onUpdateTag = {
+					/*
+						no-op on this screen
+						should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
+					 */
+				}
+			),
+			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+				quantityUnitsContentState,
+				onAddQuantityUnit = {
+					addNewQuantityUnit(it)
+				},
+				onUpdateQuantityUnit = {
+					// no-op on this screen
+				},
+			),
+			onAddItem = { addNewItem(it) },
+			onUpdateItem = { item, tagIds -> updateItem(item, tagIds) },
+		),
 	)
 
 	/////////////////////////////////////////////////

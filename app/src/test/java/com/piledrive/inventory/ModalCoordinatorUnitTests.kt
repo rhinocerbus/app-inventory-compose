@@ -10,7 +10,9 @@ import com.piledrive.inventory.ui.modal.coordinators.EditableDataModalCoordinato
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
@@ -30,10 +32,10 @@ class ModalCoordinatorUnitTests {
 			itemState = previewItemsContentFlow(),
 			quantityContentState = previewQuantityUnitsContentFlow(),
 			tagsContentState = previewTagsContentFlow(),
+			createTagCoordinator = stubCreateTagSheetCoordinator,
+			createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
 			onAddItem = {},
 			onUpdateItem = { _, _ -> },
-			onLaunchAddUnit = {},
-			onLaunchAddTag = {},
 		)
 		val stubItem = ItemWithTags(
 			item = Item(id = "", createdAt = "", name = "", unitId = ""),

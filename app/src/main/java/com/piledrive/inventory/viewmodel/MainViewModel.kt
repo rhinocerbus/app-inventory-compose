@@ -468,37 +468,33 @@ class MainViewModel @Inject constructor(
 		}
 	)
 
-	val createTagCoordinator = CreateTagSheetCoordinator(
-		userTagsContentState,
-		onAddTag = {
-			addNewTag(it)
-		},
-		onUpdateTag = {
-			/*
-				no-op on this screen 
-				should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
-			 */
-		}
-	)
-
 	val createItemCoordinator = CreateItemSheetCoordinator(
 		itemState = itemsContentState,
 		quantityContentState = quantityUnitsContentState,
 		tagsContentState = userTagsContentState,
+		createTagCoordinator = CreateTagSheetCoordinator(
+			userTagsContentState,
+			onAddTag = {
+				addNewTag(it)
+			},
+			onUpdateTag = {
+				/*
+					no-op on this screen
+					should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
+				 */
+			}
+		),
+		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+			quantityUnitsContentState,
+			onAddQuantityUnit = {
+				addNewQuantityUnit(it)
+			},
+			onUpdateQuantityUnit = {
+				// no-op on this screen
+			}
+		),
 		onAddItem = { addNewItem(it) },
 		onUpdateItem = { item, tagIds -> updateItem(item, tagIds)},
-		onLaunchAddTag = { createTagCoordinator.showSheet() },
-		onLaunchAddUnit = { createQuantityUnitSheetCoordinator.showSheet() }
-	)
-
-	val createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-		quantityUnitsContentState,
-		onAddQuantityUnit = {
-			addNewQuantityUnit(it)
-		},
-		onUpdateQuantityUnit = {
-			// no-op on this screen
-		}
 	)
 
 	val createItemStashCoordinator = CreateItemStashSheetCoordinator(

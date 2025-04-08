@@ -1,12 +1,17 @@
 package com.piledrive.inventory
 
+import com.piledrive.inventory.data.model.composite.FullItemsContent
+import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.screens.items.content.ManageItemsContentCoordinator
 import com.piledrive.inventory.ui.screens.tags.content.ManageTagsContentCoordinator
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.util.previewFullItemsContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
+import com.piledrive.inventory.ui.util.previewUnitsContentFlow
 import org.junit.Test
 
 /**
@@ -15,6 +20,31 @@ import org.junit.Test
  * actual UI testing.
  */
 class ScreenContentCoordinatorUnitTests {
+	@Test
+	fun manage_items_coordinator_actions_tests() {
+		val sampleData = FullItemsContent.generateSampleSet()
+		val coordinator = ManageItemsContentCoordinator(
+			itemState = previewFullItemsContentFlow(sampleData),
+			createItemCoordinator = CreateItemSheetCoordinator(
+				itemState = previewItemsContentFlow(),
+				quantityContentState = previewUnitsContentFlow(),
+				tagsContentState = previewTagsContentFlow(),
+				createTagCoordinator = stubCreateTagSheetCoordinator,
+				createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
+				onAddItem = {},
+				onUpdateItem = { _, _ -> }
+			),
+		)
+
+		assert(coordinator.itemState.value.data.fullItems == sampleData.fullItems)
+		coordinator.onLaunchCreateItem()
+		assert(coordinator.createItemCoordinator.showSheetState.value)
+		assert(coordinator.createItemCoordinator.activeEditDataState.value == null)
+		val targetItem = sampleData.fullItems[0]
+		coordinator.onItemClicked(targetItem)
+		assert(coordinator.createItemCoordinator.showSheetState.value)
+		assert(coordinator.createItemCoordinator.activeEditDataState.value == targetItem)
+	}
 
 	@Test
 	fun manage_tags_coordinator_actions_tests() {

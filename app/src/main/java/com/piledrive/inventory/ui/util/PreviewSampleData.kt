@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.ContentForLocation
+import com.piledrive.inventory.data.model.composite.FullItemsContent
+import com.piledrive.inventory.data.model.composite.ItemWithTags
 import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
@@ -58,8 +60,9 @@ fun previewUnitsContentFlow(
 }
 
 fun previewFullItemsContentFlow(
+	dataSet: FullItemsContent = FullItemsContent.generateSampleSet()
 ): StateFlow<FullItemsContentState> {
-	return MutableStateFlow(FullItemsContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(FullItemsContentState(data = dataSet, hasLoaded = true, isLoading = false))
 }
 
 fun previewItemStashesContentFlow(

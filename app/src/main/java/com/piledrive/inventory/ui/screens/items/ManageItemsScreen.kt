@@ -41,7 +41,7 @@ object ManageItemsScreen : NavRoute {
 	) {
 		drawContent(
 			viewModel.contentCoordinator,
-			viewModel.createItemCoordinator,
+			viewModel.contentCoordinator.createItemCoordinator,
 		)
 	}
 
