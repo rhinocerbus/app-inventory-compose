@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.composite.ItemWithTags
+import com.piledrive.inventory.ui.modal.coordinators.EditableDataModalCoordinatorImpl
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagsContentState
@@ -17,8 +18,7 @@ import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinato
 import kotlinx.coroutines.flow.StateFlow
 
 
-interface CreateItemSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
-	val activeItemState: State<ItemWithTags?>
+interface CreateItemSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDataModalCoordinatorImpl<ItemWithTags> {
 	val itemState: StateFlow<ItemContentState>
 	val quantityContentState: StateFlow<QuantityUnitContentState>
 	val tagsContentState: StateFlow<TagsContentState>
@@ -26,7 +26,6 @@ interface CreateItemSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
 	val onUpdateItem: (item: Item, tagIds: List<String>) -> Unit
 	val onLaunchAddTag: () -> Unit
 	val onLaunchAddUnit: () -> Unit
-	fun showSheetForItem(item: ItemWithTags)
 }
 
 class CreateItemSheetCoordinator(
@@ -39,22 +38,22 @@ class CreateItemSheetCoordinator(
 	override val onLaunchAddUnit: () -> Unit
 ) : ModalSheetCoordinator(), CreateItemSheetCoordinatorImpl {
 
-	private val _activeItemState: MutableState<ItemWithTags?> = mutableStateOf(null)
-	override val activeItemState: State<ItemWithTags?> = _activeItemState
+	private val _activeEditDataState: MutableState<ItemWithTags?> = mutableStateOf(null)
+	override val activeEditDataState: State<ItemWithTags?> = _activeEditDataState
 
-	override fun showSheetForItem(item: ItemWithTags) {
-		_activeItemState.value = item
+	override fun showSheetWithData(item: ItemWithTags) {
+		_activeEditDataState.value = item
 		_showSheetState.value = true
 	}
 
 	override fun showSheet() {
-		_activeItemState.value = null
+		_activeEditDataState.value = null
 		super.showSheet()
 	}
 }
 
 val stubCreateItemSheetCoordinator = object : CreateItemSheetCoordinatorImpl {
-	override val activeItemState: State<ItemWithTags?> = mutableStateOf(null)
+	override val activeEditDataState: State<ItemWithTags?> = mutableStateOf(null)
 	override val itemState: StateFlow<ItemContentState> = previewItemsContentFlow()
 	override val quantityContentState: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
 	override val tagsContentState: StateFlow<TagsContentState> = previewTagsContentFlow()
@@ -68,7 +67,7 @@ val stubCreateItemSheetCoordinator = object : CreateItemSheetCoordinatorImpl {
 	override fun showSheet() {
 	}
 
-	override fun showSheetForItem(item: ItemWithTags) {}
+	override fun showSheetWithData(item: ItemWithTags) {}
 
 	override fun onDismiss() {
 	}

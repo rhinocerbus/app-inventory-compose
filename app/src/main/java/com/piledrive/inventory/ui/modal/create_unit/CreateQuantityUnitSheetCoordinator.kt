@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.piledrive.inventory.data.model.QuantityType
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
+import com.piledrive.inventory.ui.modal.coordinators.EditableDataModalCoordinatorImpl
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
 import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinator
@@ -13,18 +14,16 @@ import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinato
 import kotlinx.coroutines.flow.StateFlow
 
 
-interface CreateQuantityUnitSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
-	val activeUnitState: State<QuantityUnit?>
+interface CreateQuantityUnitSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDataModalCoordinatorImpl<QuantityUnit> {
 	val selectedMeasurementState: State<QuantityType>
 	val unitsContentState: StateFlow<QuantityUnitContentState>
 	val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit
 	val onUpdateQuantityUnit: (unit: QuantityUnit) -> Unit
 	fun changeSelectedType(type: QuantityType)
-	fun showSheetForUnit(unit: QuantityUnit)
 }
 
 val stubCreateQuantityUnitSheetCoordinator = object : CreateQuantityUnitSheetCoordinatorImpl {
-	override val activeUnitState: State<QuantityUnit?> = mutableStateOf(null)
+	override val activeEditDataState: State<QuantityUnit?> = mutableStateOf(null)
 	override val selectedMeasurementState: State<QuantityType> = mutableStateOf(QuantityType.WHOLE)
 	override val unitsContentState: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
 	override val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit = {}
@@ -32,7 +31,7 @@ val stubCreateQuantityUnitSheetCoordinator = object : CreateQuantityUnitSheetCoo
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
 	override fun changeSelectedType(type: QuantityType) {}
 	override fun showSheet() {}
-	override fun showSheetForUnit(unit: QuantityUnit) {}
+	override fun showSheetWithData(unit: QuantityUnit) {}
 	override fun onDismiss() {}
 }
 
@@ -49,16 +48,16 @@ class CreateQuantityUnitSheetCoordinator(
 		_selectedMeasurementState.value = type
 	}
 
-	private val _activeUnitState: MutableState<QuantityUnit?> = mutableStateOf(null)
-	override val activeUnitState: State<QuantityUnit?> = _activeUnitState
+	private val _activeEditDataState: MutableState<QuantityUnit?> = mutableStateOf(null)
+	override val activeEditDataState: State<QuantityUnit?> = _activeEditDataState
 
-	override fun showSheetForUnit(unit: QuantityUnit) {
-		_activeUnitState.value = unit
+	override fun showSheetWithData(unit: QuantityUnit) {
+		_activeEditDataState.value = unit
 		_showSheetState.value = true
 	}
 
 	override fun showSheet() {
-		_activeUnitState.value = null
+		_activeEditDataState.value = null
 		super.showSheet()
 	}
 }
