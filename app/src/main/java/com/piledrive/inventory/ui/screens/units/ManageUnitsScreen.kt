@@ -41,7 +41,7 @@ object ManageUnitsScreen : NavRoute {
 	) {
 		drawContent(
 			viewModel.contentCoordinator,
-			viewModel.createQuantityUnitSheetCoordinator,
+			viewModel.contentCoordinator.createQuantityUnitSheetCoordinator,
 		)
 	}
 

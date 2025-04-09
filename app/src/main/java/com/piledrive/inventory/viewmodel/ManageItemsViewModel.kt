@@ -191,7 +191,7 @@ class ManageItemsViewModel @Inject constructor(
 				quantityUnitsRepo.watchQuantityUnits().collect {
 					Timber.d("Units received: $it")
 					quantityUnitsContent = quantityUnitsContent.copy(
-						data = quantityUnitsContent.data.copy(allUnits = QuantityUnit.defaultSet + it)
+						data = quantityUnitsContent.data.copy(customUnits = it)
 					)
 					withContext(Dispatchers.Main) {
 						_quantityUnitsContentState.value = quantityUnitsContent

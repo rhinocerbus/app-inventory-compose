@@ -5,10 +5,12 @@ import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.screens.items.content.ManageItemsContentCoordinator
 import com.piledrive.inventory.ui.screens.locations.content.ManageLocationsContentCoordinator
 import com.piledrive.inventory.ui.screens.tags.content.ManageTagsContentCoordinator
+import com.piledrive.inventory.ui.screens.units.content.ManageUnitsContentCoordinator
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.util.previewFullItemsContentFlow
@@ -91,5 +93,27 @@ class ScreenContentCoordinatorUnitTests {
 		coordinator.onLocationClicked(sampleLocation)
 		assert(coordinator.createLocationCoordinator.showSheetState.value)
 		assert(coordinator.createLocationCoordinator.activeEditDataState.value == sampleLocation)
+	}
+
+	@Test
+	fun manage_units_coordinator_actions_tests() {
+		val sampleSource = previewUnitsContentFlow()
+		val sampleSet = sampleSource.value.data.allUnits
+		val coordinator = ManageUnitsContentCoordinator(
+			unitState = sampleSource,
+			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+				unitsContentState = sampleSource,
+				onAddQuantityUnit = {},
+				onUpdateQuantityUnit = {}
+			),
+		)
+		assert(coordinator.unitState.value.data.allUnits == sampleSet)
+		coordinator.onLaunchCreateUnit()
+		assert(coordinator.createQuantityUnitSheetCoordinator.showSheetState.value)
+		assert(coordinator.createQuantityUnitSheetCoordinator.activeEditDataState.value == null)
+		val sampleUnit = sampleSet[0]
+		coordinator.onUnitClicked(sampleUnit)
+		assert(coordinator.createQuantityUnitSheetCoordinator.showSheetState.value)
+		assert(coordinator.createQuantityUnitSheetCoordinator.activeEditDataState.value == sampleUnit)
 	}
 }

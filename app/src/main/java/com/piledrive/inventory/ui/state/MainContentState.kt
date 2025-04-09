@@ -70,8 +70,11 @@ data class TagsContentState(
 /////////////////////////////////////////////////
 
 data class QuantityUnitOptions(
-	val allUnits: List<QuantityUnit> = QuantityUnit.defaultSet,
-)
+	val customUnits: List<QuantityUnit> = listOf()
+) {
+	val allUnits: List<QuantityUnit>
+		get() = QuantityUnit.defaultSet + customUnits
+}
 
 data class QuantityUnitContentState(
 	override val data: QuantityUnitOptions = QuantityUnitOptions(),

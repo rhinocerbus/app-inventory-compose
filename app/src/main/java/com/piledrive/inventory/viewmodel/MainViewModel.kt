@@ -245,7 +245,7 @@ class MainViewModel @Inject constructor(
 				quantityUnitsRepo.watchQuantityUnits().collect {
 					Timber.d("Units received: $it")
 					quantityUnitsContent = quantityUnitsContent.copy(
-						data = quantityUnitsContent.data.copy(allUnits = QuantityUnit.defaultSet + it)
+						data = quantityUnitsContent.data.copy(customUnits = it)
 					)
 					withContext(Dispatchers.Main) {
 						_quantityUnitsContentState.value = quantityUnitsContent
@@ -494,7 +494,7 @@ class MainViewModel @Inject constructor(
 			}
 		),
 		onAddItem = { addNewItem(it) },
-		onUpdateItem = { item, tagIds -> updateItem(item, tagIds)},
+		onUpdateItem = { item, tagIds -> updateItem(item, tagIds) },
 	)
 
 	val createItemStashCoordinator = CreateItemStashSheetCoordinator(
@@ -534,7 +534,7 @@ class MainViewModel @Inject constructor(
 		},
 		onItemClicked = {
 			createItemCoordinator.showSheetWithData(ItemWithTags(it.item, it.tags, it.quantityUnit))
-		} ,
+		},
 		onStartStashTransfer = { item, locId ->
 			transferItemStashSheetCoordinator.showSheetForItem(item)
 		}

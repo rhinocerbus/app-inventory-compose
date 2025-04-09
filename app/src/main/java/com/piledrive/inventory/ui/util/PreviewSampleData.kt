@@ -3,10 +3,10 @@ package com.piledrive.inventory.ui.util
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.FullItemsContent
-import com.piledrive.inventory.data.model.composite.ItemWithTags
 import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
@@ -14,6 +14,7 @@ import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
+import com.piledrive.inventory.ui.state.QuantityUnitOptions
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,8 +56,9 @@ fun previewItemsContentFlow(
 }
 
 fun previewUnitsContentFlow(
+	units: List<QuantityUnit> = listOf()
 ): StateFlow<QuantityUnitContentState> {
-	return MutableStateFlow(QuantityUnitContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(QuantityUnitContentState(data = QuantityUnitOptions(units), hasLoaded = true, isLoading = false))
 }
 
 fun previewFullItemsContentFlow(
