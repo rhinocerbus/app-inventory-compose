@@ -22,18 +22,17 @@ import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdow
 import kotlinx.coroutines.flow.StateFlow
 
 interface TransferItemStashSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
-	val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
-	val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
+	val stashesSourceFlow: StateFlow<ItemStashContentState>
+	val itemsSourceFlow: StateFlow<ItemContentState>
+	val locationsSourceFlow: StateFlow<LocationContentState>
+	val unitsSourceFlow: StateFlow<QuantityUnitContentState>
 
 	val activeItemState: State<Item?>
 	val amountDifference: State<Double>
 	val modifiedAmount: State<Double>
 
-	// going back to data sources since any changes to data loading being external is annoying and feels messy
-	val stashesSourceFlow: StateFlow<ItemStashContentState>
-	val itemsSourceFlow: StateFlow<ItemContentState>
-	val locationsSourceFlow: StateFlow<LocationContentState>
-	val unitsSourceFlow: StateFlow<QuantityUnitContentState>
+	val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
+	val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
 
 	val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit
 
