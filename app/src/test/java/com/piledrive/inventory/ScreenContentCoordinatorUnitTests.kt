@@ -38,16 +38,16 @@ class ScreenContentCoordinatorUnitTests {
 				createTagCoordinator = stubCreateTagSheetCoordinator,
 				createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
 				onCreateDataModel = {},
-				onUpdateDataModel = { _, _ -> }
+				onUpdateDataModel = {}
 			),
 		)
 
 		assert(coordinator.itemState.value.data.fullItems == sampleData.fullItems)
-		coordinator.onLaunchCreateItem()
+		coordinator.onLaunchDataModelCreation()
 		assert(coordinator.createItemCoordinator.showSheetState.value)
 		assert(coordinator.createItemCoordinator.activeEditDataState.value == null)
 		val targetItem = sampleData.fullItems[0]
-		coordinator.onItemClicked(targetItem)
+		coordinator.onDataModelSelected(targetItem)
 		assert(coordinator.createItemCoordinator.showSheetState.value)
 		assert(coordinator.createItemCoordinator.activeEditDataState.value == targetItem)
 	}
@@ -65,10 +65,10 @@ class ScreenContentCoordinatorUnitTests {
 			)
 		)
 		assert(coordinator.tagState.value.data.userTags == sampleTags)
-		coordinator.onLaunchCreateTag()
+		coordinator.onLaunchDataModelCreation()
 		assert(coordinator.createTagCoordinator.showSheetState.value)
 		assert(coordinator.createTagCoordinator.activeEditDataState.value == null)
-		coordinator.onTagClicked(sampleTag)
+		coordinator.onDataModelSelected(sampleTag)
 		assert(coordinator.createTagCoordinator.showSheetState.value)
 		assert(coordinator.createTagCoordinator.activeEditDataState.value == sampleTag)
 	}
@@ -86,11 +86,11 @@ class ScreenContentCoordinatorUnitTests {
 			)
 		)
 		assert(coordinator.locationState.value.data.userLocations == sampleSet)
-		coordinator.onLaunchCreateLocation()
+		coordinator.onLaunchDataModelCreation()
 		assert(coordinator.createLocationCoordinator.showSheetState.value)
 		assert(coordinator.createLocationCoordinator.activeEditDataState.value == null)
 		val sampleLocation = sampleSet[0]
-		coordinator.onLocationClicked(sampleLocation)
+		coordinator.onDataModelSelected(sampleLocation)
 		assert(coordinator.createLocationCoordinator.showSheetState.value)
 		assert(coordinator.createLocationCoordinator.activeEditDataState.value == sampleLocation)
 	}
@@ -108,11 +108,11 @@ class ScreenContentCoordinatorUnitTests {
 			),
 		)
 		assert(coordinator.unitState.value.data.allUnits == sampleSet)
-		coordinator.onLaunchCreateUnit()
+		coordinator.onLaunchDataModelCreation()
 		assert(coordinator.createQuantityUnitSheetCoordinator.showSheetState.value)
 		assert(coordinator.createQuantityUnitSheetCoordinator.activeEditDataState.value == null)
 		val sampleUnit = sampleSet[0]
-		coordinator.onUnitClicked(sampleUnit)
+		coordinator.onDataModelSelected(sampleUnit)
 		assert(coordinator.createQuantityUnitSheetCoordinator.showSheetState.value)
 		assert(coordinator.createQuantityUnitSheetCoordinator.activeEditDataState.value == sampleUnit)
 	}

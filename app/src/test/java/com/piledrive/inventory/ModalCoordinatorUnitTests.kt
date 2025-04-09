@@ -5,6 +5,8 @@ import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.QuantityType
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.Tag
+import com.piledrive.inventory.data.model.abstracts.FullDataModel
+import com.piledrive.inventory.data.model.abstracts.SlugDataModel
 import com.piledrive.inventory.data.model.composite.ItemWithTags
 import com.piledrive.inventory.ui.modal.coordinators.EditableDataModalCoordinatorImpl
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
@@ -35,7 +37,7 @@ class ModalCoordinatorUnitTests {
 			createTagCoordinator = stubCreateTagSheetCoordinator,
 			createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
 			onCreateDataModel = {},
-			onUpdateDataModel = { _, _ -> },
+			onUpdateDataModel = {},
 		)
 		val stubItem = ItemWithTags(
 			item = Item(id = "", createdAt = "", name = "", unitId = ""),
@@ -78,9 +80,9 @@ class ModalCoordinatorUnitTests {
 		generic_modal_coordinator_display_state_tests(coordinator, coordinator, stubLocation)
 	}
 
-	private fun <T> generic_modal_coordinator_display_state_tests(
+	private fun <T : FullDataModel, U : SlugDataModel> generic_modal_coordinator_display_state_tests(
 		modalCoordinator: ModalSheetCoordinator,
-		editableDataModalCoordinatorImpl: EditableDataModalCoordinatorImpl<T>,
+		editableDataModalCoordinatorImpl: EditableDataModalCoordinatorImpl<T, U>,
 		stubData: T
 	) {
 		assert(modalCoordinator == editableDataModalCoordinatorImpl)

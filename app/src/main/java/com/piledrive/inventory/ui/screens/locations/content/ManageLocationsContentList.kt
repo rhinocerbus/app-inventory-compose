@@ -61,7 +61,7 @@ object ManageLocationsContentList {
 							"no locations"
 						)
 						Button(onClick = {
-							coordinator.onLaunchCreateLocation()
+							coordinator.onLaunchDataModelCreation()
 						}) {
 							Text("add location")
 						}
@@ -119,7 +119,7 @@ object ManageLocationsContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = { coordinator.onLocationClicked(location) },
+					onClick = { coordinator.onDataModelSelected(location) },
 					onLongClick = { }
 				)
 				.fillMaxWidth()

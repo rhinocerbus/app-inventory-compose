@@ -1,4 +1,8 @@
 package com.piledrive.inventory.ui.screens.coordinators
 
-interface ManageDataScreenImpl {
+import com.piledrive.inventory.data.model.abstracts.FullDataModel
+
+interface ManageDataScreenImpl<T : FullDataModel> {
+	val onLaunchDataModelCreation: () -> Unit
+	val onDataModelSelected: (data: T) -> Unit
 }

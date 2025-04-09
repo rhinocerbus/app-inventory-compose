@@ -61,7 +61,7 @@ object ManageUnitsContentList {
 							"no units"
 						)
 						Button(onClick = {
-							coordinator.onLaunchCreateUnit()
+							coordinator.onLaunchDataModelCreation()
 						}) {
 							Text("add unit")
 						}
@@ -119,7 +119,7 @@ object ManageUnitsContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = { coordinator.onUnitClicked(unit) },
+					onClick = { coordinator.onDataModelSelected(unit) },
 					onLongClick = { }
 				)
 				.fillMaxWidth()

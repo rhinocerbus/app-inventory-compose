@@ -22,10 +22,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.composite.ItemWithTags
 import com.piledrive.inventory.ui.state.FullItemsContentState
-import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 
@@ -66,7 +64,7 @@ object ManageItemsContentList {
 							"no items"
 						)
 						Button(onClick = {
-							coordinator.onLaunchCreateItem()
+							coordinator.onLaunchDataModelCreation()
 						}) {
 							Text("add item")
 						}
@@ -128,7 +126,7 @@ object ManageItemsContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = { coordinator.onItemClicked(fullItem) },
+					onClick = { coordinator.onDataModelSelected(fullItem) },
 					onLongClick = { }
 				)
 				.fillMaxWidth()
