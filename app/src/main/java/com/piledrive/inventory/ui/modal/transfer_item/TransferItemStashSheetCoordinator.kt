@@ -30,10 +30,10 @@ interface TransferItemStashSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
 	val modifiedAmount: State<Double>
 
 	// going back to data sources since any changes to data loading being external is annoying and feels messy
-	val stashesSource: StateFlow<ItemStashContentState>
-	val itemsSource: StateFlow<ItemContentState>
-	val locationsSource: StateFlow<LocationContentState>
-	val unitsSource: StateFlow<QuantityUnitContentState>
+	val stashesSourceFlow: StateFlow<ItemStashContentState>
+	val itemsSourceFlow: StateFlow<ItemContentState>
+	val locationsSourceFlow: StateFlow<LocationContentState>
+	val unitsSourceFlow: StateFlow<QuantityUnitContentState>
 
 	val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit
 
@@ -53,10 +53,10 @@ val stubTransferItemStashSheetCoordinator = object : TransferItemStashSheetCoord
 	override val amountDifference: State<Double> = mutableDoubleStateOf(0.0)
 	override val modifiedAmount: State<Double> = mutableDoubleStateOf(-1.0)
 
-	override val stashesSource: StateFlow<ItemStashContentState> = previewItemStashesContentFlow()
-	override val itemsSource: StateFlow<ItemContentState> = previewItemsContentFlow()
-	override val locationsSource: StateFlow<LocationContentState> = previewLocationContentFlow()
-	override val unitsSource: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
+	override val stashesSourceFlow: StateFlow<ItemStashContentState> = previewItemStashesContentFlow()
+	override val itemsSourceFlow: StateFlow<ItemContentState> = previewItemsContentFlow()
+	override val locationsSourceFlow: StateFlow<LocationContentState> = previewLocationContentFlow()
+	override val unitsSourceFlow: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
 
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
 	override fun showSheet() {}
@@ -77,10 +77,10 @@ class TransferItemStashSheetCoordinator(
 	initialAmountDifferenceValue: Double = 0.0,
 	initialModifiedAmountValue: Double = -1.0,
 
-	override val itemsSource: StateFlow<ItemContentState>,
-	override val unitsSource: StateFlow<QuantityUnitContentState>,
-	override val locationsSource: StateFlow<LocationContentState>,
-	override val stashesSource: StateFlow<ItemStashContentState>,
+	override val itemsSourceFlow: StateFlow<ItemContentState>,
+	override val unitsSourceFlow: StateFlow<QuantityUnitContentState>,
+	override val locationsSourceFlow: StateFlow<LocationContentState>,
+	override val stashesSourceFlow: StateFlow<ItemStashContentState>,
 
 	override val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit = { _, _ -> }
 ) : ModalSheetCoordinator(), TransferItemStashSheetCoordinatorImpl {
@@ -135,10 +135,10 @@ class TransferItemStashSheetCoordinator(
 	}
 
 	private fun reload(itemId: String) {
-		val items = itemsSource.value.data.items
-		val quantityUnits = unitsSource.value.data.allUnits
-		val stashes = stashesSource.value.data.itemStashes
-		val locations = locationsSource.value.data.userLocations
+		val items = itemsSourceFlow.value.data.items
+		val quantityUnits = unitsSourceFlow.value.data.allUnits
+		val stashes = stashesSourceFlow.value.data.itemStashes
+		val locations = locationsSourceFlow.value.data.userLocations
 
 		val rootItem = items.firstOrNull { it.id == itemId } ?: throw IllegalStateException("no item by given id")
 		val withUnit = quantityUnits.firstOrNull { it.id == rootItem.unitId } ?: throw IllegalStateException("no unit for item")

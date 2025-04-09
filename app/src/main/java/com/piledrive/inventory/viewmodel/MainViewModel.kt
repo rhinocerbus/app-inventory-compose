@@ -458,7 +458,7 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
-		locationState = userLocationContentState,
+		locationsSourceFlow = userLocationContentState,
 		onCreateDataModel = {
 			addNewLocation(it)
 		},
@@ -468,9 +468,9 @@ class MainViewModel @Inject constructor(
 	)
 
 	val createItemCoordinator = CreateItemSheetCoordinator(
-		itemState = itemsContentState,
-		quantityContentState = quantityUnitsContentState,
-		tagsContentState = userTagsContentState,
+		itemsSourceFlow = itemsContentState,
+		unitsSourceFlow = quantityUnitsContentState,
+		tagsSourceFlow = userTagsContentState,
 		createTagCoordinator = CreateTagSheetCoordinator(
 			userTagsContentState,
 			onCreateDataModel = {
@@ -512,10 +512,10 @@ class MainViewModel @Inject constructor(
 	)
 
 	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
-		itemsSource = itemsContentState,
-		unitsSource = quantityUnitsContentState,
-		locationsSource = userLocationContentState,
-		stashesSource = itemStashesContentState,
+		itemsSourceFlow = itemsContentState,
+		unitsSourceFlow = quantityUnitsContentState,
+		locationsSourceFlow = userLocationContentState,
+		stashesSourceFlow = itemStashesContentState,
 		onCommitStashTransfer = { fromStash, toStash ->
 			viewModelScope.launch {
 				itemStashesRepo.performTransfer(fromStash, toStash)

@@ -32,9 +32,9 @@ class ScreenContentCoordinatorUnitTests {
 		val coordinator = ManageItemsContentCoordinator(
 			itemState = previewFullItemsContentFlow(sampleData),
 			createItemCoordinator = CreateItemSheetCoordinator(
-				itemState = previewItemsContentFlow(),
-				quantityContentState = previewUnitsContentFlow(),
-				tagsContentState = previewTagsContentFlow(),
+				itemsSourceFlow = previewItemsContentFlow(),
+				unitsSourceFlow = previewUnitsContentFlow(),
+				tagsSourceFlow = previewTagsContentFlow(),
 				createTagCoordinator = stubCreateTagSheetCoordinator,
 				createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
 				onCreateDataModel = {},
@@ -78,14 +78,14 @@ class ScreenContentCoordinatorUnitTests {
 		val sampleSet = LocationOptions.generateSampleSet()
 		val sampleSource = previewLocationContentFlow(sampleSet)
 		val coordinator = ManageLocationsContentCoordinator(
-			locationState = sampleSource,
+			locationsSourceFlow = sampleSource,
 			createLocationCoordinator = CreateLocationModalSheetCoordinator(
-				locationState = sampleSource,
+				locationsSourceFlow = sampleSource,
 				onCreateDataModel = {},
 				onUpdateDataModel = {}
 			)
 		)
-		assert(coordinator.locationState.value.data.userLocations == sampleSet)
+		assert(coordinator.locationsSourceFlow.value.data.userLocations == sampleSet)
 		coordinator.onLaunchDataModelCreation()
 		assert(coordinator.createLocationCoordinator.showSheetState.value)
 		assert(coordinator.createLocationCoordinator.activeEditDataState.value == null)
@@ -102,7 +102,7 @@ class ScreenContentCoordinatorUnitTests {
 		val coordinator = ManageUnitsContentCoordinator(
 			unitState = sampleSource,
 			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-				unitsContentState = sampleSource,
+				unitsSourceFlow = sampleSource,
 				onCreateDataModel = {},
 				onUpdateDataModel = {}
 			),

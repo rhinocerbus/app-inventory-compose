@@ -67,7 +67,7 @@ object CreateTagModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateTagSheetCoordinatorImpl,
 	) {
-		val tags = coordinator.tagsContentState.collectAsState().value
+		val tags = coordinator.tagsSourceFlow.collectAsState().value
 		val activeTag = coordinator.activeEditDataState.value
 		val initialText = remember { activeTag?.name ?: "" }
 

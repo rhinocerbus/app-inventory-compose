@@ -72,7 +72,7 @@ object CreateLocationModalSheet {
 						Validators.Custom<String>(runCheck = { nameIn ->
 							val matchEdit = nameIn == activeLocation?.name
 							val matchExisting =
-								coordinator.locationState.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } != null
+								coordinator.locationsSourceFlow.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } != null
 							!matchExisting || matchEdit
 						}, "Location with that name exists")
 					)

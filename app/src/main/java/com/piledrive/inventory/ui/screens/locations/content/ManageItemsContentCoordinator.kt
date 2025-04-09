@@ -9,19 +9,19 @@ import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface ManageLocationsContentCoordinatorImpl : ManageDataScreenImpl<Location> {
-	val locationState: StateFlow<LocationContentState>
+	val locationsSourceFlow: StateFlow<LocationContentState>
 	val createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl
 }
 
 val stubManageLocationsContentCoordinator = object : ManageLocationsContentCoordinatorImpl {
-	override val locationState: StateFlow<LocationContentState> = previewLocationContentFlow()
+	override val locationsSourceFlow: StateFlow<LocationContentState> = previewLocationContentFlow()
 	override val createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl = stubCreateLocationModalSheetCoordinator
 	override val onLaunchDataModelCreation: () -> Unit = {}
 	override val onDataModelSelected: (location: Location) -> Unit = {}
 }
 
 class ManageLocationsContentCoordinator(
-	override val locationState: StateFlow<LocationContentState>,
+	override val locationsSourceFlow: StateFlow<LocationContentState>,
 	override val createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
 ) : ManageLocationsContentCoordinatorImpl {
 	override val onLaunchDataModelCreation: () -> Unit = {createLocationCoordinator.showSheet()}

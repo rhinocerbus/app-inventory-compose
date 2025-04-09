@@ -31,9 +31,9 @@ class ModalCoordinatorUnitTests {
 	@Test
 	fun item_modal_coordinator_display_state_tests() {
 		val coordinator = CreateItemSheetCoordinator(
-			itemState = previewItemsContentFlow(),
-			quantityContentState = previewQuantityUnitsContentFlow(),
-			tagsContentState = previewTagsContentFlow(),
+			itemsSourceFlow = previewItemsContentFlow(),
+			unitsSourceFlow = previewQuantityUnitsContentFlow(),
+			tagsSourceFlow = previewTagsContentFlow(),
 			createTagCoordinator = stubCreateTagSheetCoordinator,
 			createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
 			onCreateDataModel = {},
@@ -50,7 +50,7 @@ class ModalCoordinatorUnitTests {
 	@Test
 	fun tag_modal_coordinator_display_state_tests() {
 		val coordinator = CreateTagSheetCoordinator(
-			tagsContentState = previewTagsContentFlow(),
+			tagsSourceFlow = previewTagsContentFlow(),
 			onCreateDataModel = {},
 			onUpdateDataModel = {},
 		)
@@ -61,7 +61,7 @@ class ModalCoordinatorUnitTests {
 	@Test
 	fun unit_modal_coordinator_display_state_tests() {
 		val coordinator = CreateQuantityUnitSheetCoordinator(
-			unitsContentState = previewQuantityUnitsContentFlow(),
+			unitsSourceFlow = previewQuantityUnitsContentFlow(),
 			onCreateDataModel = {},
 			onUpdateDataModel = {},
 		)
@@ -72,7 +72,7 @@ class ModalCoordinatorUnitTests {
 	@Test
 	fun location_modal_coordinator_display_state_tests() {
 		val coordinator = CreateLocationModalSheetCoordinator(
-			locationState = previewLocationContentFlow(),
+			locationsSourceFlow = previewLocationContentFlow(),
 			onCreateDataModel = {},
 			onUpdateDataModel = {}
 		)

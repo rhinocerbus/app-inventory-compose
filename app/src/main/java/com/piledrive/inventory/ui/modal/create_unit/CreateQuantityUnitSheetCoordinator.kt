@@ -15,15 +15,15 @@ import kotlinx.coroutines.flow.StateFlow
 
 
 interface CreateQuantityUnitSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDataModalCoordinatorImpl<QuantityUnit, QuantityUnitSlug> {
+	val unitsSourceFlow: StateFlow<QuantityUnitContentState>
 	val selectedMeasurementState: State<QuantityType>
-	val unitsContentState: StateFlow<QuantityUnitContentState>
 	fun changeSelectedType(type: QuantityType)
 }
 
 val stubCreateQuantityUnitSheetCoordinator = object : CreateQuantityUnitSheetCoordinatorImpl {
 	override val activeEditDataState: State<QuantityUnit?> = mutableStateOf(null)
 	override val selectedMeasurementState: State<QuantityType> = mutableStateOf(QuantityType.WHOLE)
-	override val unitsContentState: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
+	override val unitsSourceFlow: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
 	override val onCreateDataModel: (slug: QuantityUnitSlug) -> Unit = {}
 	override val onUpdateDataModel: (unit: QuantityUnit) -> Unit = {}
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
@@ -34,7 +34,7 @@ val stubCreateQuantityUnitSheetCoordinator = object : CreateQuantityUnitSheetCoo
 }
 
 class CreateQuantityUnitSheetCoordinator(
-	override val unitsContentState: StateFlow<QuantityUnitContentState>,
+	override val unitsSourceFlow: StateFlow<QuantityUnitContentState>,
 	override val onCreateDataModel: (slug: QuantityUnitSlug) -> Unit,
 	override val onUpdateDataModel: (unit: QuantityUnit) -> Unit
 ) : ModalSheetCoordinator(), CreateQuantityUnitSheetCoordinatorImpl {

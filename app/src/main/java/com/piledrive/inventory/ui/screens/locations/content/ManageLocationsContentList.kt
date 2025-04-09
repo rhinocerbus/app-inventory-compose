@@ -30,7 +30,7 @@ object ManageLocationsContentList {
 		modifier: Modifier = Modifier,
 		coordinator: ManageLocationsContentCoordinatorImpl,
 	) {
-		val locationsContent = coordinator.locationState.collectAsState().value
+		val locationsContent = coordinator.locationsSourceFlow.collectAsState().value
 
 		DrawContent(
 			modifier,

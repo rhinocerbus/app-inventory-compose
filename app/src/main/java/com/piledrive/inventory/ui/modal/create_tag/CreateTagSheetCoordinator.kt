@@ -14,12 +14,12 @@ import kotlinx.coroutines.flow.StateFlow
 
 
 interface CreateTagSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDataModalCoordinatorImpl<Tag, TagSlug> {
-	val tagsContentState: StateFlow<TagsContentState>
+	val tagsSourceFlow: StateFlow<TagsContentState>
 }
 
 val stubCreateTagSheetCoordinator = object : CreateTagSheetCoordinatorImpl {
 	override val activeEditDataState: State<Tag?> = mutableStateOf(null)
-	override val tagsContentState: StateFlow<TagsContentState> = previewTagsContentFlow()
+	override val tagsSourceFlow: StateFlow<TagsContentState> = previewTagsContentFlow()
 	override val onCreateDataModel: (slug: TagSlug) -> Unit = {}
 	override val onUpdateDataModel: (Tag) -> Unit = {}
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
@@ -29,7 +29,7 @@ val stubCreateTagSheetCoordinator = object : CreateTagSheetCoordinatorImpl {
 }
 
 class CreateTagSheetCoordinator(
-	override val tagsContentState: StateFlow<TagsContentState>,
+	override val tagsSourceFlow: StateFlow<TagsContentState>,
 	override val onCreateDataModel: (slug: TagSlug) -> Unit,
 	override val onUpdateDataModel: (tag: Tag) -> Unit,
 ) : ModalSheetCoordinator(), CreateTagSheetCoordinatorImpl {

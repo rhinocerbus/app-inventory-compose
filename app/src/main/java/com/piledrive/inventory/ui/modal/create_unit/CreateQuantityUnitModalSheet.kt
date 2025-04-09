@@ -71,7 +71,7 @@ object CreateQuantityUnitModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateQuantityUnitSheetCoordinatorImpl,
 	) {
-		val unitPool = coordinator.unitsContentState.collectAsState().value
+		val unitPool = coordinator.unitsSourceFlow.collectAsState().value
 		val activeUnit = coordinator.activeEditDataState.value
 		val initialText = remember { activeUnit?.name ?: "" }
 

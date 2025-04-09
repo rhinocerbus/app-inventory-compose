@@ -23,9 +23,9 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface CreateItemSheetCoordinatorImpl : ModalSheetCoordinatorImpl,
 	EditableDataModalCoordinatorImpl<ItemWithTags, ItemSlug> {
-	val itemState: StateFlow<ItemContentState>
-	val quantityContentState: StateFlow<QuantityUnitContentState>
-	val tagsContentState: StateFlow<TagsContentState>
+	val itemsSourceFlow: StateFlow<ItemContentState>
+	val unitsSourceFlow: StateFlow<QuantityUnitContentState>
+	val tagsSourceFlow: StateFlow<TagsContentState>
 	val createTagCoordinator: CreateTagSheetCoordinatorImpl
 	val createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl
 	val onLaunchAddTag: () -> Unit
@@ -33,9 +33,9 @@ interface CreateItemSheetCoordinatorImpl : ModalSheetCoordinatorImpl,
 }
 
 class CreateItemSheetCoordinator(
-	override val itemState: StateFlow<ItemContentState>,
-	override val quantityContentState: StateFlow<QuantityUnitContentState>,
-	override val tagsContentState: StateFlow<TagsContentState>,
+	override val itemsSourceFlow: StateFlow<ItemContentState>,
+	override val unitsSourceFlow: StateFlow<QuantityUnitContentState>,
+	override val tagsSourceFlow: StateFlow<TagsContentState>,
 	override val createTagCoordinator: CreateTagSheetCoordinatorImpl,
 	override val createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
 	override val onCreateDataModel: (item: ItemSlug) -> Unit,
@@ -60,9 +60,9 @@ class CreateItemSheetCoordinator(
 
 val stubCreateItemSheetCoordinator = object : CreateItemSheetCoordinatorImpl {
 	override val activeEditDataState: State<ItemWithTags?> = mutableStateOf(null)
-	override val itemState: StateFlow<ItemContentState> = previewItemsContentFlow()
-	override val quantityContentState: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
-	override val tagsContentState: StateFlow<TagsContentState> = previewTagsContentFlow()
+	override val itemsSourceFlow: StateFlow<ItemContentState> = previewItemsContentFlow()
+	override val unitsSourceFlow: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
+	override val tagsSourceFlow: StateFlow<TagsContentState> = previewTagsContentFlow()
 	override val createTagCoordinator: CreateTagSheetCoordinatorImpl = stubCreateTagSheetCoordinator
 	override val createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl =
 		stubCreateQuantityUnitSheetCoordinator

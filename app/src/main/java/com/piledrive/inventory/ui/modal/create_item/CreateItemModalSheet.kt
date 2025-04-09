@@ -101,8 +101,8 @@ object CreateItemModalSheet {
 		onQuantityUnitChange: (String) -> Unit,
 		onTagToggle: (String, Boolean) -> Unit
 	) {
-		val quantityUnitPool = coordinator.quantityContentState.collectAsState().value
-		val tagPool = coordinator.tagsContentState.collectAsState().value
+		val quantityUnitPool = coordinator.unitsSourceFlow.collectAsState().value
+		val tagPool = coordinator.tagsSourceFlow.collectAsState().value
 
 		val activeItem = coordinator.activeEditDataState.value
 		val initialText = remember { activeItem?.item?.name ?: "" }
@@ -118,7 +118,7 @@ object CreateItemModalSheet {
 					externalValidators = listOf(
 						Validators.Custom(runCheck = { nameIn ->
 							val matchEdit = nameIn == activeItem?.item?.name
-							val matchExisting = coordinator.itemState.value.data.items.firstOrNull { it.name.equals(nameIn, true) } != null
+							val matchExisting = coordinator.itemsSourceFlow.value.data.items.firstOrNull { it.name.equals(nameIn, true) } != null
 							!matchExisting || matchEdit
 						}, "Item with that name already exists")
 					)

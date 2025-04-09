@@ -102,9 +102,9 @@ class ManageLocationsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageLocationsContentCoordinator(
-		locationState = userLocationContentState,
+		locationsSourceFlow = userLocationContentState,
 		createLocationCoordinator = CreateLocationModalSheetCoordinator(
-			locationState = userLocationContentState,
+			locationsSourceFlow = userLocationContentState,
 			onCreateDataModel = {
 				addNewLocation(it)
 			},

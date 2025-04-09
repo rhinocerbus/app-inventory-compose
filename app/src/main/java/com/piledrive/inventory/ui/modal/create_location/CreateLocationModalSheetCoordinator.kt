@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface CreateLocationModalSheetCoordinatorImpl : ModalSheetCoordinatorImpl,
 	EditableDataModalCoordinatorImpl<Location, LocationSlug> {
-	val locationState: StateFlow<LocationContentState>
+	val locationsSourceFlow: StateFlow<LocationContentState>
 }
 
 
@@ -27,7 +27,7 @@ interface CreateLocationModalSheetCoordinatorImpl : ModalSheetCoordinatorImpl,
  more to be seen when making a few versions of this per sheet
  */
 class CreateLocationModalSheetCoordinator(
-	override val locationState: StateFlow<LocationContentState>,
+	override val locationsSourceFlow: StateFlow<LocationContentState>,
 	override val onCreateDataModel: (slug: LocationSlug) -> Unit,
 	override val onUpdateDataModel: (location: Location) -> Unit,
 ) : ModalSheetCoordinator(), CreateLocationModalSheetCoordinatorImpl {
@@ -47,7 +47,7 @@ class CreateLocationModalSheetCoordinator(
 }
 
 val stubCreateLocationModalSheetCoordinator = object : CreateLocationModalSheetCoordinatorImpl {
-	override val locationState: StateFlow<LocationContentState> = previewLocationContentFlow()
+	override val locationsSourceFlow: StateFlow<LocationContentState> = previewLocationContentFlow()
 	override val activeEditDataState: State<Location?> = mutableStateOf(null)
 	override val onCreateDataModel: (slug: LocationSlug) -> Unit = {}
 	override val onUpdateDataModel: (location: Location) -> Unit = {}

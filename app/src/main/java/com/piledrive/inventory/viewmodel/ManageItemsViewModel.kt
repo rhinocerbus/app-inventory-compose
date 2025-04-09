@@ -280,9 +280,9 @@ class ManageItemsViewModel @Inject constructor(
 	val contentCoordinator = ManageItemsContentCoordinator(
 		itemState = fullItemsContentState,
 		createItemCoordinator = CreateItemSheetCoordinator(
-			itemState = itemsContentState,
-			quantityContentState = quantityUnitsContentState,
-			tagsContentState = userTagsContentState,
+			itemsSourceFlow = itemsContentState,
+			unitsSourceFlow = quantityUnitsContentState,
+			tagsSourceFlow = userTagsContentState,
 			createTagCoordinator = CreateTagSheetCoordinator(
 				userTagsContentState,
 				onCreateDataModel = {
