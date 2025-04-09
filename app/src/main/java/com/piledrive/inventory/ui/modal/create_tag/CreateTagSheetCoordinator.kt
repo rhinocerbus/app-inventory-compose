@@ -13,17 +13,15 @@ import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinato
 import kotlinx.coroutines.flow.StateFlow
 
 
-interface CreateTagSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDataModalCoordinatorImpl<Tag> {
+interface CreateTagSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDataModalCoordinatorImpl<Tag, TagSlug> {
 	val tagsContentState: StateFlow<TagsContentState>
-	val onAddTag: (slug: TagSlug) -> Unit
-	val onUpdateTag: (tag: Tag) -> Unit
 }
 
 val stubCreateTagSheetCoordinator = object : CreateTagSheetCoordinatorImpl {
 	override val activeEditDataState: State<Tag?> = mutableStateOf(null)
 	override val tagsContentState: StateFlow<TagsContentState> = previewTagsContentFlow()
-	override val onAddTag: (slug: TagSlug) -> Unit = {}
-	override val onUpdateTag: (Tag) -> Unit = {}
+	override val onCreateDataModel: (slug: TagSlug) -> Unit = {}
+	override val onUpdateDataModel: (Tag) -> Unit = {}
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
 	override fun showSheet() {}
 	override fun showSheetWithData(tag: Tag) {}
@@ -32,8 +30,8 @@ val stubCreateTagSheetCoordinator = object : CreateTagSheetCoordinatorImpl {
 
 class CreateTagSheetCoordinator(
 	override val tagsContentState: StateFlow<TagsContentState>,
-	override val onAddTag: (slug: TagSlug) -> Unit,
-	override val onUpdateTag: (tag: Tag) -> Unit,
+	override val onCreateDataModel: (slug: TagSlug) -> Unit,
+	override val onUpdateDataModel: (tag: Tag) -> Unit,
 ) : ModalSheetCoordinator(), CreateTagSheetCoordinatorImpl {
 
 	private val _activeEditDataState: MutableState<Tag?> = mutableStateOf(null)

@@ -3,7 +3,6 @@ package com.piledrive.inventory.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.enums.SortOrder
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
@@ -105,9 +104,9 @@ class ManageItemsViewModel @Inject constructor(
 		}
 	}
 
-	private fun updateItem(item: Item, tagIds: List<String>) {
+	private fun updateItem(item: ItemWithTags) {
 		viewModelScope.launch {
-			itemsRepo.updateItemWithTags(item, tagIds)
+			itemsRepo.updateItemWithTags(item)
 		}
 	}
 
@@ -286,10 +285,10 @@ class ManageItemsViewModel @Inject constructor(
 			tagsContentState = userTagsContentState,
 			createTagCoordinator = CreateTagSheetCoordinator(
 				userTagsContentState,
-				onAddTag = {
+				onCreateDataModel = {
 					addNewTag(it)
 				},
-				onUpdateTag = {
+				onUpdateDataModel = {
 					/*
 						no-op on this screen
 						should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
@@ -298,15 +297,15 @@ class ManageItemsViewModel @Inject constructor(
 			),
 			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
 				quantityUnitsContentState,
-				onAddQuantityUnit = {
+				onCreateDataModel = {
 					addNewQuantityUnit(it)
 				},
-				onUpdateQuantityUnit = {
+				onUpdateDataModel = {
 					// no-op on this screen
 				},
 			),
-			onAddItem = { addNewItem(it) },
-			onUpdateItem = { item, tagIds -> updateItem(item, tagIds) },
+			onCreateDataModel = { addNewItem(it) },
+			onUpdateDataModel = { updateItem(it) },
 		),
 	)
 

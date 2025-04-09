@@ -34,8 +34,8 @@ class ModalCoordinatorUnitTests {
 			tagsContentState = previewTagsContentFlow(),
 			createTagCoordinator = stubCreateTagSheetCoordinator,
 			createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
-			onAddItem = {},
-			onUpdateItem = { _, _ -> },
+			onCreateDataModel = {},
+			onUpdateDataModel = { _, _ -> },
 		)
 		val stubItem = ItemWithTags(
 			item = Item(id = "", createdAt = "", name = "", unitId = ""),
@@ -49,8 +49,8 @@ class ModalCoordinatorUnitTests {
 	fun tag_modal_coordinator_display_state_tests() {
 		val coordinator = CreateTagSheetCoordinator(
 			tagsContentState = previewTagsContentFlow(),
-			onAddTag = {},
-			onUpdateTag = {},
+			onCreateDataModel = {},
+			onUpdateDataModel = {},
 		)
 		val stubTag = Tag(id = "", createdAt = "", name = "")
 		generic_modal_coordinator_display_state_tests(coordinator, coordinator, stubTag)
@@ -60,8 +60,8 @@ class ModalCoordinatorUnitTests {
 	fun unit_modal_coordinator_display_state_tests() {
 		val coordinator = CreateQuantityUnitSheetCoordinator(
 			unitsContentState = previewQuantityUnitsContentFlow(),
-			onAddQuantityUnit = {},
-			onUpdateQuantityUnit = {},
+			onCreateDataModel = {},
+			onUpdateDataModel = {},
 		)
 		val stubUnit = QuantityUnit(id = "", createdAt = "", name = "", label = "", type = QuantityType.WHOLE)
 		generic_modal_coordinator_display_state_tests(coordinator, coordinator, stubUnit)
@@ -71,8 +71,8 @@ class ModalCoordinatorUnitTests {
 	fun location_modal_coordinator_display_state_tests() {
 		val coordinator = CreateLocationModalSheetCoordinator(
 			locationState = previewLocationContentFlow(),
-			onAddLocation = {},
-			onUpdateLocation = {}
+			onCreateDataModel = {},
+			onUpdateDataModel = {}
 		)
 		val stubLocation = Location(id = "", createdAt = "", name = "")
 		generic_modal_coordinator_display_state_tests(coordinator, coordinator, stubLocation)

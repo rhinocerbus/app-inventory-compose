@@ -14,11 +14,9 @@ import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinato
 import kotlinx.coroutines.flow.StateFlow
 
 
-interface CreateQuantityUnitSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDataModalCoordinatorImpl<QuantityUnit> {
+interface CreateQuantityUnitSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDataModalCoordinatorImpl<QuantityUnit, QuantityUnitSlug> {
 	val selectedMeasurementState: State<QuantityType>
 	val unitsContentState: StateFlow<QuantityUnitContentState>
-	val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit
-	val onUpdateQuantityUnit: (unit: QuantityUnit) -> Unit
 	fun changeSelectedType(type: QuantityType)
 }
 
@@ -26,8 +24,8 @@ val stubCreateQuantityUnitSheetCoordinator = object : CreateQuantityUnitSheetCoo
 	override val activeEditDataState: State<QuantityUnit?> = mutableStateOf(null)
 	override val selectedMeasurementState: State<QuantityType> = mutableStateOf(QuantityType.WHOLE)
 	override val unitsContentState: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
-	override val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit = {}
-	override val onUpdateQuantityUnit: (unit: QuantityUnit) -> Unit = {}
+	override val onCreateDataModel: (slug: QuantityUnitSlug) -> Unit = {}
+	override val onUpdateDataModel: (unit: QuantityUnit) -> Unit = {}
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
 	override fun changeSelectedType(type: QuantityType) {}
 	override fun showSheet() {}
@@ -37,8 +35,8 @@ val stubCreateQuantityUnitSheetCoordinator = object : CreateQuantityUnitSheetCoo
 
 class CreateQuantityUnitSheetCoordinator(
 	override val unitsContentState: StateFlow<QuantityUnitContentState>,
-	override val onAddQuantityUnit: (slug: QuantityUnitSlug) -> Unit,
-	override val onUpdateQuantityUnit: (unit: QuantityUnit) -> Unit
+	override val onCreateDataModel: (slug: QuantityUnitSlug) -> Unit,
+	override val onUpdateDataModel: (unit: QuantityUnit) -> Unit
 ) : ModalSheetCoordinator(), CreateQuantityUnitSheetCoordinatorImpl {
 
 	private val _selectedMeasurementState: MutableState<QuantityType> = mutableStateOf(QuantityType.WHOLE)

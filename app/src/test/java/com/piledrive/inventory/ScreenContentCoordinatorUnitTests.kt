@@ -37,8 +37,8 @@ class ScreenContentCoordinatorUnitTests {
 				tagsContentState = previewTagsContentFlow(),
 				createTagCoordinator = stubCreateTagSheetCoordinator,
 				createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
-				onAddItem = {},
-				onUpdateItem = { _, _ -> }
+				onCreateDataModel = {},
+				onUpdateDataModel = { _, _ -> }
 			),
 		)
 
@@ -60,8 +60,8 @@ class ScreenContentCoordinatorUnitTests {
 			tagState = previewTagsContentFlow(sampleTags),
 			createTagCoordinator = CreateTagSheetCoordinator(
 				previewTagsContentFlow(sampleTags),
-				onAddTag = {},
-				onUpdateTag = {}
+				onCreateDataModel = {},
+				onUpdateDataModel = {}
 			)
 		)
 		assert(coordinator.tagState.value.data.userTags == sampleTags)
@@ -81,8 +81,8 @@ class ScreenContentCoordinatorUnitTests {
 			locationState = sampleSource,
 			createLocationCoordinator = CreateLocationModalSheetCoordinator(
 				locationState = sampleSource,
-				onAddLocation = {},
-				onUpdateLocation = {}
+				onCreateDataModel = {},
+				onUpdateDataModel = {}
 			)
 		)
 		assert(coordinator.locationState.value.data.userLocations == sampleSet)
@@ -103,8 +103,8 @@ class ScreenContentCoordinatorUnitTests {
 			unitState = sampleSource,
 			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
 				unitsContentState = sampleSource,
-				onAddQuantityUnit = {},
-				onUpdateQuantityUnit = {}
+				onCreateDataModel = {},
+				onUpdateDataModel = {}
 			),
 		)
 		assert(coordinator.unitState.value.data.allUnits == sampleSet)

@@ -105,10 +105,10 @@ class ManageLocationsViewModel @Inject constructor(
 		locationState = userLocationContentState,
 		createLocationCoordinator = CreateLocationModalSheetCoordinator(
 			locationState = userLocationContentState,
-			onAddLocation = {
+			onCreateDataModel = {
 				addNewLocation(it)
 			},
-			onUpdateLocation = {
+			onUpdateDataModel = {
 				updateLocation(it)
 			}
 		)

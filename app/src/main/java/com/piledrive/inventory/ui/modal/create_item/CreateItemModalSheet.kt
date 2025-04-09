@@ -123,7 +123,7 @@ object CreateItemModalSheet {
 						}, "Item with that name already exists")
 					)
 				).apply {
-					if(!initialText.isNullOrBlank()) {
+					if (!initialText.isNullOrBlank()) {
 						this.check(initialText)
 					}
 				}
@@ -175,10 +175,17 @@ object CreateItemModalSheet {
 									unitId = selectedQuantityUnit ?: QuantityUnit.DEFAULT_ID_BAGS,
 									tagIds = selectedTags,
 								)
-								coordinator.onAddItem(item)
+								coordinator.onCreateDataModel(item)
 							} else {
-								val updatedItem = activeItem.item.copy(name = formState.currentValue)
-								coordinator.onUpdateItem(updatedItem, selectedTags)
+								val fullTags = tagPool.data.allTags.filter { selectedTags.contains(it.id) }
+								val fullUnit = quantityUnitPool.data.allUnits.firstOrNull { selectedQuantityUnit == it.id }
+									?: throw IllegalStateException("target quantity unit not found")
+								val updatedItem = activeItem.copy(
+									item = activeItem.item.copy(name = formState.currentValue),
+									tags = fullTags,
+									quantityUnit = fullUnit
+								)
+								coordinator.onUpdateDataModel(updatedItem)
 							}
 
 							coordinator.onDismiss()

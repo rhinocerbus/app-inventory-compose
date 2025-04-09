@@ -98,10 +98,10 @@ class ManageUnitsViewModel @Inject constructor(
 		unitState = unitsContentState,
 		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
 			unitsContentState,
-			onAddQuantityUnit = {
+			onCreateDataModel = {
 				addNewQuantityUnit(it)
 			},
-			onUpdateQuantityUnit = {
+			onUpdateDataModel = {
 				updateQuantityUnit(it)
 			}
 		),

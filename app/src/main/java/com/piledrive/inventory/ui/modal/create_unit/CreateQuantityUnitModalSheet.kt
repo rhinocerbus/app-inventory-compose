@@ -205,14 +205,14 @@ object CreateQuantityUnitModalSheet {
 									label = labelFieldState.currentValue,
 									type = coordinator.selectedMeasurementState.value
 								)
-								coordinator.onAddQuantityUnit(slug)
+								coordinator.onCreateDataModel(slug)
 							} else {
 								val updatedUnit = activeUnit.copy(
 									name = nameFieldState.currentValue,
 									label = labelFieldState.currentValue,
 									type = selectedMeasurement.value
 								)
-								coordinator.onUpdateQuantityUnit(updatedUnit)
+								coordinator.onUpdateDataModel(updatedUnit)
 							}
 							coordinator.onDismiss()
 						}

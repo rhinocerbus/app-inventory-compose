@@ -103,10 +103,10 @@ class ManageTagsViewModel @Inject constructor(
 		tagState = userTagsContentState,
 		createTagCoordinator = CreateTagSheetCoordinator(
 			userTagsContentState,
-			onAddTag = {
+			onCreateDataModel = {
 				addNewTag(it)
 			},
-			onUpdateTag = {
+			onUpdateDataModel = {
 				updateTag(it)
 			}
 		)

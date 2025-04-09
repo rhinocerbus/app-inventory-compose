@@ -121,10 +121,10 @@ object CreateLocationModalSheet {
 						 */
 						if (activeLocation == null) {
 							val slug = LocationSlug(name = formState.currentValue)
-							coordinator.onAddLocation(slug)
+							coordinator.onCreateDataModel(slug)
 						} else {
 							val updatedLocation = activeLocation.copy(name = formState.currentValue)
-							coordinator.onUpdateLocation(updatedLocation)
+							coordinator.onUpdateDataModel(updatedLocation)
 						}
 						coordinator.onDismiss()
 					}

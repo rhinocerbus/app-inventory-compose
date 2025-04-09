@@ -4,7 +4,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.enums.SortOrder
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
@@ -273,9 +272,9 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	private fun updateItem(item: Item, tagIds: List<String>) {
+	private fun updateItem(item: ItemWithTags) {
 		viewModelScope.launch {
-			itemsRepo.updateItemWithTags(item, tagIds)
+			itemsRepo.updateItemWithTags(item)
 		}
 	}
 
@@ -460,10 +459,10 @@ class MainViewModel @Inject constructor(
 
 	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
 		locationState = userLocationContentState,
-		onAddLocation = {
+		onCreateDataModel = {
 			addNewLocation(it)
 		},
-		onUpdateLocation = {
+		onUpdateDataModel = {
 			updateLocation(it)
 		}
 	)
@@ -474,10 +473,10 @@ class MainViewModel @Inject constructor(
 		tagsContentState = userTagsContentState,
 		createTagCoordinator = CreateTagSheetCoordinator(
 			userTagsContentState,
-			onAddTag = {
+			onCreateDataModel = {
 				addNewTag(it)
 			},
-			onUpdateTag = {
+			onUpdateDataModel = {
 				/*
 					no-op on this screen
 					should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
@@ -486,15 +485,15 @@ class MainViewModel @Inject constructor(
 		),
 		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
 			quantityUnitsContentState,
-			onAddQuantityUnit = {
+			onCreateDataModel = {
 				addNewQuantityUnit(it)
 			},
-			onUpdateQuantityUnit = {
+			onUpdateDataModel = {
 				// no-op on this screen
 			}
 		),
-		onAddItem = { addNewItem(it) },
-		onUpdateItem = { item, tagIds -> updateItem(item, tagIds) },
+		onCreateDataModel = { addNewItem(it) },
+		onUpdateDataModel = { updateItem(it) },
 	)
 
 	val createItemStashCoordinator = CreateItemStashSheetCoordinator(

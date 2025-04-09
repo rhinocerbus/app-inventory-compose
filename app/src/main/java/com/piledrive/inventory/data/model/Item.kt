@@ -1,5 +1,7 @@
 package com.piledrive.inventory.data.model
 
+import com.piledrive.inventory.data.model.abstracts.FullDataModel
+import com.piledrive.inventory.data.model.abstracts.SlugDataModel
 import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -13,7 +15,7 @@ interface ItemImpl {
 //@Serializable
 data class ItemSlug(
 	override val name: String, override val unitId: String, val tagIds: List<String>
-) : ItemImpl
+) : ItemImpl, SlugDataModel
 
 //@Serializable
 @JsonClass(generateAdapter = true)
@@ -23,4 +25,4 @@ data class Item(
 	override val createdAt: String,
 	override val name: String,
 	override val unitId: String,
-) : ItemImpl, SupaBaseModel
+) : ItemImpl, FullDataModel, SupaBaseModel
