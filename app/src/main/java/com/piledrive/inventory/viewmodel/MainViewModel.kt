@@ -500,14 +500,10 @@ class MainViewModel @Inject constructor(
 		itemStashesContentState,
 		itemsContentState,
 		userLocationContentState,
-		onAddItemToLocation = {
+		createItemCoordinator = createItemCoordinator,
+		createLocationCoordinator = createLocationCoordinator,
+		onCreateDataModel = {
 			addNewItemStash(it)
-		},
-		onLaunchCreateItem = {
-			createItemCoordinator.showSheet()
-		},
-		onLaunchCreateLocation = {
-			createLocationCoordinator.showSheet()
 		}
 	)
 

@@ -28,8 +28,12 @@ interface CreateItemSheetCoordinatorImpl : ModalSheetCoordinatorImpl,
 	val tagsSourceFlow: StateFlow<TagsContentState>
 	val createTagCoordinator: CreateTagSheetCoordinatorImpl
 	val createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl
-	val onLaunchAddTag: () -> Unit
-	val onLaunchAddUnit: () -> Unit
+	fun launchAddTag() {
+		createTagCoordinator.showSheet()
+	}
+	fun launchAddUnit(){
+		createQuantityUnitSheetCoordinator.showSheet()
+	}
 }
 
 class CreateItemSheetCoordinator(
@@ -41,9 +45,6 @@ class CreateItemSheetCoordinator(
 	override val onCreateDataModel: (item: ItemSlug) -> Unit,
 	override val onUpdateDataModel: (item: ItemWithTags) -> Unit,
 ) : ModalSheetCoordinator(), CreateItemSheetCoordinatorImpl {
-	override val onLaunchAddTag: () -> Unit = { createTagCoordinator.showSheet() }
-	override val onLaunchAddUnit: () -> Unit = { createQuantityUnitSheetCoordinator.showSheet() }
-
 	private val _activeEditDataState: MutableState<ItemWithTags?> = mutableStateOf(null)
 	override val activeEditDataState: State<ItemWithTags?> = _activeEditDataState
 
@@ -68,16 +69,12 @@ val stubCreateItemSheetCoordinator = object : CreateItemSheetCoordinatorImpl {
 		stubCreateQuantityUnitSheetCoordinator
 	override val onCreateDataModel: (item: ItemSlug) -> Unit = {}
 	override val onUpdateDataModel: (item: ItemWithTags) -> Unit = {}
-	override val onLaunchAddTag: () -> Unit = {}
-	override val onLaunchAddUnit: () -> Unit = {}
 
 	override val showSheetState: State<Boolean> = mutableStateOf(false)
 
-	override fun showSheet() {
-	}
+	override fun showSheet() {}
 
 	override fun showSheetWithData(item: ItemWithTags) {}
 
-	override fun onDismiss() {
-	}
+	override fun onDismiss() {}
 }

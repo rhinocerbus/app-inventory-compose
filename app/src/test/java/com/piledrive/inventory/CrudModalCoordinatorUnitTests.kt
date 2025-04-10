@@ -8,13 +8,19 @@ import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.abstracts.FullDataModel
 import com.piledrive.inventory.data.model.abstracts.SlugDataModel
 import com.piledrive.inventory.data.model.composite.ItemWithTags
+import com.piledrive.inventory.ui.modal.coordinators.CreateDataModalCoordinatorImpl
 import com.piledrive.inventory.ui.modal.coordinators.EditableDataModalCoordinatorImpl
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_item.stubCreateItemSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_item_stash.CreateItemStashSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_location.stubCreateLocationModalSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
+import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
+import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
@@ -27,15 +33,23 @@ import org.junit.Test
  * This provides both a smaller parameter footprint for composables and makes callbacks & state interactions testable without
  * actual UI testing.
  */
-class ModalCoordinatorUnitTests {
+class CrudModalCoordinatorUnitTests {
 	@Test
 	fun item_modal_coordinator_display_state_tests() {
 		val coordinator = CreateItemSheetCoordinator(
 			itemsSourceFlow = previewItemsContentFlow(),
 			unitsSourceFlow = previewQuantityUnitsContentFlow(),
 			tagsSourceFlow = previewTagsContentFlow(),
-			createTagCoordinator = stubCreateTagSheetCoordinator,
-			createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
+			createTagCoordinator = CreateTagSheetCoordinator(
+				previewTagsContentFlow(),
+				onCreateDataModel = {},
+				onUpdateDataModel = {}
+			),
+			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+				previewQuantityUnitsContentFlow(),
+				onCreateDataModel = {},
+				onUpdateDataModel = {}
+			),
 			onCreateDataModel = {},
 			onUpdateDataModel = {},
 		)
@@ -45,6 +59,10 @@ class ModalCoordinatorUnitTests {
 			quantityUnit = QuantityUnit.defaultUnitBags
 		)
 		generic_modal_coordinator_display_state_tests(coordinator, coordinator, stubItem)
+		coordinator.launchAddUnit()
+		assert(coordinator.createQuantityUnitSheetCoordinator.showSheetState.value)
+		coordinator.launchAddTag()
+		assert(coordinator.createTagCoordinator.showSheetState.value)
 	}
 
 	@Test
@@ -80,24 +98,72 @@ class ModalCoordinatorUnitTests {
 		generic_modal_coordinator_display_state_tests(coordinator, coordinator, stubLocation)
 	}
 
+	@Test
+	fun item_stash_modal_coordinator_display_state_tests() {
+		val coordinator = CreateItemStashSheetCoordinator(
+			stashesSourceFlow = previewItemStashesContentFlow(),
+			itemsSourceFlow = previewItemsContentFlow(),
+			locationsSourceFlow = previewLocationContentFlow(),
+			createItemCoordinator = CreateItemSheetCoordinator(
+				previewItemsContentFlow(),
+				previewQuantityUnitsContentFlow(),
+				previewTagsContentFlow(),
+				stubCreateTagSheetCoordinator,
+				stubCreateQuantityUnitSheetCoordinator,
+				onCreateDataModel = {},
+				onUpdateDataModel = {}
+			),
+			createLocationCoordinator = CreateLocationModalSheetCoordinator(
+				previewLocationContentFlow(),
+				onCreateDataModel = {},
+				onUpdateDataModel = {}
+			),
+			onCreateDataModel = {},
+		)
+		modal_coordinator_display_state_tests(coordinator)
+		coordinator.launchCreateItem()
+		assert(coordinator.createItemCoordinator.showSheetState.value)
+		coordinator.launchCreateLocation()
+		assert(coordinator.createLocationCoordinator.showSheetState.value)
+	}
+
+	private fun modal_coordinator_display_state_tests(
+		modalCoordinator: ModalSheetCoordinator,
+	) {
+		assert(!modalCoordinator.showSheetState.value)
+
+		modalCoordinator.showSheet()
+		assert(modalCoordinator.showSheetState.value)
+
+		modalCoordinator.onDismiss()
+		assert(!modalCoordinator.showSheetState.value)
+	}
+
+	/* currently no worthwhile tests for this interface
+	private fun <U : SlugDataModel> create_modal_coordinator_display_state_tests(
+		modalCoordinator: ModalSheetCoordinator,
+		createDataModalCoordinatorImpl: CreateDataModalCoordinatorImpl<U>,
+	) {
+		assert(modalCoordinator == createDataModalCoordinatorImpl)
+	}
+	*/
+
 	private fun <T : FullDataModel, U : SlugDataModel> generic_modal_coordinator_display_state_tests(
 		modalCoordinator: ModalSheetCoordinator,
 		editableDataModalCoordinatorImpl: EditableDataModalCoordinatorImpl<T, U>,
 		stubData: T
 	) {
+		modal_coordinator_display_state_tests(modalCoordinator)
+		//create_modal_coordinator_display_state_tests(modalCoordinator, editableDataModalCoordinatorImpl)
+
 		assert(modalCoordinator == editableDataModalCoordinatorImpl)
 
-		assert(!modalCoordinator.showSheetState.value)
 		assert(editableDataModalCoordinatorImpl.activeEditDataState.value == null)
+
 		modalCoordinator.showSheet()
-		assert(modalCoordinator.showSheetState.value)
 		assert(editableDataModalCoordinatorImpl.activeEditDataState.value == null)
-		modalCoordinator.onDismiss()
-		assert(!modalCoordinator.showSheetState.value)
+
 		editableDataModalCoordinatorImpl.showSheetWithData(stubData)
-		assert(modalCoordinator.showSheetState.value)
-		assert(editableDataModalCoordinatorImpl.activeEditDataState.value != null)
-		modalCoordinator.onDismiss()
-		assert(!modalCoordinator.showSheetState.value)
+		assert(editableDataModalCoordinatorImpl.activeEditDataState.value == stubData)
 	}
 }

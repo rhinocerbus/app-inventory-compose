@@ -4,9 +4,12 @@ import androidx.compose.runtime.State
 import com.piledrive.inventory.data.model.abstracts.FullDataModel
 import com.piledrive.inventory.data.model.abstracts.SlugDataModel
 
-interface EditableDataModalCoordinatorImpl<T : FullDataModel, U : SlugDataModel> {
-	val activeEditDataState: State<T?>
+interface CreateDataModalCoordinatorImpl<U : SlugDataModel> {
 	val onCreateDataModel: (dataSlug: U) -> Unit
+}
+
+interface EditableDataModalCoordinatorImpl<T : FullDataModel, U : SlugDataModel> : CreateDataModalCoordinatorImpl<U> {
+	val activeEditDataState: State<T?>
 	val onUpdateDataModel: (updatedData: T) -> Unit
 	fun showSheetWithData(data: T)
 }

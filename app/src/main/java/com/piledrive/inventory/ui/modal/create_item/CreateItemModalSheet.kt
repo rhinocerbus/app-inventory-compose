@@ -201,7 +201,7 @@ object CreateItemModalSheet {
 				ChipGroup {
 					SuggestionChip(
 						onClick = {
-							coordinator.onLaunchAddUnit()
+							coordinator.launchAddUnit()
 						},
 						label = { Text("Add") },
 						icon = { Icon(Icons.Default.Add, "add new quantity unit") }
@@ -240,7 +240,7 @@ object CreateItemModalSheet {
 						SuggestionChip(
 							onClick = {
 								// todo - add single-fire launch param to tag sheet, with callback to flag as selected here
-								coordinator.onLaunchAddTag()
+								coordinator.launchAddTag()
 							},
 							label = { Text("Add") },
 							icon = { Icon(Icons.Default.Add, "add new tag") }
