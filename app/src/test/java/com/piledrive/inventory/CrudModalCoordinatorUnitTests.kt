@@ -40,16 +40,8 @@ class CrudModalCoordinatorUnitTests {
 			itemsSourceFlow = previewItemsContentFlow(),
 			unitsSourceFlow = previewQuantityUnitsContentFlow(),
 			tagsSourceFlow = previewTagsContentFlow(),
-			createTagCoordinator = CreateTagSheetCoordinator(
-				previewTagsContentFlow(),
-				onCreateDataModel = {},
-				onUpdateDataModel = {}
-			),
-			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-				previewQuantityUnitsContentFlow(),
-				onCreateDataModel = {},
-				onUpdateDataModel = {}
-			),
+			createTagCoordinator = stubCreateTagSheetCoordinator,
+			createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator,
 			onCreateDataModel = {},
 			onUpdateDataModel = {},
 		)
@@ -104,20 +96,8 @@ class CrudModalCoordinatorUnitTests {
 			stashesSourceFlow = previewItemStashesContentFlow(),
 			itemsSourceFlow = previewItemsContentFlow(),
 			locationsSourceFlow = previewLocationContentFlow(),
-			createItemCoordinator = CreateItemSheetCoordinator(
-				previewItemsContentFlow(),
-				previewQuantityUnitsContentFlow(),
-				previewTagsContentFlow(),
-				stubCreateTagSheetCoordinator,
-				stubCreateQuantityUnitSheetCoordinator,
-				onCreateDataModel = {},
-				onUpdateDataModel = {}
-			),
-			createLocationCoordinator = CreateLocationModalSheetCoordinator(
-				previewLocationContentFlow(),
-				onCreateDataModel = {},
-				onUpdateDataModel = {}
-			),
+			createItemCoordinator = stubCreateItemSheetCoordinator,
+			createLocationCoordinator = stubCreateLocationModalSheetCoordinator,
 			onCreateDataModel = {},
 		)
 		modal_coordinator_display_state_tests(coordinator)
