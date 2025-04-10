@@ -278,7 +278,7 @@ class ManageItemsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageItemsContentCoordinator(
-		itemState = fullItemsContentState,
+		itemsSourceFlow = fullItemsContentState,
 		createItemCoordinator = CreateItemSheetCoordinator(
 			itemsSourceFlow = itemsContentState,
 			unitsSourceFlow = quantityUnitsContentState,

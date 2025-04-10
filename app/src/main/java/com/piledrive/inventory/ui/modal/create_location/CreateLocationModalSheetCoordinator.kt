@@ -46,20 +46,8 @@ class CreateLocationModalSheetCoordinator(
 	}
 }
 
-val stubCreateLocationModalSheetCoordinator = object : CreateLocationModalSheetCoordinatorImpl {
-	override val locationsSourceFlow: StateFlow<LocationContentState> = previewLocationContentFlow()
-	override val activeEditDataState: State<Location?> = mutableStateOf(null)
-	override val onCreateDataModel: (slug: LocationSlug) -> Unit = {}
-	override val onUpdateDataModel: (location: Location) -> Unit = {}
-
-	override val showSheetState: State<Boolean> = mutableStateOf(false)
-
-	override fun showSheet() {
-	}
-
-	override fun showSheetWithData(location: Location) {
-	}
-
-	override fun onDismiss() {
-	}
-}
+val stubCreateLocationModalSheetCoordinator = CreateLocationModalSheetCoordinator(
+	locationsSourceFlow = previewLocationContentFlow(),
+	onCreateDataModel = {},
+	onUpdateDataModel = {}
+)

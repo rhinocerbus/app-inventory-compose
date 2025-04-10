@@ -14,23 +14,11 @@ import com.piledrive.lib_compose_components.ui.coordinators.ModalSheetCoordinato
 import kotlinx.coroutines.flow.StateFlow
 
 
-interface CreateQuantityUnitSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDataModalCoordinatorImpl<QuantityUnit, QuantityUnitSlug> {
+interface CreateQuantityUnitSheetCoordinatorImpl : ModalSheetCoordinatorImpl,
+	EditableDataModalCoordinatorImpl<QuantityUnit, QuantityUnitSlug> {
 	val unitsSourceFlow: StateFlow<QuantityUnitContentState>
 	val selectedMeasurementState: State<QuantityType>
 	fun changeSelectedType(type: QuantityType)
-}
-
-val stubCreateQuantityUnitSheetCoordinator = object : CreateQuantityUnitSheetCoordinatorImpl {
-	override val activeEditDataState: State<QuantityUnit?> = mutableStateOf(null)
-	override val selectedMeasurementState: State<QuantityType> = mutableStateOf(QuantityType.WHOLE)
-	override val unitsSourceFlow: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
-	override val onCreateDataModel: (slug: QuantityUnitSlug) -> Unit = {}
-	override val onUpdateDataModel: (unit: QuantityUnit) -> Unit = {}
-	override val showSheetState: State<Boolean> = mutableStateOf(false)
-	override fun changeSelectedType(type: QuantityType) {}
-	override fun showSheet() {}
-	override fun showSheetWithData(unit: QuantityUnit) {}
-	override fun onDismiss() {}
 }
 
 class CreateQuantityUnitSheetCoordinator(
@@ -59,3 +47,9 @@ class CreateQuantityUnitSheetCoordinator(
 		super.showSheet()
 	}
 }
+
+val stubCreateQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+	unitsSourceFlow = previewQuantityUnitsContentFlow(),
+	onCreateDataModel = {},
+	onUpdateDataModel = {}
+)

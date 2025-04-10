@@ -30,7 +30,7 @@ object ManageTagsContentList {
 		modifier: Modifier = Modifier,
 		coordinator: ManageTagsContentCoordinatorImpl,
 	) {
-		val tagsContent = coordinator.tagState.collectAsState().value
+		val tagsContent = coordinator.tagsSourceFlow.collectAsState().value
 
 		DrawContent(
 			modifier,
@@ -61,7 +61,7 @@ object ManageTagsContentList {
 							"no tags"
 						)
 						Button(onClick = {
-							coordinator.onLaunchDataModelCreation()
+							coordinator.launchDataModelCreation()
 						}) {
 							Text("add tag")
 						}
@@ -119,7 +119,7 @@ object ManageTagsContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = { coordinator.onDataModelSelected(tag) },
+					onClick = { coordinator.launchDataModelEdit(tag) },
 					onLongClick = { }
 				)
 				.fillMaxWidth()

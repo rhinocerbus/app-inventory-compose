@@ -100,7 +100,7 @@ class ManageTagsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageTagsContentCoordinator(
-		tagState = userTagsContentState,
+		tagsSourceFlow = userTagsContentState,
 		createTagCoordinator = CreateTagSheetCoordinator(
 			userTagsContentState,
 			onCreateDataModel = {

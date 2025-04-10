@@ -41,35 +41,6 @@ interface TransferItemStashSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
 	fun showSheetForItem(forItem: Item)
 }
 
-val stubTransferItemStashSheetCoordinator = object : TransferItemStashSheetCoordinatorImpl {
-	override val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> =
-		ReadOnlyDropdownCoordinatorGeneric()
-	override val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> =
-		ReadOnlyDropdownCoordinatorGeneric()
-
-	override val activeItemState: State<Item?> = mutableStateOf(null)
-
-	override val amountDifference: State<Double> = mutableDoubleStateOf(0.0)
-	override val modifiedAmount: State<Double> = mutableDoubleStateOf(-1.0)
-
-	override val stashesSourceFlow: StateFlow<ItemStashContentState> = previewItemStashesContentFlow()
-	override val itemsSourceFlow: StateFlow<ItemContentState> = previewItemsContentFlow()
-	override val locationsSourceFlow: StateFlow<LocationContentState> = previewLocationContentFlow()
-	override val unitsSourceFlow: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
-
-	override val showSheetState: State<Boolean> = mutableStateOf(false)
-	override fun showSheet() {}
-
-	override fun showSheetForItem(forItem: Item) {}
-	override val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit =
-		{ _, _ -> }
-
-	override fun onDismiss() {}
-
-	override fun changeTransferAmount(amount: Double) {}
-	override fun submitTransfer() {}
-}
-
 class TransferItemStashSheetCoordinator(
 	initialShowSheetValue: Boolean = false,
 	initialItemValue: Item? = null,
@@ -196,6 +167,14 @@ class TransferItemStashSheetCoordinator(
 		onDismiss()
 	}
 }
+
+val stubTransferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
+	itemsSourceFlow = previewItemsContentFlow(),
+	unitsSourceFlow = previewQuantityUnitsContentFlow(),
+	locationsSourceFlow = previewLocationContentFlow(),
+	stashesSourceFlow = previewItemStashesContentFlow(),
+	onCommitStashTransfer = { _, _ -> }
+)
 
 fun clampLong(value: Long, min: Long, max: Long): Long {
 	return when {

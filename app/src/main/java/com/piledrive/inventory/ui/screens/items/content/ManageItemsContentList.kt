@@ -33,7 +33,7 @@ object ManageItemsContentList {
 		modifier: Modifier = Modifier,
 		coordinator: ManageItemsContentCoordinatorImpl,
 	) {
-		val itemsContent = coordinator.itemState.collectAsState().value
+		val itemsContent = coordinator.itemsSourceFlow.collectAsState().value
 
 		DrawContent(
 			modifier,
@@ -64,7 +64,7 @@ object ManageItemsContentList {
 							"no items"
 						)
 						Button(onClick = {
-							coordinator.onLaunchDataModelCreation()
+							coordinator.launchDataModelCreation()
 						}) {
 							Text("add item")
 						}
@@ -126,7 +126,7 @@ object ManageItemsContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = { coordinator.onDataModelSelected(fullItem) },
+					onClick = { coordinator.launchDataModelEdit(fullItem) },
 					onLongClick = { }
 				)
 				.fillMaxWidth()

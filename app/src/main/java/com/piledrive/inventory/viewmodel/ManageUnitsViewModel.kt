@@ -95,7 +95,7 @@ class ManageUnitsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageUnitsContentCoordinator(
-		unitState = unitsContentState,
+		unitsSourceFlow = unitsContentState,
 		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
 			unitsContentState,
 			onCreateDataModel = {

@@ -17,17 +17,6 @@ interface CreateTagSheetCoordinatorImpl : ModalSheetCoordinatorImpl, EditableDat
 	val tagsSourceFlow: StateFlow<TagsContentState>
 }
 
-val stubCreateTagSheetCoordinator = object : CreateTagSheetCoordinatorImpl {
-	override val activeEditDataState: State<Tag?> = mutableStateOf(null)
-	override val tagsSourceFlow: StateFlow<TagsContentState> = previewTagsContentFlow()
-	override val onCreateDataModel: (slug: TagSlug) -> Unit = {}
-	override val onUpdateDataModel: (Tag) -> Unit = {}
-	override val showSheetState: State<Boolean> = mutableStateOf(false)
-	override fun showSheet() {}
-	override fun showSheetWithData(tag: Tag) {}
-	override fun onDismiss() {}
-}
-
 class CreateTagSheetCoordinator(
 	override val tagsSourceFlow: StateFlow<TagsContentState>,
 	override val onCreateDataModel: (slug: TagSlug) -> Unit,
@@ -47,3 +36,9 @@ class CreateTagSheetCoordinator(
 		super.showSheet()
 	}
 }
+
+val stubCreateTagSheetCoordinator = CreateTagSheetCoordinator(
+	tagsSourceFlow = previewTagsContentFlow(),
+	onCreateDataModel = {},
+	onUpdateDataModel = {}
+)

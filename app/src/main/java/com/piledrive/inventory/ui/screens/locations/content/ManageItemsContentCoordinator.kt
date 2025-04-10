@@ -13,17 +13,20 @@ interface ManageLocationsContentCoordinatorImpl : ManageDataScreenImpl<Location>
 	val createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl
 }
 
-val stubManageLocationsContentCoordinator = object : ManageLocationsContentCoordinatorImpl {
-	override val locationsSourceFlow: StateFlow<LocationContentState> = previewLocationContentFlow()
-	override val createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl = stubCreateLocationModalSheetCoordinator
-	override val onLaunchDataModelCreation: () -> Unit = {}
-	override val onDataModelSelected: (location: Location) -> Unit = {}
-}
-
 class ManageLocationsContentCoordinator(
 	override val locationsSourceFlow: StateFlow<LocationContentState>,
 	override val createLocationCoordinator: CreateLocationModalSheetCoordinatorImpl,
 ) : ManageLocationsContentCoordinatorImpl {
-	override val onLaunchDataModelCreation: () -> Unit = {createLocationCoordinator.showSheet()}
-	override val onDataModelSelected: (location: Location) -> Unit = { createLocationCoordinator.showSheetWithData(it) }
+	override fun launchDataModelCreation() {
+		createLocationCoordinator.showSheet()
+	}
+
+	override fun launchDataModelEdit(location: Location) {
+		createLocationCoordinator.showSheetWithData(location)
+	}
 }
+
+val stubManageLocationsContentCoordinator = ManageLocationsContentCoordinator(
+	locationsSourceFlow = previewLocationContentFlow(),
+	createLocationCoordinator = stubCreateLocationModalSheetCoordinator
+)

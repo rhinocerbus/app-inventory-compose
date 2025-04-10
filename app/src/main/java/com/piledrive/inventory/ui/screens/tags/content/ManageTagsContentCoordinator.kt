@@ -9,25 +9,24 @@ import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface ManageTagsContentCoordinatorImpl : ManageDataScreenImpl<Tag> {
-	val tagState: StateFlow<TagsContentState>
+	val tagsSourceFlow: StateFlow<TagsContentState>
 	val createTagCoordinator: CreateTagSheetCoordinatorImpl
-}
-
-val stubManageTagsContentCoordinator = object : ManageTagsContentCoordinatorImpl {
-	override val tagState: StateFlow<TagsContentState> = previewTagsContentFlow()
-	override val onLaunchDataModelCreation: () -> Unit = {}
-	override val onDataModelSelected: (tag: Tag) -> Unit = {}
-	override val createTagCoordinator: CreateTagSheetCoordinatorImpl = stubCreateTagSheetCoordinator
 }
 
 class ManageTagsContentCoordinator(
 	override val createTagCoordinator: CreateTagSheetCoordinatorImpl,
-	override val tagState: StateFlow<TagsContentState>,
+	override val tagsSourceFlow: StateFlow<TagsContentState>,
 ) : ManageTagsContentCoordinatorImpl {
-	override val onLaunchDataModelCreation: () -> Unit = {
+	override fun launchDataModelCreation() {
 		createTagCoordinator.showSheet()
 	}
-	override val onDataModelSelected: (tag: Tag) -> Unit = {
-		createTagCoordinator.showSheetWithData(it)
+
+	override fun launchDataModelEdit(tag: Tag) {
+		createTagCoordinator.showSheetWithData(tag)
 	}
 }
+
+val stubManageTagsContentCoordinator = ManageTagsContentCoordinator(
+	tagsSourceFlow = previewTagsContentFlow(),
+	createTagCoordinator = stubCreateTagSheetCoordinator
+)

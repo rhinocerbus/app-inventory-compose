@@ -30,7 +30,7 @@ class ScreenContentCoordinatorUnitTests {
 	fun manage_items_coordinator_actions_tests() {
 		val sampleData = FullItemsContent.generateSampleSet()
 		val coordinator = ManageItemsContentCoordinator(
-			itemState = previewFullItemsContentFlow(sampleData),
+			itemsSourceFlow = previewFullItemsContentFlow(sampleData),
 			createItemCoordinator = CreateItemSheetCoordinator(
 				itemsSourceFlow = previewItemsContentFlow(),
 				unitsSourceFlow = previewUnitsContentFlow(),
@@ -42,12 +42,12 @@ class ScreenContentCoordinatorUnitTests {
 			),
 		)
 
-		assert(coordinator.itemState.value.data.fullItems == sampleData.fullItems)
-		coordinator.onLaunchDataModelCreation()
+		assert(coordinator.itemsSourceFlow.value.data.fullItems == sampleData.fullItems)
+		coordinator.launchDataModelCreation()
 		assert(coordinator.createItemCoordinator.showSheetState.value)
 		assert(coordinator.createItemCoordinator.activeEditDataState.value == null)
 		val targetItem = sampleData.fullItems[0]
-		coordinator.onDataModelSelected(targetItem)
+		coordinator.launchDataModelEdit(targetItem)
 		assert(coordinator.createItemCoordinator.showSheetState.value)
 		assert(coordinator.createItemCoordinator.activeEditDataState.value == targetItem)
 	}
@@ -57,18 +57,18 @@ class ScreenContentCoordinatorUnitTests {
 		val sampleTag = TagOptions.defaultTag
 		val sampleTags = listOf(sampleTag)
 		val coordinator = ManageTagsContentCoordinator(
-			tagState = previewTagsContentFlow(sampleTags),
+			tagsSourceFlow = previewTagsContentFlow(sampleTags),
 			createTagCoordinator = CreateTagSheetCoordinator(
 				previewTagsContentFlow(sampleTags),
 				onCreateDataModel = {},
 				onUpdateDataModel = {}
 			)
 		)
-		assert(coordinator.tagState.value.data.userTags == sampleTags)
-		coordinator.onLaunchDataModelCreation()
+		assert(coordinator.tagsSourceFlow.value.data.userTags == sampleTags)
+		coordinator.launchDataModelCreation()
 		assert(coordinator.createTagCoordinator.showSheetState.value)
 		assert(coordinator.createTagCoordinator.activeEditDataState.value == null)
-		coordinator.onDataModelSelected(sampleTag)
+		coordinator.launchDataModelEdit(sampleTag)
 		assert(coordinator.createTagCoordinator.showSheetState.value)
 		assert(coordinator.createTagCoordinator.activeEditDataState.value == sampleTag)
 	}
@@ -86,11 +86,11 @@ class ScreenContentCoordinatorUnitTests {
 			)
 		)
 		assert(coordinator.locationsSourceFlow.value.data.userLocations == sampleSet)
-		coordinator.onLaunchDataModelCreation()
+		coordinator.launchDataModelCreation()
 		assert(coordinator.createLocationCoordinator.showSheetState.value)
 		assert(coordinator.createLocationCoordinator.activeEditDataState.value == null)
 		val sampleLocation = sampleSet[0]
-		coordinator.onDataModelSelected(sampleLocation)
+		coordinator.launchDataModelEdit(sampleLocation)
 		assert(coordinator.createLocationCoordinator.showSheetState.value)
 		assert(coordinator.createLocationCoordinator.activeEditDataState.value == sampleLocation)
 	}
@@ -100,19 +100,19 @@ class ScreenContentCoordinatorUnitTests {
 		val sampleSource = previewUnitsContentFlow()
 		val sampleSet = sampleSource.value.data.allUnits
 		val coordinator = ManageUnitsContentCoordinator(
-			unitState = sampleSource,
+			unitsSourceFlow = sampleSource,
 			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
 				unitsSourceFlow = sampleSource,
 				onCreateDataModel = {},
 				onUpdateDataModel = {}
 			),
 		)
-		assert(coordinator.unitState.value.data.allUnits == sampleSet)
-		coordinator.onLaunchDataModelCreation()
+		assert(coordinator.unitsSourceFlow.value.data.allUnits == sampleSet)
+		coordinator.launchDataModelCreation()
 		assert(coordinator.createQuantityUnitSheetCoordinator.showSheetState.value)
 		assert(coordinator.createQuantityUnitSheetCoordinator.activeEditDataState.value == null)
 		val sampleUnit = sampleSet[0]
-		coordinator.onDataModelSelected(sampleUnit)
+		coordinator.launchDataModelEdit(sampleUnit)
 		assert(coordinator.createQuantityUnitSheetCoordinator.showSheetState.value)
 		assert(coordinator.createQuantityUnitSheetCoordinator.activeEditDataState.value == sampleUnit)
 	}
