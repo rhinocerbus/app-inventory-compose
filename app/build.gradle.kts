@@ -8,6 +8,8 @@ plugins {
 	alias(libs.plugins.hilt.android)
 	// serialization
 	kotlin(libs.plugins.kotlin.serialization.get().pluginId).version(libs.versions.kotlin)
+
+	id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -24,11 +26,6 @@ android {
 		versionName = "1.0"
 
 		testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-
-		buildConfigField("String", "SUPABASE_URL", "\"https://qchankldevimabcnapws.supabase.co\"")
-		buildConfigField("String", "SUPABASE_ANON_KEY", "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjaGFua2xkZXZpbWFiY25hcHdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MzA4NjAsImV4cCI6MjA1NjAwNjg2MH0.VqmE24t68BIFPO0ffNRfZmy33sj_7uAFYaEedQuK7NU\"")
-		buildConfigField("String", "POWERSYNC_URL", "\"https://67c1ea67586c8d282a0671fa.powersync.journeyapps.com\"")
 	}
 
 	buildTypes {
@@ -47,6 +44,18 @@ android {
 	buildFeatures {
 		compose = true
 	}
+}
+
+secrets {
+	// To add your Maps API key to this project:
+	// 1. If the secrets.properties file does not exist, create it in the same folder as the local.properties file.
+	// 2. Add this line, where YOUR_API_KEY is your API key:
+	//        MAPS_API_KEY=YOUR_API_KEY
+	propertiesFileName = "secrets.properties"
+
+	// A properties file containing default secret values. This file can be
+	// checked in version control.
+	defaultPropertiesFileName = "local.defaults.properties"
 }
 
 dependencies {

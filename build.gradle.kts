@@ -13,3 +13,9 @@ plugins {
 	//alias(libs.plugins.kotlin.serialization) apply false
 	kotlin(libs.plugins.kotlin.serialization.get().pluginId).version(libs.versions.kotlin).apply(false)
 }
+
+buildscript {
+	dependencies {
+		classpath(libs.secrets.gradle.plugin)
+	}
+}
