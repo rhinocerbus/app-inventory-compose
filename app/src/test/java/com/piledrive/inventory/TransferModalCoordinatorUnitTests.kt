@@ -58,7 +58,7 @@ class TransferModalCoordinatorUnitTests {
 		coordinator.changeTransferAmount(validAmount)
 		assert(coordinator.amountDifference.value == validAmount)
 
-		coordinator.onCommitStashTransfer(fromStash.stash, toStash.stash)
+		coordinator.submitTransfer()
 		assert(!coordinator.showSheetState.value)
 	}
 }
