@@ -50,12 +50,13 @@ object CreateItemModalSheet {
 		modifier: Modifier = Modifier,
 		coordinator: CreateItemSheetCoordinatorImpl,
 	) {
+		val activeItem = coordinator.activeEditDataState.value
 		var selectedQuantityUnitId: String? by remember {
-			val id = coordinator.activeItemState.value?.quantityUnit?.id
+			val id = activeItem?.quantityUnit?.id
 			mutableStateOf(id)
 		}
 		var selectedTagIds by remember {
-			val ids = coordinator.activeItemState.value?.tags?.map { it.id } ?: listOf<String>()
+			val ids = activeItem?.tags?.map { it.id } ?: listOf<String>()
 			mutableStateOf(ids)
 		}
 		/*
@@ -100,10 +101,10 @@ object CreateItemModalSheet {
 		onQuantityUnitChange: (String) -> Unit,
 		onTagToggle: (String, Boolean) -> Unit
 	) {
-		val quantityUnitPool = coordinator.quantityContentState.collectAsState().value
-		val tagPool = coordinator.tagsContentState.collectAsState().value
+		val quantityUnitPool = coordinator.unitsSourceFlow.collectAsState().value
+		val tagPool = coordinator.tagsSourceFlow.collectAsState().value
 
-		val activeItem = coordinator.activeItemState.value
+		val activeItem = coordinator.activeEditDataState.value
 		val initialText = remember { activeItem?.item?.name ?: "" }
 
 		Surface(
@@ -117,12 +118,12 @@ object CreateItemModalSheet {
 					externalValidators = listOf(
 						Validators.Custom(runCheck = { nameIn ->
 							val matchEdit = nameIn == activeItem?.item?.name
-							val matchExisting = coordinator.itemState.value.data.items.firstOrNull { it.name.equals(nameIn, true) } != null
+							val matchExisting = coordinator.itemsSourceFlow.value.data.items.firstOrNull { it.name.equals(nameIn, true) } != null
 							!matchExisting || matchEdit
 						}, "Item with that name already exists")
 					)
 				).apply {
-					if(!initialText.isNullOrBlank()) {
+					if (!initialText.isNullOrBlank()) {
 						this.check(initialText)
 					}
 				}
@@ -174,10 +175,17 @@ object CreateItemModalSheet {
 									unitId = selectedQuantityUnit ?: QuantityUnit.DEFAULT_ID_BAGS,
 									tagIds = selectedTags,
 								)
-								coordinator.onAddItem(item)
+								coordinator.onCreateDataModel(item)
 							} else {
-								val updatedItem = activeItem.item.copy(name = formState.currentValue)
-								coordinator.onUpdateItem(updatedItem, selectedTags)
+								val fullTags = tagPool.data.allTags.filter { selectedTags.contains(it.id) }
+								val fullUnit = quantityUnitPool.data.allUnits.firstOrNull { selectedQuantityUnit == it.id }
+									?: throw IllegalStateException("target quantity unit not found")
+								val updatedItem = activeItem.copy(
+									item = activeItem.item.copy(name = formState.currentValue),
+									tags = fullTags,
+									quantityUnit = fullUnit
+								)
+								coordinator.onUpdateDataModel(updatedItem)
 							}
 
 							coordinator.onDismiss()
@@ -193,7 +201,7 @@ object CreateItemModalSheet {
 				ChipGroup {
 					SuggestionChip(
 						onClick = {
-							coordinator.onLaunchAddUnit()
+							coordinator.launchAddUnit()
 						},
 						label = { Text("Add") },
 						icon = { Icon(Icons.Default.Add, "add new quantity unit") }
@@ -232,7 +240,7 @@ object CreateItemModalSheet {
 						SuggestionChip(
 							onClick = {
 								// todo - add single-fire launch param to tag sheet, with callback to flag as selected here
-								coordinator.onLaunchAddTag()
+								coordinator.launchAddTag()
 							},
 							label = { Text("Add") },
 							icon = { Icon(Icons.Default.Add, "add new tag") }

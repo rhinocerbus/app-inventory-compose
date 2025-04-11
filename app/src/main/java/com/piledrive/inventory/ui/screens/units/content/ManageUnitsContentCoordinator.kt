@@ -1,25 +1,32 @@
 package com.piledrive.inventory.ui.screens.units.content
 
 import com.piledrive.inventory.data.model.QuantityUnit
+import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinatorImpl
+import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
+import com.piledrive.inventory.ui.screens.coordinators.ManageDataScreenImpl
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
-import com.piledrive.inventory.ui.util.previewUnitsContentFlow
+import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
 import kotlinx.coroutines.flow.StateFlow
 
-interface ManageUnitsContentCoordinatorImpl {
-	val unitState: StateFlow<QuantityUnitContentState>
-	val onLaunchCreateUnit: () -> Unit
-	val onUnitClicked: (unit: QuantityUnit) -> Unit
-}
-
-val stubManageUnitsContentCoordinator = object : ManageUnitsContentCoordinatorImpl {
-	override val unitState: StateFlow<QuantityUnitContentState> = previewUnitsContentFlow()
-	override val onLaunchCreateUnit: () -> Unit = {}
-	override val onUnitClicked: (unit: QuantityUnit) -> Unit = {}
+interface ManageUnitsContentCoordinatorImpl : ManageDataScreenImpl<QuantityUnit> {
+	val unitsSourceFlow: StateFlow<QuantityUnitContentState>
+	val createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl
 }
 
 class ManageUnitsContentCoordinator(
-	override val unitState: StateFlow<QuantityUnitContentState>,
-	override val onLaunchCreateUnit: () -> Unit,
-	override val onUnitClicked: (unit: QuantityUnit) -> Unit,
+	override val unitsSourceFlow: StateFlow<QuantityUnitContentState>,
+	override val createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
 ) : ManageUnitsContentCoordinatorImpl {
+	override fun launchDataModelCreation() {
+		createQuantityUnitSheetCoordinator.showSheet()
+	}
+
+	override fun launchDataModelEdit(unit: QuantityUnit) {
+		createQuantityUnitSheetCoordinator.showSheetWithData(unit)
+	}
 }
+
+val stubManageUnitsContentCoordinator = ManageUnitsContentCoordinator(
+	unitsSourceFlow = previewQuantityUnitsContentFlow(),
+	createQuantityUnitSheetCoordinator = stubCreateQuantityUnitSheetCoordinator
+)

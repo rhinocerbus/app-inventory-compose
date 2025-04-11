@@ -1,5 +1,7 @@
 package com.piledrive.inventory.data.model
 
+import com.piledrive.inventory.data.model.abstracts.FullDataModel
+import com.piledrive.inventory.data.model.abstracts.SlugDataModel
 import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -18,7 +20,7 @@ data class StashSlug(
 	override val itemId: String,
 	override val locationId: String,
 	override val amount: Double
-) : StashImpl
+) : StashImpl, SlugDataModel
 
 @JsonClass(generateAdapter = true)
 data class Stash(
@@ -28,5 +30,5 @@ data class Stash(
 	override val itemId: String,
 	override val locationId: String,
 	override val amount: Double,
-) : StashImpl, SupaBaseModel
+) : StashImpl, FullDataModel, SupaBaseModel
 

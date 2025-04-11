@@ -57,7 +57,7 @@ object CreateLocationModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateLocationModalSheetCoordinatorImpl,
 	) {
-		val activeLocation = coordinator.activeLocationState.value
+		val activeLocation = coordinator.activeEditDataState.value
 		val initialText = remember { activeLocation?.name ?: "" }
 
 		Surface(
@@ -72,7 +72,7 @@ object CreateLocationModalSheet {
 						Validators.Custom<String>(runCheck = { nameIn ->
 							val matchEdit = nameIn == activeLocation?.name
 							val matchExisting =
-								coordinator.locationState.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } != null
+								coordinator.locationsSourceFlow.value.data.allLocations.firstOrNull { it.name.equals(nameIn, true) } != null
 							!matchExisting || matchEdit
 						}, "Location with that name exists")
 					)
@@ -121,10 +121,10 @@ object CreateLocationModalSheet {
 						 */
 						if (activeLocation == null) {
 							val slug = LocationSlug(name = formState.currentValue)
-							coordinator.onAddLocation(slug)
+							coordinator.onCreateDataModel(slug)
 						} else {
 							val updatedLocation = activeLocation.copy(name = formState.currentValue)
-							coordinator.onUpdateLocation(updatedLocation)
+							coordinator.onUpdateDataModel(updatedLocation)
 						}
 						coordinator.onDismiss()
 					}

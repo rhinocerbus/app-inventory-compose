@@ -3,7 +3,6 @@ package com.piledrive.inventory.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.enums.SortOrder
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
@@ -105,9 +104,9 @@ class ManageItemsViewModel @Inject constructor(
 		}
 	}
 
-	private fun updateItem(item: Item, tagIds: List<String>) {
+	private fun updateItem(item: ItemWithTags) {
 		viewModelScope.launch {
-			itemsRepo.updateItemWithTags(item, tagIds)
+			itemsRepo.updateItemWithTags(item)
 		}
 	}
 
@@ -141,12 +140,9 @@ class ManageItemsViewModel @Inject constructor(
 			withContext(Dispatchers.Default) {
 				tagsRepo.watchTags().collect {
 					Timber.d("Tags received: $it")
-					val flatTags = listOf(TagOptions.defaultTag, *it.toTypedArray())
-					userTagsContent = TagsContentState(
+					userTagsContent = userTagsContent.copy(
 						data = TagOptions(
-							allTags = flatTags,
 							userTags = it,
-							currentTag = userTagsContent.data.currentTag
 						),
 						hasLoaded = true,
 						isLoading = false
@@ -194,7 +190,7 @@ class ManageItemsViewModel @Inject constructor(
 				quantityUnitsRepo.watchQuantityUnits().collect {
 					Timber.d("Units received: $it")
 					quantityUnitsContent = quantityUnitsContent.copy(
-						data = quantityUnitsContent.data.copy(allUnits = QuantityUnit.defaultSet + it)
+						data = quantityUnitsContent.data.copy(customUnits = it)
 					)
 					withContext(Dispatchers.Main) {
 						_quantityUnitsContentState.value = quantityUnitsContent
@@ -281,43 +277,36 @@ class ManageItemsViewModel @Inject constructor(
 	//  region UI Coordinators
 	/////////////////////////////////////////////////
 
-	val createItemCoordinator = CreateItemSheetCoordinator(
-		itemState = itemsContentState,
-		quantityContentState = quantityUnitsContentState,
-		tagsContentState = userTagsContentState,
-		onAddItem = { addNewItem(it) },
-		onUpdateItem = { item, tagIds -> updateItem(item, tagIds) },
-		onLaunchAddTag = { createTagCoordinator.showSheet() },
-		onLaunchAddUnit = { createQuantityUnitSheetCoordinator.showSheet() }
-	)
-
-	val createTagCoordinator = CreateTagSheetCoordinator(
-		userTagsContentState,
-		onAddTag = {
-			addNewTag(it)
-		},
-		onUpdateTag = {
-			/*
-				no-op on this screen
-				should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
-			 */
-		}
-	)
-
-	val createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-		quantityUnitsContentState,
-		onAddQuantityUnit = {
-			addNewQuantityUnit(it)
-		},
-		onUpdateQuantityUnit = {
-			// no-op on this screen
-		}
-	)
-
 	val contentCoordinator = ManageItemsContentCoordinator(
-		itemState = fullItemsContentState,
-		onLaunchCreateItem = { createItemCoordinator.showSheet() },
-		onItemClicked = { createItemCoordinator.showSheetForItem(it) },
+		itemsSourceFlow = fullItemsContentState,
+		createItemCoordinator = CreateItemSheetCoordinator(
+			itemsSourceFlow = itemsContentState,
+			unitsSourceFlow = quantityUnitsContentState,
+			tagsSourceFlow = userTagsContentState,
+			createTagCoordinator = CreateTagSheetCoordinator(
+				userTagsContentState,
+				onCreateDataModel = {
+					addNewTag(it)
+				},
+				onUpdateDataModel = {
+					/*
+						no-op on this screen
+						should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
+					 */
+				}
+			),
+			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+				quantityUnitsContentState,
+				onCreateDataModel = {
+					addNewQuantityUnit(it)
+				},
+				onUpdateDataModel = {
+					// no-op on this screen
+				},
+			),
+			onCreateDataModel = { addNewItem(it) },
+			onUpdateDataModel = { updateItem(it) },
+		),
 	)
 
 	/////////////////////////////////////////////////

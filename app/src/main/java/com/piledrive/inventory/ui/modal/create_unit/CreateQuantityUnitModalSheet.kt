@@ -71,12 +71,12 @@ object CreateQuantityUnitModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateQuantityUnitSheetCoordinatorImpl,
 	) {
-		val unitPool = coordinator.unitsContentState.collectAsState().value
-		val activeUnit = coordinator.activeUnitState.value
+		val unitPool = coordinator.unitsSourceFlow.collectAsState().value
+		val activeUnit = coordinator.activeEditDataState.value
 		val initialText = remember { activeUnit?.name ?: "" }
 
-		var selectedMeasurement = remember {
-			val type = coordinator.activeUnitState.value?.type ?: coordinator.selectedMeasurementState.value
+		val selectedMeasurement = remember {
+			val type = activeUnit?.type ?: coordinator.selectedMeasurementState.value
 			mutableStateOf(type)
 		}
 
@@ -205,14 +205,14 @@ object CreateQuantityUnitModalSheet {
 									label = labelFieldState.currentValue,
 									type = coordinator.selectedMeasurementState.value
 								)
-								coordinator.onAddQuantityUnit(slug)
+								coordinator.onCreateDataModel(slug)
 							} else {
 								val updatedUnit = activeUnit.copy(
 									name = nameFieldState.currentValue,
 									label = labelFieldState.currentValue,
 									type = selectedMeasurement.value
 								)
-								coordinator.onUpdateQuantityUnit(updatedUnit)
+								coordinator.onUpdateDataModel(updatedUnit)
 							}
 							coordinator.onDismiss()
 						}

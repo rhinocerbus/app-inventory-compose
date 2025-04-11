@@ -41,7 +41,7 @@ object ManageTagsScreen : NavRoute {
 	) {
 		drawContent(
 			viewModel.contentCoordinator,
-			viewModel.createTagCoordinator,
+			viewModel.contentCoordinator.createTagCoordinator,
 		)
 	}
 

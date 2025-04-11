@@ -1,15 +1,11 @@
 package com.piledrive.inventory.repo.datasource
 
 import android.content.ContentValues
-import com.piledrive.inventory.data.model.Item
-import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityType
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
-import com.piledrive.inventory.repo.datasource.abstracts.ItemsSourceImpl
 import com.piledrive.inventory.repo.datasource.abstracts.QuantityUnitsSourceImpl
-import com.piledrive.inventory.ui.util.UUIDv5
 import com.powersync.db.getString
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
@@ -54,7 +50,7 @@ class PowerSyncQuantityUnitsDataSource @Inject constructor(
 		powerSync.insert("units", values, QuantityUnit::class)
 	}
 
-	override suspend fun editQuantityUnit(unit: QuantityUnit) {
+	override suspend fun updateQuantityUnit(unit: QuantityUnit) {
 		val values = ContentValues().apply {
 			put("name", unit.name)
 			put("label", unit.label)

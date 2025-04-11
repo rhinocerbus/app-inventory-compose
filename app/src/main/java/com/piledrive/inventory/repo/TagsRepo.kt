@@ -11,8 +11,6 @@ import javax.inject.Inject
 @ViewModelScoped
 class TagsRepo @Inject constructor(
 	private val powerSyncSource: PowerSyncTagsDataSource,
-	//private val localSource: LocalMoviesSource,
-	//private val settingsSource: LocalSettingsSource
 ) : TagsSourceImpl {
 
 	suspend fun initialize(): Flow<Int> {
@@ -21,12 +19,10 @@ class TagsRepo @Inject constructor(
 
 	override fun watchTags(): Flow<List<Tag>> {
 		return powerSyncSource.watchTags()
-		//return supaBase.watchLocations()
 	}
 
 	override suspend fun addTag(slug: TagSlug) {
 		powerSyncSource.addTag(slug)
-		//supaBase.addLocation(name)
 	}
 
 	override suspend fun updateTag(tag: Tag) {

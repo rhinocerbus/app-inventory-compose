@@ -4,7 +4,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.enums.SortOrder
-import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
@@ -184,10 +183,8 @@ class MainViewModel @Inject constructor(
 			withContext(Dispatchers.Default) {
 				tagsRepo.watchTags().collect {
 					Timber.d("Tags received: $it")
-					val flatTags = listOf(TagOptions.defaultTag, *it.toTypedArray())
-					userTagsContent = TagsContentState(
+					userTagsContent = userTagsContent.copy(
 						data = TagOptions(
-							allTags = flatTags,
 							userTags = it,
 							currentTag = userTagsContent.data.currentTag
 						),
@@ -196,7 +193,7 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userTagsContentState.value = userTagsContent
-						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(flatTags)
+						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(userTagsContent.data.allTags)
 						if (filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
 							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
 						}
@@ -247,7 +244,7 @@ class MainViewModel @Inject constructor(
 				quantityUnitsRepo.watchQuantityUnits().collect {
 					Timber.d("Units received: $it")
 					quantityUnitsContent = quantityUnitsContent.copy(
-						data = quantityUnitsContent.data.copy(allUnits = QuantityUnit.defaultSet + it)
+						data = quantityUnitsContent.data.copy(customUnits = it)
 					)
 					withContext(Dispatchers.Main) {
 						_quantityUnitsContentState.value = quantityUnitsContent
@@ -275,9 +272,9 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	private fun updateItem(item: Item, tagIds: List<String>) {
+	private fun updateItem(item: ItemWithTags) {
 		viewModelScope.launch {
-			itemsRepo.updateItemWithTags(item, tagIds)
+			itemsRepo.updateItemWithTags(item)
 		}
 	}
 
@@ -461,68 +458,60 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
-		locationState = userLocationContentState,
-		onAddLocation = {
+		locationsSourceFlow = userLocationContentState,
+		onCreateDataModel = {
 			addNewLocation(it)
 		},
-		onUpdateLocation = {
+		onUpdateDataModel = {
 			updateLocation(it)
 		}
 	)
 
-	val createTagCoordinator = CreateTagSheetCoordinator(
-		userTagsContentState,
-		onAddTag = {
-			addNewTag(it)
-		},
-		onUpdateTag = {
-			/*
-				no-op on this screen 
-				should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
-			 */
-		}
-	)
-
 	val createItemCoordinator = CreateItemSheetCoordinator(
-		itemState = itemsContentState,
-		quantityContentState = quantityUnitsContentState,
-		tagsContentState = userTagsContentState,
-		onAddItem = { addNewItem(it) },
-		onUpdateItem = { item, tagIds -> updateItem(item, tagIds)},
-		onLaunchAddTag = { createTagCoordinator.showSheet() },
-		onLaunchAddUnit = { createQuantityUnitSheetCoordinator.showSheet() }
-	)
-
-	val createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-		quantityUnitsContentState,
-		onAddQuantityUnit = {
-			addNewQuantityUnit(it)
-		},
-		onUpdateQuantityUnit = {
-			// no-op on this screen
-		}
+		itemsSourceFlow = itemsContentState,
+		unitsSourceFlow = quantityUnitsContentState,
+		tagsSourceFlow = userTagsContentState,
+		createTagCoordinator = CreateTagSheetCoordinator(
+			userTagsContentState,
+			onCreateDataModel = {
+				addNewTag(it)
+			},
+			onUpdateDataModel = {
+				/*
+					no-op on this screen
+					should maybe launch the manage screen with a flag to auto-launch the modal and remove this coordinator entirely
+				 */
+			}
+		),
+		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+			quantityUnitsContentState,
+			onCreateDataModel = {
+				addNewQuantityUnit(it)
+			},
+			onUpdateDataModel = {
+				// no-op on this screen
+			}
+		),
+		onCreateDataModel = { addNewItem(it) },
+		onUpdateDataModel = { updateItem(it) },
 	)
 
 	val createItemStashCoordinator = CreateItemStashSheetCoordinator(
 		itemStashesContentState,
 		itemsContentState,
 		userLocationContentState,
-		onAddItemToLocation = {
+		createItemCoordinator = createItemCoordinator,
+		createLocationCoordinator = createLocationCoordinator,
+		onCreateDataModel = {
 			addNewItemStash(it)
-		},
-		onLaunchCreateItem = {
-			createItemCoordinator.showSheet()
-		},
-		onLaunchCreateLocation = {
-			createLocationCoordinator.showSheet()
 		}
 	)
 
 	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
-		itemsSource = itemsContentState,
-		unitsSource = quantityUnitsContentState,
-		locationsSource = userLocationContentState,
-		stashesSource = itemStashesContentState,
+		itemsSourceFlow = itemsContentState,
+		unitsSourceFlow = quantityUnitsContentState,
+		locationsSourceFlow = userLocationContentState,
+		stashesSourceFlow = itemStashesContentState,
 		onCommitStashTransfer = { fromStash, toStash ->
 			viewModelScope.launch {
 				itemStashesRepo.performTransfer(fromStash, toStash)
@@ -539,8 +528,8 @@ class MainViewModel @Inject constructor(
 			updateStashQuantity(stashId, qty)
 		},
 		onItemClicked = {
-			createItemCoordinator.showSheetForItem(ItemWithTags(it.item, it.tags, it.quantityUnit))
-		} ,
+			createItemCoordinator.showSheetWithData(ItemWithTags(it.item, it.tags, it.quantityUnit))
+		},
 		onStartStashTransfer = { item, locId ->
 			transferItemStashSheetCoordinator.showSheetForItem(item)
 		}

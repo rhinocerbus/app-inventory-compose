@@ -160,7 +160,7 @@ object CreateItemStashModalSheet {
 								} else {
 									IconButton(
 										onClick = {
-											coordinator.onLaunchCreateItem()
+											coordinator.launchCreateItem()
 											searchCoordinator.onSearchActiveChanged(false)
 										}
 									) {
@@ -202,7 +202,7 @@ object CreateItemStashModalSheet {
 										form-level viewmodel, feels like clutter in the main VM
 								 */
 								val stashSlug = StashSlug(selectedItem!!.id, loc, 0.0)
-								coordinator.onAddItemToLocation(stashSlug)
+								coordinator.onCreateDataModel(stashSlug)
 							}
 							coordinator.onDismiss()
 						}) {
@@ -228,7 +228,7 @@ object CreateItemStashModalSheet {
 						}
 					}
 					item {
-						Surface(onClick = { coordinator.onLaunchCreateLocation() }) {
+						Surface(onClick = { coordinator.launchCreateLocation() }) {
 							Row(verticalAlignment = Alignment.CenterVertically) {
 								Icon(Icons.Default.Add, "Add new location")
 								Text("Add new location")

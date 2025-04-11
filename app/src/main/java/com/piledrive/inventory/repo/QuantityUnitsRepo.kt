@@ -1,6 +1,5 @@
 package com.piledrive.inventory.repo
 
-import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.repo.datasource.PowerSyncQuantityUnitsDataSource
@@ -30,7 +29,7 @@ class QuantityUnitsRepo @Inject constructor(
 		//supaBase.addQuantityUnit(slug)
 	}
 
-	override suspend fun editQuantityUnit(unit: QuantityUnit) {
-		powerSyncSource.editQuantityUnit(unit)
+	override suspend fun updateQuantityUnit(unit: QuantityUnit) {
+		powerSyncSource.updateQuantityUnit(unit)
 	}
 }

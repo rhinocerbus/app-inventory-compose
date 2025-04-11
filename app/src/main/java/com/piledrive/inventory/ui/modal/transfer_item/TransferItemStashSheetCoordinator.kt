@@ -22,18 +22,17 @@ import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdow
 import kotlinx.coroutines.flow.StateFlow
 
 interface TransferItemStashSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
-	val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
-	val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
+	val stashesSourceFlow: StateFlow<ItemStashContentState>
+	val itemsSourceFlow: StateFlow<ItemContentState>
+	val locationsSourceFlow: StateFlow<LocationContentState>
+	val unitsSourceFlow: StateFlow<QuantityUnitContentState>
 
 	val activeItemState: State<Item?>
 	val amountDifference: State<Double>
 	val modifiedAmount: State<Double>
 
-	// going back to data sources since any changes to data loading being external is annoying and feels messy
-	val stashesSource: StateFlow<ItemStashContentState>
-	val itemsSource: StateFlow<ItemContentState>
-	val locationsSource: StateFlow<LocationContentState>
-	val unitsSource: StateFlow<QuantityUnitContentState>
+	val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
+	val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation>
 
 	val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit
 
@@ -42,45 +41,16 @@ interface TransferItemStashSheetCoordinatorImpl : ModalSheetCoordinatorImpl {
 	fun showSheetForItem(forItem: Item)
 }
 
-val stubTransferItemStashSheetCoordinator = object : TransferItemStashSheetCoordinatorImpl {
-	override val fromLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> =
-		ReadOnlyDropdownCoordinatorGeneric()
-	override val toLocationDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<StashForItemAtLocation> =
-		ReadOnlyDropdownCoordinatorGeneric()
-
-	override val activeItemState: State<Item?> = mutableStateOf(null)
-
-	override val amountDifference: State<Double> = mutableDoubleStateOf(0.0)
-	override val modifiedAmount: State<Double> = mutableDoubleStateOf(-1.0)
-
-	override val stashesSource: StateFlow<ItemStashContentState> = previewItemStashesContentFlow()
-	override val itemsSource: StateFlow<ItemContentState> = previewItemsContentFlow()
-	override val locationsSource: StateFlow<LocationContentState> = previewLocationContentFlow()
-	override val unitsSource: StateFlow<QuantityUnitContentState> = previewQuantityUnitsContentFlow()
-
-	override val showSheetState: State<Boolean> = mutableStateOf(false)
-	override fun showSheet() {}
-
-	override fun showSheetForItem(forItem: Item) {}
-	override val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit =
-		{ _, _ -> }
-
-	override fun onDismiss() {}
-
-	override fun changeTransferAmount(amount: Double) {}
-	override fun submitTransfer() {}
-}
-
 class TransferItemStashSheetCoordinator(
 	initialShowSheetValue: Boolean = false,
 	initialItemValue: Item? = null,
 	initialAmountDifferenceValue: Double = 0.0,
 	initialModifiedAmountValue: Double = -1.0,
 
-	override val itemsSource: StateFlow<ItemContentState>,
-	override val unitsSource: StateFlow<QuantityUnitContentState>,
-	override val locationsSource: StateFlow<LocationContentState>,
-	override val stashesSource: StateFlow<ItemStashContentState>,
+	override val itemsSourceFlow: StateFlow<ItemContentState>,
+	override val unitsSourceFlow: StateFlow<QuantityUnitContentState>,
+	override val locationsSourceFlow: StateFlow<LocationContentState>,
+	override val stashesSourceFlow: StateFlow<ItemStashContentState>,
 
 	override val onCommitStashTransfer: (updatedFromStash: Stash, updatedToStash: Stash) -> Unit = { _, _ -> }
 ) : ModalSheetCoordinator(), TransferItemStashSheetCoordinatorImpl {
@@ -135,10 +105,10 @@ class TransferItemStashSheetCoordinator(
 	}
 
 	private fun reload(itemId: String) {
-		val items = itemsSource.value.data.items
-		val quantityUnits = unitsSource.value.data.allUnits
-		val stashes = stashesSource.value.data.itemStashes
-		val locations = locationsSource.value.data.userLocations
+		val items = itemsSourceFlow.value.data.items
+		val quantityUnits = unitsSourceFlow.value.data.allUnits
+		val stashes = stashesSourceFlow.value.data.itemStashes
+		val locations = locationsSourceFlow.value.data.userLocations
 
 		val rootItem = items.firstOrNull { it.id == itemId } ?: throw IllegalStateException("no item by given id")
 		val withUnit = quantityUnits.firstOrNull { it.id == rootItem.unitId } ?: throw IllegalStateException("no unit for item")
@@ -197,6 +167,14 @@ class TransferItemStashSheetCoordinator(
 		onDismiss()
 	}
 }
+
+val stubTransferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
+	itemsSourceFlow = previewItemsContentFlow(),
+	unitsSourceFlow = previewQuantityUnitsContentFlow(),
+	locationsSourceFlow = previewLocationContentFlow(),
+	stashesSourceFlow = previewItemStashesContentFlow(),
+	onCommitStashTransfer = { _, _ -> }
+)
 
 fun clampLong(value: Long, min: Long, max: Long): Long {
 	return when {

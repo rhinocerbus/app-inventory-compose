@@ -30,7 +30,7 @@ object ManageUnitsContentList {
 		modifier: Modifier = Modifier,
 		coordinator: ManageUnitsContentCoordinatorImpl,
 	) {
-		val unitsContent = coordinator.unitState.collectAsState().value
+		val unitsContent = coordinator.unitsSourceFlow.collectAsState().value
 
 		DrawContent(
 			modifier,
@@ -61,7 +61,7 @@ object ManageUnitsContentList {
 							"no units"
 						)
 						Button(onClick = {
-							coordinator.onLaunchCreateUnit()
+							coordinator.launchDataModelCreation()
 						}) {
 							Text("add unit")
 						}
@@ -119,7 +119,7 @@ object ManageUnitsContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = { coordinator.onUnitClicked(unit) },
+					onClick = { coordinator.launchDataModelEdit(unit) },
 					onLongClick = { }
 				)
 				.fillMaxWidth()

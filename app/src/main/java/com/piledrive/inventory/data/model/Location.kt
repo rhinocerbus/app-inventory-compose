@@ -1,5 +1,7 @@
 package com.piledrive.inventory.data.model
 
+import com.piledrive.inventory.data.model.abstracts.FullDataModel
+import com.piledrive.inventory.data.model.abstracts.SlugDataModel
 import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -14,7 +16,7 @@ interface LocationImpl {
 
 data class LocationSlug(
 	override val name: String,
-) : LocationImpl
+) : LocationImpl, SlugDataModel
 
 @JsonClass(generateAdapter = true)
 data class Location(
@@ -22,4 +24,4 @@ data class Location(
 	@Json(name = "created_at")
 	override val createdAt: String,
 	override val name: String,
-): LocationImpl, SupaBaseModel
+): LocationImpl, FullDataModel, SupaBaseModel

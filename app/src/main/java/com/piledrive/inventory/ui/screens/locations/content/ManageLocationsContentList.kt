@@ -30,7 +30,7 @@ object ManageLocationsContentList {
 		modifier: Modifier = Modifier,
 		coordinator: ManageLocationsContentCoordinatorImpl,
 	) {
-		val locationsContent = coordinator.locationState.collectAsState().value
+		val locationsContent = coordinator.locationsSourceFlow.collectAsState().value
 
 		DrawContent(
 			modifier,
@@ -61,7 +61,7 @@ object ManageLocationsContentList {
 							"no locations"
 						)
 						Button(onClick = {
-							coordinator.onLaunchCreateLocation()
+							coordinator.launchDataModelCreation()
 						}) {
 							Text("add location")
 						}
@@ -119,7 +119,7 @@ object ManageLocationsContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = { coordinator.onLocationClicked(location) },
+					onClick = { coordinator.launchDataModelEdit(location) },
 					onLongClick = { }
 				)
 				.fillMaxWidth()

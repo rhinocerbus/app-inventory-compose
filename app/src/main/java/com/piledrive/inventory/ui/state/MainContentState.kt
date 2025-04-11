@@ -21,6 +21,12 @@ data class LocationOptions(
 ) {
 	companion object {
 		val defaultLocation = Location(STATIC_ID_LOCATION_ALL, "", "Everywhere")
+		fun generateSampleSet(): List<Location> {
+			return listOf(
+				Location(id = "0", createdAt = "0", name = "Fridge"),
+				Location(id = "1", createdAt = "1", name = "Freezer"),
+			)
+		}
 	}
 }
 
@@ -38,10 +44,13 @@ data class LocationContentState(
 /////////////////////////////////////////////////
 
 data class TagOptions(
-	val allTags: List<Tag> = listOf(defaultTag),
 	val userTags: List<Tag> = listOf(),
 	val currentTag: Tag = defaultTag
 ) {
+
+	val allTags: List<Tag>
+		get() = listOf(defaultTag, *userTags.toTypedArray())
+
 	companion object {
 		val defaultTag = Tag(STATIC_ID_TAG_ALL, "", "Everything")
 	}
@@ -61,8 +70,11 @@ data class TagsContentState(
 /////////////////////////////////////////////////
 
 data class QuantityUnitOptions(
-	val allUnits: List<QuantityUnit> = QuantityUnit.defaultSet,
-)
+	val customUnits: List<QuantityUnit> = listOf()
+) {
+	val allUnits: List<QuantityUnit>
+		get() = QuantityUnit.defaultSet + customUnits
+}
 
 data class QuantityUnitContentState(
 	override val data: QuantityUnitOptions = QuantityUnitOptions(),
@@ -122,7 +134,19 @@ data class FullItemsContentState(
 
 data class ItemOptions(
 	val items: List<Item> = listOf(),
-)
+) {
+	companion object {
+		fun generateSampleSet(): List<Item> {
+			return listOf(
+				Item(id = "0", createdAt = "", name = "Apples", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+				Item(id = "1", createdAt = "", name = "Bananas", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+				Item(id = "2", createdAt = "", name = "Coffee", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+				Item(id = "3", createdAt = "", name = "Donuts", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+				Item(id = "4", createdAt = "", name = "Earwigs", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+			)
+		}
+	}
+}
 
 data class ItemContentState(
 	override val data: ItemOptions = ItemOptions(),

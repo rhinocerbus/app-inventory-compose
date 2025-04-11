@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.TagSlug
-import com.piledrive.inventory.ui.util.previewTagsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.forms.state.TextFormFieldState
 import com.piledrive.lib_compose_components.ui.forms.validators.Validators
@@ -68,8 +67,8 @@ object CreateTagModalSheet {
 	internal fun DrawContent(
 		coordinator: CreateTagSheetCoordinatorImpl,
 	) {
-		val tags = coordinator.tagsContentState.collectAsState().value
-		val activeTag = coordinator.activeTagState.value
+		val tags = coordinator.tagsSourceFlow.collectAsState().value
+		val activeTag = coordinator.activeEditDataState.value
 		val initialText = remember { activeTag?.name ?: "" }
 
 		Surface(
@@ -137,10 +136,10 @@ object CreateTagModalSheet {
 							 */
 							if(activeTag == null) {
 								val slug = TagSlug(name = formState.currentValue)
-								coordinator.onAddTag(slug)
+								coordinator.onCreateDataModel(slug)
 							} else {
 								val updatedTag = activeTag.copy(name = formState.currentValue)
-								coordinator.onUpdateTag(updatedTag)
+								coordinator.onUpdateDataModel(updatedTag)
 							}
 							coordinator.onDismiss()
 						}

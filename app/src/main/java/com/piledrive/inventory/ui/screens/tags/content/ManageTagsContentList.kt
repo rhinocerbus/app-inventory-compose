@@ -6,7 +6,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +30,7 @@ object ManageTagsContentList {
 		modifier: Modifier = Modifier,
 		coordinator: ManageTagsContentCoordinatorImpl,
 	) {
-		val tagsContent = coordinator.tagState.collectAsState().value
+		val tagsContent = coordinator.tagsSourceFlow.collectAsState().value
 
 		DrawContent(
 			modifier,
@@ -62,7 +61,7 @@ object ManageTagsContentList {
 							"no tags"
 						)
 						Button(onClick = {
-							coordinator.onLaunchCreateTag()
+							coordinator.launchDataModelCreation()
 						}) {
 							Text("add tag")
 						}
@@ -120,7 +119,7 @@ object ManageTagsContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = { coordinator.onTagClicked(tag) },
+					onClick = { coordinator.launchDataModelEdit(tag) },
 					onLongClick = { }
 				)
 				.fillMaxWidth()

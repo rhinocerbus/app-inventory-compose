@@ -4,18 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
-import com.piledrive.inventory.data.model.Tag
-import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.repo.LocationsRepo
-import com.piledrive.inventory.repo.TagsRepo
 import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
-import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.screens.locations.content.ManageLocationsContentCoordinator
-import com.piledrive.inventory.ui.screens.tags.content.ManageTagsContentCoordinator
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
-import com.piledrive.inventory.ui.state.TagOptions
-import com.piledrive.inventory.ui.state.TagsContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,20 +101,17 @@ class ManageLocationsViewModel @Inject constructor(
 	//  region UI Coordinators
 	/////////////////////////////////////////////////
 
-	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
-		locationState = userLocationContentState,
-		onAddLocation = {
-			addNewLocation(it)
-		},
-		onUpdateLocation = {
-			updateLocation(it)
-		}
-	)
-
 	val contentCoordinator = ManageLocationsContentCoordinator(
-		locationState = userLocationContentState,
-		onLaunchCreateLocation = {createLocationCoordinator.showSheet()},
-		onLocationClicked = {createLocationCoordinator.showSheetForLocation(it)},
+		locationsSourceFlow = userLocationContentState,
+		createLocationCoordinator = CreateLocationModalSheetCoordinator(
+			locationsSourceFlow = userLocationContentState,
+			onCreateDataModel = {
+				addNewLocation(it)
+			},
+			onUpdateDataModel = {
+				updateLocation(it)
+			}
+		)
 	)
 
 	/////////////////////////////////////////////////

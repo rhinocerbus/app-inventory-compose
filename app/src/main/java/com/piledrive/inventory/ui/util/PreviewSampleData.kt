@@ -2,15 +2,24 @@ package com.piledrive.inventory.ui.util
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
+import com.piledrive.inventory.data.model.QuantityUnit
+import com.piledrive.inventory.data.model.Stash
+import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.ContentForLocation
+import com.piledrive.inventory.data.model.composite.FullItemsContent
 import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.inventory.ui.state.ItemContentState
+import com.piledrive.inventory.ui.state.ItemOptions
 import com.piledrive.inventory.ui.state.ItemStashContentState
+import com.piledrive.inventory.ui.state.ItemStashOptions
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
+import com.piledrive.inventory.ui.state.QuantityUnitOptions
+import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,8 +38,15 @@ fun previewLocationContentFlow(
 }
 
 fun previewTagsContentFlow(
+	tags: List<Tag> = listOf()
 ): StateFlow<TagsContentState> {
-	return MutableStateFlow(TagsContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(
+		TagsContentState(
+			data = TagOptions(userTags = tags),
+			hasLoaded = true,
+			isLoading = false
+		)
+	)
 }
 
 fun previewQuantityUnitsContentFlow(
@@ -39,23 +55,27 @@ fun previewQuantityUnitsContentFlow(
 }
 
 fun previewItemsContentFlow(
+	items: List<Item> = ItemOptions.generateSampleSet()
 ): StateFlow<ItemContentState> {
-	return MutableStateFlow(ItemContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(ItemContentState(data = ItemOptions(items), hasLoaded = true, isLoading = false))
 }
 
 fun previewUnitsContentFlow(
+	units: List<QuantityUnit> = listOf()
 ): StateFlow<QuantityUnitContentState> {
-	return MutableStateFlow(QuantityUnitContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(QuantityUnitContentState(data = QuantityUnitOptions(units), hasLoaded = true, isLoading = false))
 }
 
 fun previewFullItemsContentFlow(
+	dataSet: FullItemsContent = FullItemsContent.generateSampleSet()
 ): StateFlow<FullItemsContentState> {
-	return MutableStateFlow(FullItemsContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(FullItemsContentState(data = dataSet, hasLoaded = true, isLoading = false))
 }
 
 fun previewItemStashesContentFlow(
+	dataSet: List<Stash> = listOf()
 ): StateFlow<ItemStashContentState> {
-	return MutableStateFlow(ItemStashContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(ItemStashContentState(data = ItemStashOptions(dataSet), hasLoaded = true, isLoading = false))
 }
 
 fun previewLocalizedContentFlow(

@@ -67,7 +67,7 @@ class ManageUnitsViewModel @Inject constructor(
 
 	private fun updateQuantityUnit(unit: QuantityUnit) {
 		viewModelScope.launch {
-			unitsRepo.editQuantityUnit(unit)
+			unitsRepo.updateQuantityUnit(unit)
 		}
 	}
 
@@ -77,7 +77,7 @@ class ManageUnitsViewModel @Inject constructor(
 				unitsRepo.watchQuantityUnits().collect {
 					Timber.d("Units received: $it")
 					unitsContent = unitsContent.copy(
-						data = unitsContent.data.copy(allUnits = QuantityUnit.defaultSet + it)
+						data = unitsContent.data.copy(customUnits = it)
 					)
 					withContext(Dispatchers.Main) {
 						_unitsContentState.value = unitsContent
@@ -94,20 +94,17 @@ class ManageUnitsViewModel @Inject constructor(
 	//  region UI Coordinators
 	/////////////////////////////////////////////////
 
-	val createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-		unitsContentState,
-		onAddQuantityUnit = {
-			addNewQuantityUnit(it)
-		},
-		onUpdateQuantityUnit = {
-			updateQuantityUnit(it)
-		}
-	)
-
 	val contentCoordinator = ManageUnitsContentCoordinator(
-		unitState = unitsContentState,
-		onLaunchCreateUnit = { createQuantityUnitSheetCoordinator.showSheet() },
-		onUnitClicked = { createQuantityUnitSheetCoordinator.showSheetForUnit(it) }
+		unitsSourceFlow = unitsContentState,
+		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
+			unitsContentState,
+			onCreateDataModel = {
+				addNewQuantityUnit(it)
+			},
+			onUpdateDataModel = {
+				updateQuantityUnit(it)
+			}
+		),
 	)
 
 	/////////////////////////////////////////////////

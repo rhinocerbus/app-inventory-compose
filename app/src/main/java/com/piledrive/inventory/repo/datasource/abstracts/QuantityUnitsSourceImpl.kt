@@ -7,5 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface QuantityUnitsSourceImpl {
 	fun watchQuantityUnits(): Flow<List<QuantityUnit>>
 	suspend fun addQuantityUnit(slug: QuantityUnitSlug)
-	suspend fun editQuantityUnit(unit: QuantityUnit)
+	suspend fun updateQuantityUnit(unit: QuantityUnit)
 }

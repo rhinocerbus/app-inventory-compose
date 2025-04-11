@@ -1,5 +1,7 @@
 package com.piledrive.inventory.data.model
 
+import com.piledrive.inventory.data.model.abstracts.FullDataModel
+import com.piledrive.inventory.data.model.abstracts.SlugDataModel
 import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -13,7 +15,7 @@ interface QuantityUnitImpl {
 
 open class QuantityUnitSlug(
 	override val name: String, override val label: String, override val type: QuantityType
-) : QuantityUnitImpl
+) : QuantityUnitImpl, SlugDataModel
 
 @JsonClass(generateAdapter = true)
 data class QuantityUnit(
@@ -23,7 +25,7 @@ data class QuantityUnit(
 	override val name: String,
 	override val label: String,
 	override val type: QuantityType,
-) : QuantityUnitImpl, SupaBaseModel {
+) : QuantityUnitImpl, FullDataModel, SupaBaseModel {
 	companion object {
 		const val DEFAULT_ID_BAGS = "915c0cb3-28e8-4e79-990b-0051090c98d8"
 		const val DEFAULT_ID_POUNDS = "551bf4da-21ce-4f2d-aa2e-4ea66b969ea1"
