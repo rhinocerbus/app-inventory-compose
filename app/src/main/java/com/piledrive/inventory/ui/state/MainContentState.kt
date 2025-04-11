@@ -134,7 +134,19 @@ data class FullItemsContentState(
 
 data class ItemOptions(
 	val items: List<Item> = listOf(),
-)
+) {
+	companion object {
+		fun generateSampleSet(): List<Item> {
+			return listOf(
+				Item(id = "0", createdAt = "", name = "Apples", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+				Item(id = "1", createdAt = "", name = "Bananas", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+				Item(id = "2", createdAt = "", name = "Coffee", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+				Item(id = "3", createdAt = "", name = "Donuts", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+				Item(id = "4", createdAt = "", name = "Earwigs", unitId = QuantityUnit.DEFAULT_ID_BAGS),
+			)
+		}
+	}
+}
 
 data class ItemContentState(
 	override val data: ItemOptions = ItemOptions(),

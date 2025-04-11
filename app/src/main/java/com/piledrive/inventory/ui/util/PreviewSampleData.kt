@@ -2,14 +2,18 @@ package com.piledrive.inventory.ui.util
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.QuantityUnit
+import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.ContentForLocation
 import com.piledrive.inventory.data.model.composite.FullItemsContent
 import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.inventory.ui.state.ItemContentState
+import com.piledrive.inventory.ui.state.ItemOptions
 import com.piledrive.inventory.ui.state.ItemStashContentState
+import com.piledrive.inventory.ui.state.ItemStashOptions
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
@@ -51,8 +55,9 @@ fun previewQuantityUnitsContentFlow(
 }
 
 fun previewItemsContentFlow(
+	items: List<Item> = ItemOptions.generateSampleSet()
 ): StateFlow<ItemContentState> {
-	return MutableStateFlow(ItemContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(ItemContentState(data = ItemOptions(items), hasLoaded = true, isLoading = false))
 }
 
 fun previewUnitsContentFlow(
@@ -68,8 +73,9 @@ fun previewFullItemsContentFlow(
 }
 
 fun previewItemStashesContentFlow(
+	dataSet: List<Stash> = listOf()
 ): StateFlow<ItemStashContentState> {
-	return MutableStateFlow(ItemStashContentState(hasLoaded = true, isLoading = false))
+	return MutableStateFlow(ItemStashContentState(data = ItemStashOptions(dataSet), hasLoaded = true, isLoading = false))
 }
 
 fun previewLocalizedContentFlow(
