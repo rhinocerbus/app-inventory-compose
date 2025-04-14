@@ -42,11 +42,6 @@ fun AmountAdjuster(
 	Surface {
 
 		Row(verticalAlignment = Alignment.CenterVertically) {
-			if (unit != null) {
-				Text("(${unit.label})")
-				Gap(8.dp)
-			}
-
 			IconButton(
 				onClick = {
 					onQtyChange(qtyValue - increment)
@@ -64,6 +59,11 @@ fun AmountAdjuster(
 					.width(amountW.dp)
 					.focusable(!readOnly),
 				value = if (qtyValue < 0) "--" else "$qtyValue",
+				label = {
+					unit?.also {
+						Text(it.label)
+					}
+				},
 				onValueChange = {
 					if (it.toDouble() < 0) {
 						//err
@@ -95,7 +95,7 @@ private fun AmountAdjusterPreview() {
 	AppTheme {
 		AmountAdjuster(
 			Modifier,
-			unit = null,
+			unit = QuantityUnit.defaultUnitBags,
 			qtyValue = 8.0,
 			increment = 1.0,
 			min = 0.0,
