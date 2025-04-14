@@ -16,6 +16,7 @@ interface MainContentListCoordinatorImpl {
 	val stashesSourceFlow: StateFlow<LocalizedContentState>
 	val locationsSourceFlow: StateFlow<LocationContentState>
 	val tagsSourceFlow: StateFlow<TagsContentState>
+	val allLocationsSectionsCoordinator: SectionedListCoordinator
 	val itemMenuCoordinator: ListItemOverflowMenuCoordinator
 	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit
 	val onItemClicked: (item: StashForItem) -> Unit
@@ -26,6 +27,7 @@ class MainContentListCoordinator(
 	override val stashesSourceFlow: StateFlow<LocalizedContentState>,
 	override val locationsSourceFlow: StateFlow<LocationContentState>,
 	override val tagsSourceFlow: StateFlow<TagsContentState>,
+	override val allLocationsSectionsCoordinator: SectionedListCoordinator,
 	override val itemMenuCoordinator: ListItemOverflowMenuCoordinator,
 	override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit,
 	override val onItemClicked: (item: StashForItem) -> Unit,
@@ -41,6 +43,7 @@ val stubMainContentListCoordinator = MainContentListCoordinator(
 	stashesSourceFlow = previewLocalizedContentFlow(),
 	locationsSourceFlow = previewLocationContentFlow(),
 	tagsSourceFlow = previewTagsContentFlow(),
+	allLocationsSectionsCoordinator = SectionedListCoordinator(),
 	itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
 	onItemStashQuantityUpdated = { _, _ -> },
 	onItemClicked = {},
