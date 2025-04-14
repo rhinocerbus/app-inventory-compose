@@ -41,14 +41,12 @@ class MainFilterAppBarCoordinator(
 	}
 }
 
-val stubMainFilterAppBarCoordinator = object : MainFilterAppBarCoordinatorImpl {
-	override val locationsSourceFlow: StateFlow<LocationContentState> = previewLocationContentFlow()
-	override val tagsSourceFlow: StateFlow<TagsContentState> = previewTagsContentFlow()
-	override val tagsDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<Tag> = ReadOnlyDropdownCoordinatorGeneric()
-	override val locationsDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<Location> =
-		ReadOnlyDropdownCoordinatorGeneric()
-	override val sortDropdownCoordinator: ReadOnlyDropdownCoordinatorGeneric<SortOrder> = ReadOnlyDropdownCoordinatorGeneric()
-	override val sortDescendingState: StateFlow<Boolean> = previewBooleanFlow(false)
-	override fun toggleSortOrder(sortDesc: Boolean) {}
-}
+val stubMainFilterAppBarCoordinator = MainFilterAppBarCoordinator(
+	locationsSourceFlow = previewLocationContentFlow(),
+	tagsSourceFlow = previewTagsContentFlow(),
+	tagsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
+	locationsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
+	sortDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
+	sortDesc = false
+)
 
