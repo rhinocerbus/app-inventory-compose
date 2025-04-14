@@ -521,8 +521,8 @@ class MainViewModel @Inject constructor(
 
 	val listContentCoordinator = MainContentListCoordinator(
 		locationStashesContentState,
-		locationState = userLocationContentState,
-		tagState = userTagsContentState,
+		locationsSourceFlow = userLocationContentState,
+		tagsSourceFlow = userTagsContentState,
 		itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
 		onItemStashQuantityUpdated = { stashId, qty ->
 			updateStashQuantity(stashId, qty)
@@ -536,8 +536,8 @@ class MainViewModel @Inject constructor(
 	)
 
 	val filterAppBarCoordinator = MainFilterAppBarCoordinator(
-		locationState = _userLocationContentState,
-		tagState = userTagsContentState,
+		locationsSourceFlow = _userLocationContentState,
+		tagsSourceFlow = userTagsContentState,
 		locationsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
 			externalOnOptionSelected = {
 				it ?: return@ReadOnlyDropdownCoordinatorGeneric
