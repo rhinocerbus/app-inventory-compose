@@ -9,7 +9,7 @@ import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
-import com.piledrive.inventory.data.model.composite.FullItemsContent
+import com.piledrive.inventory.data.model.composite.ItemWithTagsContent
 import com.piledrive.inventory.data.model.composite.ItemWithTags
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemsRepo
@@ -259,7 +259,7 @@ class ManageItemsViewModel @Inject constructor(
 			}
 		}
 
-		val content = FullItemsContent(
+		val content = ItemWithTagsContent(
 			sorted
 		)
 		fullItemsContent = fullItemsContent.copy(

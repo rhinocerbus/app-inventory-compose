@@ -1,6 +1,6 @@
 package com.piledrive.inventory
 
-import com.piledrive.inventory.data.model.composite.FullItemsContent
+import com.piledrive.inventory.data.model.composite.ItemWithTagsContent
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_location.CreateLocationModalSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
@@ -28,7 +28,7 @@ import org.junit.Test
 class ScreenContentCoordinatorUnitTests {
 	@Test
 	fun manage_items_coordinator_actions_tests() {
-		val sampleData = FullItemsContent.generateSampleSet()
+		val sampleData = ItemWithTagsContent.generateSampleSet()
 		val coordinator = ManageItemsContentCoordinator(
 			itemsSourceFlow = previewFullItemsContentFlow(sampleData),
 			createItemCoordinator = CreateItemSheetCoordinator(
