@@ -23,7 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.QuantityUnit
-import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 import com.piledrive.lib_compose_components.ui.util.MeasureTextWidth
 
@@ -37,18 +36,21 @@ fun AmountAdjuster(
 	min: Double = 0.0,
 	max: Double = -1.0,
 	readOnly: Boolean,
+	hideButtonsIfDisabled: Boolean,
 	onQtyChange: (Double) -> Unit
 ) {
 	Surface {
 
 		Row(verticalAlignment = Alignment.CenterVertically) {
-			IconButton(
-				onClick = {
-					onQtyChange(qtyValue - increment)
-				},
-				enabled = qtyValue > min && !readOnly
-			) {
-				Icon(Icons.Default.KeyboardArrowDown, "decrement item stash amount")
+			if (!(readOnly && hideButtonsIfDisabled)) {
+				IconButton(
+					onClick = {
+						onQtyChange(qtyValue - increment)
+					},
+					enabled = qtyValue > min && !readOnly
+				) {
+					Icon(Icons.Default.KeyboardArrowDown, "decrement item stash amount")
+				}
 			}
 
 			val amountW =
@@ -77,13 +79,15 @@ fun AmountAdjuster(
 				readOnly = readOnly
 			)
 
-			IconButton(
-				onClick = {
-					onQtyChange(qtyValue + increment)
-				},
-				enabled = !readOnly && !(max != -1.0 && qtyValue >= max)
-			) {
-				Icon(Icons.Default.KeyboardArrowUp, "increment item stash amount")
+			if (!(readOnly && hideButtonsIfDisabled)) {
+				IconButton(
+					onClick = {
+						onQtyChange(qtyValue + increment)
+					},
+					enabled = !readOnly && !(max != -1.0 && qtyValue >= max)
+				) {
+					Icon(Icons.Default.KeyboardArrowUp, "increment item stash amount")
+				}
 			}
 		}
 	}
@@ -101,6 +105,7 @@ private fun AmountAdjusterPreview() {
 			min = 0.0,
 			max = -1.0,
 			readOnly = false,
+			hideButtonsIfDisabled = false,
 			onQtyChange = {}
 		)
 	}
