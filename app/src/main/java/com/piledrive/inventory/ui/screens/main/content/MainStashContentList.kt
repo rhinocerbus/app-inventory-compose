@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
+import com.piledrive.inventory.ui.screens.main.content.multi_location.MultiLocationStashContent
 import com.piledrive.inventory.ui.screens.main.content.single_location.SingleLocationStashContent
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
@@ -105,6 +106,10 @@ object MainStashContentList {
 
 					else -> {
 						if (currLocationId == STATIC_ID_LOCATION_ALL) {
+							MultiLocationStashContent.Draw(
+								modifier = Modifier.fillMaxSize(),
+								coordinator,
+							)
 						} else {
 							SingleLocationStashContent.Draw(
 								modifier = Modifier.fillMaxSize(),

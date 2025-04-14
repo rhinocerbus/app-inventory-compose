@@ -32,6 +32,7 @@ import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoord
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
 import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinator
 import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
+import com.piledrive.inventory.ui.screens.main.content.SectionedListCoordinator
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
@@ -527,6 +528,7 @@ class MainViewModel @Inject constructor(
 		onItemStashQuantityUpdated = { stashId, qty ->
 			updateStashQuantity(stashId, qty)
 		},
+		allLocationsSectionsCoordinator = SectionedListCoordinator(),
 		onItemClicked = {
 			createItemCoordinator.showSheetWithData(ItemWithTags(it.item, it.tags, it.quantityUnit))
 		},
