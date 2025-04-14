@@ -56,8 +56,8 @@ class ManageLocationsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var userLocationsContent: LocationContentState = LocationContentState()
-	private val _userLocationContentState = MutableStateFlow<LocationContentState>(userLocationsContent)
-	val userLocationContentState: StateFlow<LocationContentState> = _userLocationContentState
+	private val _userLocationContentFlow = MutableStateFlow<LocationContentState>(userLocationsContent)
+	val userLocationContentFlow: StateFlow<LocationContentState> = _userLocationContentFlow
 
 	private fun watchLocations() {
 		viewModelScope.launch {
@@ -75,7 +75,7 @@ class ManageLocationsViewModel @Inject constructor(
 						isLoading = false
 					)
 					withContext(Dispatchers.Main) {
-						_userLocationContentState.value = userLocationsContent
+						_userLocationContentFlow.value = userLocationsContent
 					}
 				}
 			}
@@ -102,9 +102,9 @@ class ManageLocationsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageLocationsContentCoordinator(
-		locationsSourceFlow = userLocationContentState,
+		locationsSourceFlow = userLocationContentFlow,
 		createLocationCoordinator = CreateLocationModalSheetCoordinator(
-			locationsSourceFlow = userLocationContentState,
+			locationsSourceFlow = userLocationContentFlow,
 			onCreateDataModel = {
 				addNewLocation(it)
 			},

@@ -57,8 +57,8 @@ class ManageTagsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var userTagsContent: TagsContentState = TagsContentState()
-	private val _userTagsContentState = MutableStateFlow<TagsContentState>(userTagsContent)
-	val userTagsContentState: StateFlow<TagsContentState> = _userTagsContentState
+	private val _userTagsContentFlow = MutableStateFlow<TagsContentState>(userTagsContent)
+	val userTagsContentFlow: StateFlow<TagsContentState> = _userTagsContentFlow
 
 	private fun watchTags() {
 		viewModelScope.launch {
@@ -73,7 +73,7 @@ class ManageTagsViewModel @Inject constructor(
 						isLoading = false
 					)
 					withContext(Dispatchers.Main) {
-						_userTagsContentState.value = userTagsContent
+						_userTagsContentFlow.value = userTagsContent
 					}
 				}
 			}
@@ -100,9 +100,9 @@ class ManageTagsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageTagsContentCoordinator(
-		tagsSourceFlow = userTagsContentState,
+		tagsSourceFlow = userTagsContentFlow,
 		createTagCoordinator = CreateTagSheetCoordinator(
-			userTagsContentState,
+			userTagsContentFlow,
 			onCreateDataModel = {
 				addNewTag(it)
 			},
