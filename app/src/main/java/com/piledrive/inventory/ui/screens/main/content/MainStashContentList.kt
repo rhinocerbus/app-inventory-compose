@@ -56,7 +56,7 @@ object MainStashContentList {
 		onLaunchCreateLocation: () -> Unit,
 		onLaunchCreateItemStash: () -> Unit
 	) {
-		val stashesForLocation = itemStashContent.data.currentLocationItemStashContent
+		val stashesForLocation = itemStashContent.data.stashes
 		val currLocationId = locationContent.data.currentLocation.id
 
 		Surface(

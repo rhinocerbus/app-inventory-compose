@@ -4,7 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.piledrive.inventory.data.model.ItemSlug
-import com.piledrive.inventory.data.model.composite.ItemWithTags
+import com.piledrive.inventory.data.model.composite.FullItemData
 import com.piledrive.inventory.ui.modal.coordinators.EditableDataModalCoordinatorImpl
 import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 
 interface CreateItemSheetCoordinatorImpl : ModalSheetCoordinatorImpl,
-	EditableDataModalCoordinatorImpl<ItemWithTags, ItemSlug> {
+	EditableDataModalCoordinatorImpl<FullItemData, ItemSlug> {
 	val itemsSourceFlow: StateFlow<ItemContentState>
 	val unitsSourceFlow: StateFlow<QuantityUnitContentState>
 	val tagsSourceFlow: StateFlow<TagsContentState>
@@ -44,12 +44,12 @@ class CreateItemSheetCoordinator(
 	override val createTagCoordinator: CreateTagSheetCoordinatorImpl,
 	override val createQuantityUnitSheetCoordinator: CreateQuantityUnitSheetCoordinatorImpl,
 	override val onCreateDataModel: (item: ItemSlug) -> Unit,
-	override val onUpdateDataModel: (item: ItemWithTags) -> Unit,
+	override val onUpdateDataModel: (item: FullItemData) -> Unit,
 ) : ModalSheetCoordinator(), CreateItemSheetCoordinatorImpl {
-	private val _activeEditDataState: MutableState<ItemWithTags?> = mutableStateOf(null)
-	override val activeEditDataState: State<ItemWithTags?> = _activeEditDataState
+	private val _activeEditDataState: MutableState<FullItemData?> = mutableStateOf(null)
+	override val activeEditDataState: State<FullItemData?> = _activeEditDataState
 
-	override fun showSheetWithData(item: ItemWithTags) {
+	override fun showSheetWithData(item: FullItemData) {
 		_activeEditDataState.value = item
 		_showSheetState.value = true
 	}

@@ -4,7 +4,7 @@ import android.content.ContentValues
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
-import com.piledrive.inventory.data.model.composite.ItemWithTags
+import com.piledrive.inventory.data.model.composite.FullItemData
 import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.repo.datasource.abstracts.ItemsSourceImpl
 import com.piledrive.inventory.ui.util.UUIDv5
@@ -89,7 +89,7 @@ class PowerSyncItemsDataSource @Inject constructor(
 		}
 	}
 
-	override suspend fun updateItemWithTags(itemData: ItemWithTags) {
+	override suspend fun updateItemWithTags(itemData: FullItemData) {
 		val item = itemData.item
 		val tagIds = itemData.tags.map { it.id }
 		val values = ContentValues().apply {

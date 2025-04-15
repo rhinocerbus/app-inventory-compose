@@ -9,8 +9,8 @@ import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
+import com.piledrive.inventory.data.model.composite.FullItemData
 import com.piledrive.inventory.data.model.composite.ItemWithTagsContent
-import com.piledrive.inventory.data.model.composite.ItemWithTags
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.QuantityUnitsRepo
@@ -104,7 +104,7 @@ class ManageItemsViewModel @Inject constructor(
 		}
 	}
 
-	private fun updateItem(item: ItemWithTags) {
+	private fun updateItem(item: FullItemData) {
 		viewModelScope.launch {
 			itemsRepo.updateItemWithTags(item)
 		}
@@ -224,11 +224,11 @@ class ManageItemsViewModel @Inject constructor(
 		val quantityUnits = quantityUnitsContent.data.allUnits
 		val items = itemsContent.data.items
 
-		val itemsWithTags: List<ItemWithTags> = items.map { item ->
+		val itemsWithTags: List<FullItemData> = items.map { item ->
 			val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
 			val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
 			val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
-			ItemWithTags(item, tagsForItem, unitForItem)
+			FullItemData(item, unitForItem, tagsForItem)
 		}
 
 		val sort = SortOrder.DEFAULT

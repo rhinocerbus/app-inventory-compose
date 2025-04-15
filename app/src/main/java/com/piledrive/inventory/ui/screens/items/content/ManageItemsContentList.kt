@@ -22,7 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.piledrive.inventory.data.model.composite.ItemWithTags
+import com.piledrive.inventory.data.model.composite.FullItemData
 import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.spacer.Gap
@@ -89,7 +89,7 @@ object ManageItemsContentList {
 	@Composable
 	internal fun ItemsList(
 		modifier: Modifier = Modifier,
-		items: List<ItemWithTags>,
+		items: List<FullItemData>,
 		coordinator: ManageItemsContentCoordinatorImpl,
 	) {
 		Surface(
@@ -116,12 +116,12 @@ object ManageItemsContentList {
 	@Composable
 	fun ItemListItem(
 		modifier: Modifier = Modifier,
-		fullItem: ItemWithTags,
+		fullItem: FullItemData,
 		coordinator: ManageItemsContentCoordinatorImpl,
 	) {
 		val item = fullItem.item
 		val tags = fullItem.tags
-		val unit = fullItem.quantityUnit
+		val unit = fullItem.unit
 
 		Surface(
 			modifier = modifier

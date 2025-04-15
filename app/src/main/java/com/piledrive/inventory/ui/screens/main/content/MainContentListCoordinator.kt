@@ -2,7 +2,8 @@ package com.piledrive.inventory.ui.screens.main.content
 
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
-import com.piledrive.inventory.data.model.composite.StashForItem
+import com.piledrive.inventory.data.model.composite.FullItemData
+import com.piledrive.inventory.data.model.composite.StashesForItem
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
@@ -19,8 +20,8 @@ interface MainContentListCoordinatorImpl {
 	val allLocationsSectionsCoordinator: SectionedListCoordinator
 	val itemMenuCoordinator: ListItemOverflowMenuCoordinator
 	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit
-	val onItemClicked: (item: StashForItem) -> Unit
-	fun startStashTransfer(item: Item, startingLocation: Location?)
+	val onItemClicked: (itemStashes: StashesForItem) -> Unit
+	fun startStashTransfer(item: FullItemData, startingLocation: Location?)
 }
 
 class MainContentListCoordinator(
@@ -30,10 +31,10 @@ class MainContentListCoordinator(
 	override val allLocationsSectionsCoordinator: SectionedListCoordinator,
 	override val itemMenuCoordinator: ListItemOverflowMenuCoordinator,
 	override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit,
-	override val onItemClicked: (item: StashForItem) -> Unit,
-	private val onStartStashTransfer: (item: Item, startingLocation: Location?) -> Unit,
+	override val onItemClicked: (itemStashes: StashesForItem) -> Unit,
+	private val onStartStashTransfer: (item: FullItemData, startingLocation: Location?) -> Unit,
 ) : ListItemOverflowMenuCoordinator(), MainContentListCoordinatorImpl {
-	override fun startStashTransfer(item: Item, startingLocation: Location?) {
+	override fun startStashTransfer(item: FullItemData, startingLocation: Location?) {
 		onDismiss()
 		onStartStashTransfer(item, startingLocation)
 	}
