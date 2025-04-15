@@ -15,9 +15,9 @@ import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
 import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.TagSlug
-import com.piledrive.inventory.data.model.composite.ContentForLocation
-import com.piledrive.inventory.data.model.composite.ItemWithTags
-import com.piledrive.inventory.data.model.composite.StashForItem
+import com.piledrive.inventory.data.model.composite.FullItemData
+import com.piledrive.inventory.data.model.composite.FullStashData
+import com.piledrive.inventory.data.model.composite.StashesForItem
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemStashesRepo
 import com.piledrive.inventory.repo.ItemsRepo
@@ -36,6 +36,7 @@ import com.piledrive.inventory.ui.screens.main.content.SectionedListCoordinator
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
+import com.piledrive.inventory.ui.state.LocalizedStashesPayload
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
@@ -273,7 +274,7 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	private fun updateItem(item: ItemWithTags) {
+	private fun updateItem(item: FullItemData) {
 		viewModelScope.launch {
 			itemsRepo.updateItemWithTags(item)
 		}
@@ -375,76 +376,97 @@ class MainViewModel @Inject constructor(
 		val items = itemsContent.data.items
 		val stashes = itemStashesContent.data.itemStashes
 
-		val stashesByLocationMap = mutableMapOf<String, List<StashForItem>>()
-		locations.forEach { loc ->
-			val stashesForLoc = stashes.filter { it.locationId == loc.id }.mapNotNull { stash ->
-				val item = items.firstOrNull { it.id == stash.itemId } ?: return@mapNotNull null
-				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
-				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-				val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
-				StashForItem(stash, item, tagsForItem, unitForItem)
-			}
-			stashesByLocationMap[loc.id] = stashesForLoc
-		}
+		val sort = filterAppBarCoordinator.sortDropdownCoordinator.selectedOptionState.value ?: SortOrder.DEFAULT
+		val sortDesc = filterAppBarCoordinator.sortDescendingState.value
+
+		// in: flat stashes, items, locations, etc.
+		// 1) 	raw Stashes ~by~ FOR location
+		// 1a)	all locations - so just all stashes
+		// 1b)	specific location - filter by stash.location
+		// 2)		StashesForItem by item
 
 		val stashesForLocation = if (currLocation.id == STATIC_ID_LOCATION_ALL) {
-			val consolidatedMap = mutableMapOf<String, StashForItem>()
-			stashesByLocationMap.values.forEach { s4is ->
-				s4is.forEach { s4i ->
-					val oldStash = consolidatedMap[s4i.item.id]
-					if (oldStash != null) {
-						consolidatedMap[s4i.item.id] =
-							oldStash.copy(stash = oldStash.stash.copy(amount = oldStash.stash.amount + s4i.stash.amount))
+			stashes
+		} else {
+			stashes.filter { it.locationId == currLocation.id }
+		}
+
+		val stashesByItem: List<StashesForItem> = stashesForLocation
+			.groupBy { it.itemId }
+			.mapNotNull { input ->
+				val item = items.firstOrNull { it.id == input.key } ?: return@mapNotNull null
+				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
+
+				if (currTag.id != STATIC_ID_TAG_ALL && !tagIdsForItem.contains(currTag.id)) return@mapNotNull null
+
+				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
+				val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
+
+				val stashesForItem: List<FullStashData> = input.value
+					.map { stash ->
+						val location = locations.firstOrNull { it.id == stash.locationId } ?: return@mapNotNull null
+						FullStashData(stash, location)
+					}
+					.run {
+						when (sort) {
+							SortOrder.NAME -> {
+								if (sortDesc) {
+									this.sortedByDescending { it.location.name }
+								} else {
+									this.sortedBy { it.location.name }
+								}
+							}
+
+							SortOrder.LAST_ADDED -> {
+								if (sortDesc) {
+									this.sortedByDescending { it.stash.createdAt }
+								} else {
+									this.sortedBy { it.stash.createdAt }
+								}
+							}
+
+							SortOrder.LAST_UPDATED -> {
+								if (sortDesc) {
+									this.sortedByDescending { it.stash.createdAt }
+								} else {
+									this.sortedBy { it.stash.createdAt }
+								}
+							}
+						}
+					}
+				StashesForItem(FullItemData(item, unitForItem, tagsForItem), stashesForItem)
+			}
+
+		val sorted = stashesByItem.run {
+			when (sort) {
+				SortOrder.NAME -> {
+					if (sortDesc) {
+						this.sortedByDescending { it.item.item.name }
 					} else {
-						consolidatedMap[s4i.item.id] = s4i
+						this.sortedBy { it.item.item.name }
+					}
+				}
+
+				SortOrder.LAST_ADDED -> {
+					if (sortDesc) {
+						this.sortedByDescending { it.stashes[0].stash.createdAt }
+					} else {
+						this.sortedBy { it.stashes[0].stash.createdAt }
+					}
+				}
+
+				SortOrder.LAST_UPDATED -> {
+					if (sortDesc) {
+						this.sortedByDescending { it.stashes[0].stash.createdAt }
+					} else {
+						this.sortedBy { it.stashes[0].stash.createdAt }
 					}
 				}
 			}
-			consolidatedMap.values.toList()
-		} else {
-			stashesByLocationMap[currLocation.id] ?: listOf()
 		}
 
-		val unsortedByTag = if (currTag.id == STATIC_ID_TAG_ALL) {
-			stashesForLocation
-		} else {
-			stashesForLocation.filter { it.tags.contains(currTag) }
-		}
-
-		val sort = filterAppBarCoordinator.sortDropdownCoordinator.selectedOptionState.value ?: SortOrder.DEFAULT
-		val sortDesc = filterAppBarCoordinator.sortDescendingState.value
-		val sorted = when (sort) {
-			SortOrder.NAME -> {
-				if (sortDesc) {
-					unsortedByTag.sortedByDescending { it.item.name }
-				} else {
-					unsortedByTag.sortedBy { it.item.name }
-				}
-			}
-
-			SortOrder.LAST_ADDED -> {
-				if (sortDesc) {
-					unsortedByTag.sortedByDescending { it.stash.createdAt }
-				} else {
-					unsortedByTag.sortedBy { it.item.createdAt }
-				}
-			}
-
-			SortOrder.LAST_UPDATED -> {
-				if (sortDesc) {
-					unsortedByTag.sortedByDescending { it.item.name }
-				} else {
-					unsortedByTag.sortedBy { it.item.name }
-				}
-			}
-		}
-
-		val content = ContentForLocation(
-			currLocation.id,
-			currentLocationItemStashContent = sorted
-		)
 		locationStashesContent = locationStashesContent.copy(
-			data = content
+			data = LocalizedStashesPayload(sorted)
 		)
 		withContext(Dispatchers.Main) {
 			_locationStashesContentFlow.value = locationStashesContent
@@ -510,7 +532,6 @@ class MainViewModel @Inject constructor(
 
 	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
 		itemsSourceFlow = itemsContentFlow,
-		unitsSourceFlow = quantityUnitsContentFlow,
 		locationsSourceFlow = userLocationsContentFlow,
 		stashesSourceFlow = itemStashesContentFlow,
 		onCommitStashTransfer = { fromStash, toStash ->
@@ -530,7 +551,7 @@ class MainViewModel @Inject constructor(
 		},
 		allLocationsSectionsCoordinator = SectionedListCoordinator(),
 		onItemClicked = {
-			createItemCoordinator.showSheetWithData(ItemWithTags(it.item, it.tags, it.quantityUnit))
+			createItemCoordinator.showSheetWithData(FullItemData(it.item.item, it.item.unit, it.item.tags))
 		},
 		onStartStashTransfer = { item, locId ->
 			transferItemStashSheetCoordinator.showSheetForItem(item)
