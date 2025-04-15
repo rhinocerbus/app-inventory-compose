@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.piledrive.inventory.ui.screens.main.content.multi_location
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -9,9 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,10 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
-import com.piledrive.inventory.data.model.composite.StashForItem
+import com.piledrive.inventory.data.model.composite.FullItemData
+import com.piledrive.inventory.data.model.composite.FullStashData
+import com.piledrive.inventory.data.model.composite.StashesForItem
 import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinatorImpl
-import com.piledrive.inventory.ui.screens.main.content.single_location.SingleLocationStashContent
 import com.piledrive.inventory.ui.screens.main.content.stubMainContentListCoordinator
 import com.piledrive.inventory.ui.shared.AmountAdjuster
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
@@ -41,21 +47,32 @@ object MultiLocationStashContent {
 		modifier: Modifier = Modifier,
 		coordinator: MainContentListCoordinatorImpl,
 	) {
+		val itemStashContent = coordinator.stashesSourceFlow.collectAsState().value
+		val stashes = itemStashContent.data.stashes
+		val currLocationId = coordinator.locationsSourceFlow.collectAsState().value.data.currentLocation.id
+		val currTagId = coordinator.tagsSourceFlow.collectAsState().value.data.currentTag.id
+		val expandedStashes = coordinator.allLocationsSectionsCoordinator.expandedSectionsState.value
+
 		DrawContent(
 			modifier,
 			coordinator,
+			stashes,
+			currLocationId,
+			currTagId,
+			expandedStashes
 		)
 	}
+
 
 	@Composable
 	internal fun DrawContent(
 		modifier: Modifier = Modifier,
 		coordinator: MainContentListCoordinatorImpl,
+		stashes: List<StashesForItem>,
+		currLocationId: String,
+		currTagId: String,
+		expandedStashes: List<String>
 	) {
-		val itemStashContent = coordinator.stashesSourceFlow.collectAsState().value
-		val stashes = itemStashContent.data.currentLocationItemStashContent
-		val currLocationId = coordinator.locationsSourceFlow.collectAsState().value.data.currentLocation.id
-		val currTagId = coordinator.tagsSourceFlow.collectAsState().value.data.currentTag.id
 		Surface(
 			modifier = modifier.fillMaxSize(),
 		) {
@@ -68,41 +85,49 @@ object MultiLocationStashContent {
 						 using current location & tag state to ensure looking at the same stash while changing location/tags refreshes properly
 						 side-product of how composite stashes work for the "all" locations state, could redo how that id is determined to avoid the need
 						 */
-						currLocationId + currTagId + stash.stash.id
+						currLocationId + currTagId + stash.item.item.id
 					}
 				) { idx, stash ->
 					if (idx > 0) {
 						HorizontalDivider(Modifier.fillMaxWidth())
 					}
-					ItemStashListItem(
+					val expanded = expandedStashes.contains(stash.item.item.id)
+					CombinedItemStashListItem(
 						Modifier,
 						stash,
+						expanded,
 						coordinator,
 					)
+
+					if (expanded) {
+						stash.stashes.forEach { s ->
+							StashAtLocationListItem(Modifier, stash.item, s)
+						}
+					}
 				}
 			}
 		}
 	}
 
-	@OptIn(ExperimentalFoundationApi::class)
 	@Composable
-	fun ItemStashListItem(
+	internal fun CombinedItemStashListItem(
 		modifier: Modifier = Modifier,
-		stashForItem: StashForItem,
+		stashesForItem: StashesForItem,
+		expanded: Boolean,
 		coordinator: MainContentListCoordinatorImpl,
 	) {
-		val item = stashForItem.item
-		val stash = stashForItem.stash
-		val unit = stashForItem.quantityUnit
-		val tags = stashForItem.tags
+		val fullItem = stashesForItem.item
+		val item = fullItem.item
+		val unit = fullItem.unit
+		val tags = fullItem.tags
 
-		var qtyValue by remember { mutableDoubleStateOf(stash.amount) }
+		var qtyValue by remember { mutableDoubleStateOf(stashesForItem.totalAmount) }
 
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = { coordinator.onItemClicked(stashForItem) },
-					onLongClick = { coordinator.itemMenuCoordinator.onShowMenuForItemId(stash.id) }
+					onClick = { coordinator.allLocationsSectionsCoordinator.toggleSectionExpansion(item.id) },
+					onLongClick = { coordinator.itemMenuCoordinator.onShowMenuForItemId(item.id) }
 				)
 				.fillMaxWidth()
 		) {
@@ -111,17 +136,26 @@ object MultiLocationStashContent {
 					.padding(8.dp)
 			) {
 				Row(verticalAlignment = Alignment.CenterVertically) {
-					Text(modifier = Modifier.weight(1f), text = item.name)
+					if (expanded) {
+						Icon(Icons.Default.KeyboardArrowUp, "hide locations for stash")
+					} else {
+						Icon(Icons.Default.KeyboardArrowDown, "show locations for stash")
+					}
+
 					Gap(8.dp)
+
+					Text(modifier = Modifier.weight(1f), text = item.name)
+
+					Gap(8.dp)
+
 					AmountAdjuster(
 						Modifier,
 						unit = unit,
 						qtyValue = qtyValue,
 						increment = 1.0,
 						readOnly = true,
+						hideButtonsIfDisabled = true,
 						onQtyChange = {
-							qtyValue = it
-							coordinator.onItemStashQuantityUpdated(stash.id, it)
 						}
 					)
 				}
@@ -137,7 +171,7 @@ object MultiLocationStashContent {
 				}
 			}
 
-			if (coordinator.itemMenuCoordinator.showMenuForId.value == stash.id) {
+			if (coordinator.itemMenuCoordinator.showMenuForId.value == item.id) {
 				DropdownMenu(
 					expanded = true,
 					onDismissRequest = { coordinator.itemMenuCoordinator.onDismiss() }
@@ -145,10 +179,33 @@ object MultiLocationStashContent {
 					DropdownMenuItem(
 						text = { Text("Transfer...") },
 						onClick = {
-							coordinator.startStashTransfer(item, null)
+							coordinator.startStashTransfer(fullItem, null)
 						}
 					)
 				}
+			}
+		}
+	}
+
+	@Composable
+	fun StashAtLocationListItem(modifier: Modifier = Modifier, fullItem: FullItemData, stash: FullStashData) {
+		Surface(modifier = modifier.fillMaxWidth()) {
+			Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+				Text(
+					modifier = Modifier.weight(1f),
+					text = stash.location.name
+				)
+				Gap(8.dp)
+
+				AmountAdjuster(
+					Modifier,
+					unit = fullItem.unit,
+					qtyValue = stash.stash.amount,
+					increment = 1.0,
+					readOnly = true,
+					hideButtonsIfDisabled = true,
+					onQtyChange = {}
+				)
 			}
 		}
 	}
@@ -158,9 +215,15 @@ object MultiLocationStashContent {
 @Composable
 private fun MultiLocationStashContentPreview() {
 	AppTheme {
+		val sampleData = StashesForItem.generateSampleSet()
+
 		MultiLocationStashContent.DrawContent(
 			modifier = Modifier,
 			stubMainContentListCoordinator,
+			sampleData,
+			"l1",
+			"t1",
+			listOf()
 		)
 	}
 }

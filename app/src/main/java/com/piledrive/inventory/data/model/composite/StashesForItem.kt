@@ -14,7 +14,7 @@ data class StashesForItem(
 
 	val stash: Stash
 		get() {
-			if(stashes.size > 0) {
+			if(stashes.size > 1) {
 				throw IllegalStateException("single-stash accessor used when multiple stashes present, use indexed list to ensure correctness at call-site")
 			}
 			return stashes[0].stash

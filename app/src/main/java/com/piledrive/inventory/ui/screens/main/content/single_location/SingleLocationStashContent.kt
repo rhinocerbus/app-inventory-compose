@@ -24,9 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.piledrive.inventory.data.model.Location
-import com.piledrive.inventory.data.model.composite.ContentForLocation
-import com.piledrive.inventory.data.model.composite.StashForItem
+import com.piledrive.inventory.data.model.composite.StashesForItem
 import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinatorImpl
 import com.piledrive.inventory.ui.screens.main.content.stubMainContentListCoordinator
 import com.piledrive.inventory.ui.shared.AmountAdjuster
@@ -41,7 +39,7 @@ object SingleLocationStashContent {
 		coordinator: MainContentListCoordinatorImpl,
 	) {
 		val itemStashContent = coordinator.stashesSourceFlow.collectAsState().value
-		val stashes = itemStashContent.data.currentLocationItemStashContent
+		val stashes = itemStashContent.data.stashes
 		val currLocationId = coordinator.locationsSourceFlow.collectAsState().value.data.currentLocation.id
 		val currTagId = coordinator.tagsSourceFlow.collectAsState().value.data.currentTag.id
 
@@ -59,11 +57,11 @@ object SingleLocationStashContent {
 	internal fun DrawContent(
 		modifier: Modifier = Modifier,
 		coordinator: MainContentListCoordinatorImpl,
-		stashes: List<StashForItem>,
+		stashes: List<StashesForItem>,
 		currLocationId: String,
 		currTagId: String,
 	) {
-
+		if (stashes.firstOrNull { !it.isSingleStash } != null) return
 		Surface(
 			modifier = modifier.fillMaxSize(),
 		) {
@@ -95,13 +93,13 @@ object SingleLocationStashContent {
 	@Composable
 	internal fun ItemStashListItem(
 		modifier: Modifier = Modifier,
-		stashForItem: StashForItem,
+		stashForItem: StashesForItem,
 		coordinator: MainContentListCoordinatorImpl,
 	) {
-		val item = stashForItem.item
+		val item = stashForItem.item.item
+		val unit = stashForItem.item.unit
+		val tags = stashForItem.item.tags
 		val stash = stashForItem.stash
-		val unit = stashForItem.quantityUnit
-		val tags = stashForItem.tags
 
 		var qtyValue by remember { mutableDoubleStateOf(stash.amount) }
 
@@ -147,12 +145,12 @@ object SingleLocationStashContent {
 @Composable
 private fun SingleLocationStashContentPreview() {
 	AppTheme {
-		val sampleData = ContentForLocation.generateSampleSet()
+		val sampleData = StashesForItem.generateSampleSet()
 
 		SingleLocationStashContent.DrawContent(
 			modifier = Modifier,
 			stubMainContentListCoordinator,
-			sampleData.currentLocationItemStashContent,
+			sampleData,
 			"l1",
 			"t1",
 		)

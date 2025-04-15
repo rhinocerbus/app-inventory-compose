@@ -36,7 +36,7 @@ fun AmountAdjuster(
 	min: Double = 0.0,
 	max: Double = -1.0,
 	readOnly: Boolean,
-	hideButtonsIfDisabled: Boolean,
+	hideButtonsIfDisabled: Boolean = false,
 	onQtyChange: (Double) -> Unit
 ) {
 	Surface {
