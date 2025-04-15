@@ -554,6 +554,7 @@ class MainViewModel @Inject constructor(
 			createItemCoordinator.showSheetWithData(FullItemData(it.item.item, it.item.unit, it.item.tags))
 		},
 		onStartStashTransfer = { item, locId ->
+			//todo - hook up starting location
 			transferItemStashSheetCoordinator.showSheetForItem(item)
 		}
 	)

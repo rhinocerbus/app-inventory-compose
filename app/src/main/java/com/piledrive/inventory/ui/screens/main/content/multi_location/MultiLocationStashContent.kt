@@ -101,7 +101,7 @@ object MultiLocationStashContent {
 
 					if (expanded) {
 						stash.stashes.forEach { s ->
-							StashAtLocationListItem(Modifier, stash.item, s)
+							StashAtLocationListItem(Modifier, stash.item, s, coordinator)
 						}
 					}
 				}
@@ -188,9 +188,16 @@ object MultiLocationStashContent {
 	}
 
 	@Composable
-	fun StashAtLocationListItem(modifier: Modifier = Modifier, fullItem: FullItemData, stash: FullStashData) {
-		Surface(modifier = modifier.fillMaxWidth()) {
+	fun StashAtLocationListItem(modifier: Modifier = Modifier, fullItem: FullItemData, stash: FullStashData, coordinator: MainContentListCoordinatorImpl) {
+		Surface(
+			modifier = modifier
+				.fillMaxWidth()
+				.combinedClickable(
+					onClick = { coordinator.startStashTransfer(fullItem, stash.location) },
+				)
+		) {
 			Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+				Gap(16.dp)
 				Text(
 					modifier = Modifier.weight(1f),
 					text = stash.location.name
