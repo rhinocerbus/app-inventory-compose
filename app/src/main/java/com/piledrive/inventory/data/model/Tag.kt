@@ -50,6 +50,6 @@ val predefinedTagSet: List<Tag> = listOf(
 	Tag(STATIC_ID_TAG_VEGGIES, createdAt = "", name = "Veggies"),
 	Tag(STATIC_ID_TAG_FRUIT, createdAt = "", name = "Fruit"),
 	Tag(STATIC_ID_TAG_LEFTOVERS, createdAt = "", name = "Leftovers"),
-	Tag(STATIC_ID_TAG_STAPLES, createdAt = "", name = "Staples"),
+	Tag(STATIC_ID_TAG_STAPLES, createdAt = "", name = "Staples", showEmptyRaw = 1),
 	Tag(STATIC_ID_TAG_PREPARED, createdAt = "", name = "Prepared"),
 )

@@ -135,7 +135,7 @@ object CreateTagModalSheet {
 							    form-level viewmodel, feels like clutter in the main VM
 							 */
 							if(activeTag == null) {
-								val slug = TagSlug(name = formState.currentValue)
+								val slug = TagSlug(name = formState.currentValue, showEmpty = false)
 								coordinator.onCreateDataModel(slug)
 							} else {
 								val updatedTag = activeTag.copy(name = formState.currentValue)
