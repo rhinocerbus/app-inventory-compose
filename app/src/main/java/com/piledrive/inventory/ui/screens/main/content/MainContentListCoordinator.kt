@@ -13,29 +13,19 @@ import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenu
 import kotlinx.coroutines.flow.StateFlow
 
 interface MainContentListCoordinatorImpl {
-	val stashContentFlow: StateFlow<LocalizedContentState>
-	val locationState: StateFlow<LocationContentState>
-	val tagState: StateFlow<TagsContentState>
+	val stashesSourceFlow: StateFlow<LocalizedContentState>
+	val locationsSourceFlow: StateFlow<LocationContentState>
+	val tagsSourceFlow: StateFlow<TagsContentState>
 	val itemMenuCoordinator: ListItemOverflowMenuCoordinator
 	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit
 	val onItemClicked: (item: StashForItem) -> Unit
 	fun startStashTransfer(item: Item, startingLocation: Location?)
 }
 
-val stubMainContentListCoordinator = object : MainContentListCoordinatorImpl {
-	override val stashContentFlow: StateFlow<LocalizedContentState> = previewLocalizedContentFlow()
-	override val locationState: StateFlow<LocationContentState> = previewLocationContentFlow()
-	override val tagState: StateFlow<TagsContentState> = previewTagsContentFlow()
-	override val itemMenuCoordinator: ListItemOverflowMenuCoordinator = ListItemOverflowMenuCoordinator()
-	override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit = { _, _ -> }
-	override val onItemClicked: (item: StashForItem) -> Unit = {}
-	override fun startStashTransfer(item: Item, startingLocation: Location?) {}
-}
-
 class MainContentListCoordinator(
-	override val stashContentFlow: StateFlow<LocalizedContentState>,
-	override val locationState: StateFlow<LocationContentState>,
-	override val tagState: StateFlow<TagsContentState>,
+	override val stashesSourceFlow: StateFlow<LocalizedContentState>,
+	override val locationsSourceFlow: StateFlow<LocationContentState>,
+	override val tagsSourceFlow: StateFlow<TagsContentState>,
 	override val itemMenuCoordinator: ListItemOverflowMenuCoordinator,
 	override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit,
 	override val onItemClicked: (item: StashForItem) -> Unit,
@@ -46,3 +36,13 @@ class MainContentListCoordinator(
 		onStartStashTransfer(item, startingLocation)
 	}
 }
+
+val stubMainContentListCoordinator = MainContentListCoordinator(
+	stashesSourceFlow = previewLocalizedContentFlow(),
+	locationsSourceFlow = previewLocationContentFlow(),
+	tagsSourceFlow = previewTagsContentFlow(),
+	itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
+	onItemStashQuantityUpdated = { _, _ -> },
+	onItemClicked = {},
+	onStartStashTransfer = { _, _ -> }
+)

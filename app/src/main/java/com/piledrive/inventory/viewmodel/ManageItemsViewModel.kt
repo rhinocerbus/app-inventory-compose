@@ -77,8 +77,8 @@ class ManageItemsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var itemsContent: ItemContentState = ItemContentState()
-	private val _itemsContentState = MutableStateFlow<ItemContentState>(itemsContent)
-	val itemsContentState: StateFlow<ItemContentState> = _itemsContentState
+	private val _itemsContentFlow = MutableStateFlow<ItemContentState>(itemsContent)
+	val itemsContentFlow: StateFlow<ItemContentState> = _itemsContentFlow
 
 
 	private fun watchItems() {
@@ -90,7 +90,7 @@ class ManageItemsViewModel @Inject constructor(
 						data = itemsContent.data.copy(items = it)
 					)
 					withContext(Dispatchers.Main) {
-						_itemsContentState.value = itemsContent
+						_itemsContentFlow.value = itemsContent
 					}
 					rebuildItemsWithTags()
 				}
@@ -133,7 +133,7 @@ class ManageItemsViewModel @Inject constructor(
 
 	private var userTagsContent: TagsContentState = TagsContentState()
 	private val _userTagsContentState = MutableStateFlow<TagsContentState>(userTagsContent)
-	val userTagsContentState: StateFlow<TagsContentState> = _userTagsContentState
+	val userTagsContentFlow: StateFlow<TagsContentState> = _userTagsContentState
 
 	private fun watchTags() {
 		viewModelScope.launch {
@@ -181,8 +181,8 @@ class ManageItemsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var quantityUnitsContent: QuantityUnitContentState = QuantityUnitContentState()
-	private val _quantityUnitsContentState = MutableStateFlow<QuantityUnitContentState>(quantityUnitsContent)
-	val quantityUnitsContentState: StateFlow<QuantityUnitContentState> = _quantityUnitsContentState
+	private val _quantityUnitsContentFlow = MutableStateFlow<QuantityUnitContentState>(quantityUnitsContent)
+	val quantityUnitsContentFlow: StateFlow<QuantityUnitContentState> = _quantityUnitsContentFlow
 
 	private fun watchQuantityUnits() {
 		viewModelScope.launch {
@@ -193,7 +193,7 @@ class ManageItemsViewModel @Inject constructor(
 						data = quantityUnitsContent.data.copy(customUnits = it)
 					)
 					withContext(Dispatchers.Main) {
-						_quantityUnitsContentState.value = quantityUnitsContent
+						_quantityUnitsContentFlow.value = quantityUnitsContent
 					}
 					rebuildItemsWithTags()
 				}
@@ -215,8 +215,8 @@ class ManageItemsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var fullItemsContent: FullItemsContentState = FullItemsContentState()
-	private val _fullItemsContentState = MutableStateFlow<FullItemsContentState>(fullItemsContent)
-	val fullItemsContentState: StateFlow<FullItemsContentState> = _fullItemsContentState
+	private val _fullItemsContentFlow = MutableStateFlow<FullItemsContentState>(fullItemsContent)
+	val fullItemsContentFlow: StateFlow<FullItemsContentState> = _fullItemsContentFlow
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
@@ -266,7 +266,7 @@ class ManageItemsViewModel @Inject constructor(
 			data = content
 		)
 		withContext(Dispatchers.Main) {
-			_fullItemsContentState.value = fullItemsContent
+			_fullItemsContentFlow.value = fullItemsContent
 		}
 	}
 
@@ -278,13 +278,13 @@ class ManageItemsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageItemsContentCoordinator(
-		itemsSourceFlow = fullItemsContentState,
+		itemsSourceFlow = fullItemsContentFlow,
 		createItemCoordinator = CreateItemSheetCoordinator(
-			itemsSourceFlow = itemsContentState,
-			unitsSourceFlow = quantityUnitsContentState,
-			tagsSourceFlow = userTagsContentState,
+			itemsSourceFlow = itemsContentFlow,
+			unitsSourceFlow = quantityUnitsContentFlow,
+			tagsSourceFlow = userTagsContentFlow,
 			createTagCoordinator = CreateTagSheetCoordinator(
-				userTagsContentState,
+				userTagsContentFlow,
 				onCreateDataModel = {
 					addNewTag(it)
 				},
@@ -296,7 +296,7 @@ class ManageItemsViewModel @Inject constructor(
 				}
 			),
 			createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-				quantityUnitsContentState,
+				quantityUnitsContentFlow,
 				onCreateDataModel = {
 					addNewQuantityUnit(it)
 				},

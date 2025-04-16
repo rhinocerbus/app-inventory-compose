@@ -102,8 +102,8 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var userLocationsContent: LocationContentState = LocationContentState()
-	private val _userLocationContentState = MutableStateFlow<LocationContentState>(userLocationsContent)
-	val userLocationContentState: StateFlow<LocationContentState> = _userLocationContentState
+	private val _userLocationsContentFlow = MutableStateFlow<LocationContentState>(userLocationsContent)
+	val userLocationsContentFlow: StateFlow<LocationContentState> = _userLocationsContentFlow
 
 	/*
 	private fun loadLocations() {
@@ -133,7 +133,7 @@ class MainViewModel @Inject constructor(
 						isLoading = false
 					)
 					withContext(Dispatchers.Main) {
-						_userLocationContentState.value = userLocationsContent
+						_userLocationsContentFlow.value = userLocationsContent
 						filterAppBarCoordinator.locationsDropdownCoordinator.updateOptionsPool(flatLocations)
 						if (filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
 							filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
@@ -150,7 +150,7 @@ class MainViewModel @Inject constructor(
 			userLocationsContent = userLocationsContent.copy(
 				data = userLocationsContent.data.copy(currentLocation = loc)
 			)
-			_userLocationContentState.value = userLocationsContent
+			_userLocationsContentFlow.value = userLocationsContent
 			rebuildItemsWithTags()
 		}
 	}
@@ -175,8 +175,8 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var userTagsContent: TagsContentState = TagsContentState()
-	private val _userTagsContentState = MutableStateFlow<TagsContentState>(userTagsContent)
-	val userTagsContentState: StateFlow<TagsContentState> = _userTagsContentState
+	private val _userTagsContentFlow = MutableStateFlow<TagsContentState>(userTagsContent)
+	val userTagsContentFlow: StateFlow<TagsContentState> = _userTagsContentFlow
 
 	private fun watchTags() {
 		viewModelScope.launch {
@@ -192,7 +192,7 @@ class MainViewModel @Inject constructor(
 						isLoading = false
 					)
 					withContext(Dispatchers.Main) {
-						_userTagsContentState.value = userTagsContent
+						_userTagsContentFlow.value = userTagsContent
 						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(userTagsContent.data.allTags)
 						if (filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
 							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
@@ -216,7 +216,7 @@ class MainViewModel @Inject constructor(
 			userTagsContent = userTagsContent.copy(
 				data = userTagsContent.data.copy(currentTag = tag)
 			)
-			_userTagsContentState.value = userTagsContent
+			_userTagsContentFlow.value = userTagsContent
 			rebuildItemsWithTags()
 		}
 	}
@@ -229,8 +229,8 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var quantityUnitsContent: QuantityUnitContentState = QuantityUnitContentState()
-	private val _quantityUnitsContentState = MutableStateFlow<QuantityUnitContentState>(quantityUnitsContent)
-	val quantityUnitsContentState: StateFlow<QuantityUnitContentState> = _quantityUnitsContentState
+	private val _quantityUnitsContentFlow = MutableStateFlow<QuantityUnitContentState>(quantityUnitsContent)
+	val quantityUnitsContentFlow: StateFlow<QuantityUnitContentState> = _quantityUnitsContentFlow
 
 	fun addNewQuantityUnit(slug: QuantityUnitSlug) {
 		viewModelScope.launch {
@@ -247,7 +247,7 @@ class MainViewModel @Inject constructor(
 						data = quantityUnitsContent.data.copy(customUnits = it)
 					)
 					withContext(Dispatchers.Main) {
-						_quantityUnitsContentState.value = quantityUnitsContent
+						_quantityUnitsContentFlow.value = quantityUnitsContent
 					}
 					rebuildItemsWithTags()
 				}
@@ -263,8 +263,8 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var itemsContent: ItemContentState = ItemContentState()
-	private val _itemsContentState = MutableStateFlow<ItemContentState>(itemsContent)
-	val itemsContentState: StateFlow<ItemContentState> = _itemsContentState
+	private val _itemsContentFlow = MutableStateFlow<ItemContentState>(itemsContent)
+	val itemsContentFlow: StateFlow<ItemContentState> = _itemsContentFlow
 
 	private fun addNewItem(item: ItemSlug) {
 		viewModelScope.launch {
@@ -287,7 +287,7 @@ class MainViewModel @Inject constructor(
 						data = itemsContent.data.copy(items = it)
 					)
 					withContext(Dispatchers.Main) {
-						_itemsContentState.value = itemsContent
+						_itemsContentFlow.value = itemsContent
 					}
 					rebuildItemsWithTags()
 				}
@@ -317,8 +317,8 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var itemStashesContent: ItemStashContentState = ItemStashContentState()
-	private val _itemStashesContentState = MutableStateFlow<ItemStashContentState>(itemStashesContent)
-	val itemStashesContentState: StateFlow<ItemStashContentState> = _itemStashesContentState
+	private val _itemStashesContentFlow = MutableStateFlow<ItemStashContentState>(itemStashesContent)
+	val itemStashesContentFlow: StateFlow<ItemStashContentState> = _itemStashesContentFlow
 
 	fun addNewItemStash(slug: StashSlug) {
 		viewModelScope.launch {
@@ -335,7 +335,7 @@ class MainViewModel @Inject constructor(
 						data = itemStashesContent.data.copy(itemStashes = it)
 					)
 					withContext(Dispatchers.Main) {
-						_itemStashesContentState.value = itemStashesContent
+						_itemStashesContentFlow.value = itemStashesContent
 					}
 					rebuildItemsWithTags()
 				}
@@ -361,8 +361,8 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var locationStashesContent: LocalizedContentState = LocalizedContentState()
-	private val _locationStashesContentState = MutableStateFlow<LocalizedContentState>(locationStashesContent)
-	val locationStashesContentState: StateFlow<LocalizedContentState> = _locationStashesContentState
+	private val _locationStashesContentFlow = MutableStateFlow<LocalizedContentState>(locationStashesContent)
+	val locationStashesContentFlow: StateFlow<LocalizedContentState> = _locationStashesContentFlow
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
@@ -446,7 +446,7 @@ class MainViewModel @Inject constructor(
 			data = content
 		)
 		withContext(Dispatchers.Main) {
-			_locationStashesContentState.value = locationStashesContent
+			_locationStashesContentFlow.value = locationStashesContent
 		}
 	}
 
@@ -458,7 +458,7 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
-		locationsSourceFlow = userLocationContentState,
+		locationsSourceFlow = userLocationsContentFlow,
 		onCreateDataModel = {
 			addNewLocation(it)
 		},
@@ -468,11 +468,11 @@ class MainViewModel @Inject constructor(
 	)
 
 	val createItemCoordinator = CreateItemSheetCoordinator(
-		itemsSourceFlow = itemsContentState,
-		unitsSourceFlow = quantityUnitsContentState,
-		tagsSourceFlow = userTagsContentState,
+		itemsSourceFlow = itemsContentFlow,
+		unitsSourceFlow = quantityUnitsContentFlow,
+		tagsSourceFlow = userTagsContentFlow,
 		createTagCoordinator = CreateTagSheetCoordinator(
-			userTagsContentState,
+			userTagsContentFlow,
 			onCreateDataModel = {
 				addNewTag(it)
 			},
@@ -484,7 +484,7 @@ class MainViewModel @Inject constructor(
 			}
 		),
 		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-			quantityUnitsContentState,
+			quantityUnitsContentFlow,
 			onCreateDataModel = {
 				addNewQuantityUnit(it)
 			},
@@ -497,9 +497,9 @@ class MainViewModel @Inject constructor(
 	)
 
 	val createItemStashCoordinator = CreateItemStashSheetCoordinator(
-		itemStashesContentState,
-		itemsContentState,
-		userLocationContentState,
+		itemStashesContentFlow,
+		itemsContentFlow,
+		userLocationsContentFlow,
 		createItemCoordinator = createItemCoordinator,
 		createLocationCoordinator = createLocationCoordinator,
 		onCreateDataModel = {
@@ -508,10 +508,10 @@ class MainViewModel @Inject constructor(
 	)
 
 	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
-		itemsSourceFlow = itemsContentState,
-		unitsSourceFlow = quantityUnitsContentState,
-		locationsSourceFlow = userLocationContentState,
-		stashesSourceFlow = itemStashesContentState,
+		itemsSourceFlow = itemsContentFlow,
+		unitsSourceFlow = quantityUnitsContentFlow,
+		locationsSourceFlow = userLocationsContentFlow,
+		stashesSourceFlow = itemStashesContentFlow,
 		onCommitStashTransfer = { fromStash, toStash ->
 			viewModelScope.launch {
 				itemStashesRepo.performTransfer(fromStash, toStash)
@@ -520,9 +520,9 @@ class MainViewModel @Inject constructor(
 	)
 
 	val listContentCoordinator = MainContentListCoordinator(
-		locationStashesContentState,
-		locationState = userLocationContentState,
-		tagState = userTagsContentState,
+		locationStashesContentFlow,
+		locationsSourceFlow = userLocationsContentFlow,
+		tagsSourceFlow = userTagsContentFlow,
 		itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
 		onItemStashQuantityUpdated = { stashId, qty ->
 			updateStashQuantity(stashId, qty)
@@ -536,8 +536,8 @@ class MainViewModel @Inject constructor(
 	)
 
 	val filterAppBarCoordinator = MainFilterAppBarCoordinator(
-		locationState = _userLocationContentState,
-		tagState = userTagsContentState,
+		locationsSourceFlow = _userLocationsContentFlow,
+		tagsSourceFlow = userTagsContentFlow,
 		locationsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
 			externalOnOptionSelected = {
 				it ?: return@ReadOnlyDropdownCoordinatorGeneric

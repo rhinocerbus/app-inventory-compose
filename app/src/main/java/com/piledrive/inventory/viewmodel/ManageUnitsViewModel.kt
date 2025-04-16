@@ -56,8 +56,8 @@ class ManageUnitsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var unitsContent: QuantityUnitContentState = QuantityUnitContentState()
-	private val _unitsContentState = MutableStateFlow<QuantityUnitContentState>(unitsContent)
-	val unitsContentState: StateFlow<QuantityUnitContentState> = _unitsContentState
+	private val _unitsContentFlow = MutableStateFlow<QuantityUnitContentState>(unitsContent)
+	val unitsContentFlow: StateFlow<QuantityUnitContentState> = _unitsContentFlow
 
 	fun addNewQuantityUnit(slug: QuantityUnitSlug) {
 		viewModelScope.launch {
@@ -80,7 +80,7 @@ class ManageUnitsViewModel @Inject constructor(
 						data = unitsContent.data.copy(customUnits = it)
 					)
 					withContext(Dispatchers.Main) {
-						_unitsContentState.value = unitsContent
+						_unitsContentFlow.value = unitsContent
 					}
 				}
 			}
@@ -95,9 +95,9 @@ class ManageUnitsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageUnitsContentCoordinator(
-		unitsSourceFlow = unitsContentState,
+		unitsSourceFlow = unitsContentFlow,
 		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-			unitsContentState,
+			unitsContentFlow,
 			onCreateDataModel = {
 				addNewQuantityUnit(it)
 			},

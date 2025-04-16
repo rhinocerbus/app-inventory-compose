@@ -171,8 +171,8 @@ fun MainFilterAppBarPreview() {
 		MainFilterAppBar(
 			Modifier,
 			coordinator = MainFilterAppBarCoordinator(
-				locationState = previewLocationContentFlow(),
-				tagState = previewTagsContentFlow(),
+				locationsSourceFlow = previewLocationContentFlow(),
+				tagsSourceFlow = previewTagsContentFlow(),
 				locationsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
 				tagsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),
 				sortDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(),

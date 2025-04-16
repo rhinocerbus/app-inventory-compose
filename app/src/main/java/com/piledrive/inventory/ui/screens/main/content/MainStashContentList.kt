@@ -37,7 +37,6 @@ import com.piledrive.inventory.data.model.composite.StashForItem
 import com.piledrive.inventory.ui.shared.AmountAdjuster
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
-import com.piledrive.inventory.ui.state.TagsContentState
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
@@ -50,14 +49,12 @@ object MainStashContentList {
 		onLaunchCreateLocation: () -> Unit,
 		onLaunchCreateItemStash: () -> Unit
 	) {
-		val itemStashContent = coordinator.stashContentFlow.collectAsState().value
-		val locationContent = coordinator.locationState.collectAsState().value
-		val tagContent = coordinator.tagState.collectAsState().value
+		val itemStashContent = coordinator.stashesSourceFlow.collectAsState().value
+		val locationContent = coordinator.locationsSourceFlow.collectAsState().value
 
 		DrawContent(
 			modifier,
 			locationContent,
-			tagContent,
 			itemStashContent,
 			coordinator,
 			onLaunchCreateLocation,
@@ -69,7 +66,6 @@ object MainStashContentList {
 	internal fun DrawContent(
 		modifier: Modifier = Modifier,
 		locationContent: LocationContentState,
-		tagContent: TagsContentState,
 		itemStashContent: LocalizedContentState,
 		coordinator: MainContentListCoordinatorImpl,
 		onLaunchCreateLocation: () -> Unit,
@@ -124,7 +120,7 @@ object MainStashContentList {
 					}
 
 					else -> {
-						ItemStashList(
+						SingleLocationItemStashList(
 							modifier = Modifier.fillMaxSize(),
 							stashesForLocation,
 							coordinator,
@@ -155,14 +151,15 @@ object MainStashContentList {
 		}
 	}
 
+
 	@Composable
-	internal fun ItemStashList(
+	internal fun SingleLocationItemStashList(
 		modifier: Modifier = Modifier,
 		stashes: List<StashForItem>,
 		coordinator: MainContentListCoordinatorImpl,
 	) {
-		val currLocationId = coordinator.locationState.collectAsState().value.data.currentLocation.id
-		val currTagId = coordinator.tagState.collectAsState().value.data.currentTag.id
+		val currLocationId = coordinator.locationsSourceFlow.collectAsState().value.data.currentLocation.id
+		val currTagId = coordinator.tagsSourceFlow.collectAsState().value.data.currentTag.id
 		Surface(
 			modifier = modifier.fillMaxSize(),
 		) {
@@ -204,7 +201,7 @@ object MainStashContentList {
 		Surface(
 			modifier = modifier
 				.combinedClickable(
-					onClick = {coordinator.onItemClicked(stashForItem)},
+					onClick = { coordinator.onItemClicked(stashForItem) },
 					onLongClick = { coordinator.itemMenuCoordinator.onShowMenuForItemId(stash.id) }
 				)
 				.fillMaxWidth()
@@ -264,7 +261,6 @@ private fun MainStashContentListPreview() {
 		MainStashContentList.DrawContent(
 			modifier = Modifier,
 			locationContent = LocationContentState(),
-			tagContent = TagsContentState(),
 			itemStashContent = LocalizedContentState(/*data = ContentForLocation.generateSampleSet()*/),
 			stubMainContentListCoordinator,
 			onLaunchCreateLocation = {},
