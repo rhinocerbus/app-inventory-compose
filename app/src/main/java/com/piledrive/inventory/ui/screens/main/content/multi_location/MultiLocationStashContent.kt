@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.composite.FullItemData
@@ -101,6 +102,11 @@ object MultiLocationStashContent {
 
 					if (expanded) {
 						stash.stashes.forEach { s ->
+							HorizontalDivider(
+								Modifier
+									.fillMaxWidth()
+									.alpha(0.5f)
+							)
 							StashAtLocationListItem(Modifier, stash.item, s, coordinator)
 						}
 					}
@@ -188,7 +194,12 @@ object MultiLocationStashContent {
 	}
 
 	@Composable
-	fun StashAtLocationListItem(modifier: Modifier = Modifier, fullItem: FullItemData, stash: FullStashData, coordinator: MainContentListCoordinatorImpl) {
+	fun StashAtLocationListItem(
+		modifier: Modifier = Modifier,
+		fullItem: FullItemData,
+		stash: FullStashData,
+		coordinator: MainContentListCoordinatorImpl
+	) {
 		Surface(
 			modifier = modifier
 				.fillMaxWidth()
@@ -196,7 +207,12 @@ object MultiLocationStashContent {
 					onClick = { coordinator.startStashTransfer(fullItem, stash.location) },
 				)
 		) {
-			Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(8.dp),
+				verticalAlignment = Alignment.CenterVertically
+			) {
 				Gap(16.dp)
 				Text(
 					modifier = Modifier.weight(1f),
@@ -230,7 +246,7 @@ private fun MultiLocationStashContentPreview() {
 			sampleData,
 			"l1",
 			"t1",
-			listOf()
+			listOf(sampleData[0].item.item.id)
 		)
 	}
 }
