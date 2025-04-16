@@ -64,6 +64,7 @@ val AppSchema: Schema = Schema(
 				//Column.text("id"),
 				Column.text("created_at"),
 				Column.text("name"),
+				Column.integer("show_empty")
 			)
 		),
 	)
