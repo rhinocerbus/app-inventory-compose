@@ -392,6 +392,7 @@ class MainViewModel @Inject constructor(
 		}
 
 		val stashesByItem: List<StashesForItem> = stashesForLocation
+			.filter { it.amount > 0.0 }
 			.groupBy { it.itemId }
 			.mapNotNull { input ->
 				val item = items.firstOrNull { it.id == input.key } ?: return@mapNotNull null
