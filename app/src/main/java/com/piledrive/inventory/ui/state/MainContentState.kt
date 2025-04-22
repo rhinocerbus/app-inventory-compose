@@ -49,7 +49,10 @@ data class TagOptions(
 	val currentTag: Tag = defaultTag
 ) {
 
-	val allTags: List<Tag>
+	val tagsForFiltering: List<Tag>
+		get() = listOf(everythingTag, *predefinedTagSet.toTypedArray(), *userTags.toTypedArray())
+
+	val tagsForItems: List<Tag>
 		get() = listOf(*predefinedTagSet.toTypedArray(), *userTags.toTypedArray())
 
 	companion object {

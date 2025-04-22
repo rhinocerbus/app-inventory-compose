@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,6 +71,7 @@ object CreateTagModalSheet {
 		val tags = coordinator.tagsSourceFlow.collectAsState().value
 		val activeTag = coordinator.activeEditDataState.value
 		val initialText = remember { activeTag?.name ?: "" }
+		val readOnly = activeTag?.predefined ?: false
 
 		Surface(
 			modifier = Modifier
@@ -83,12 +85,12 @@ object CreateTagModalSheet {
 						Validators.Custom<String>(runCheck = { nameIn ->
 							val matchEdit = nameIn == activeTag?.name
 							val matchExisting =
-								tags.data.allTags.firstOrNull { it.name.equals(nameIn, true) } != null
+								tags.data.tagsForFiltering.firstOrNull { it.name.equals(nameIn, true) } != null
 							!matchExisting || matchEdit
 						}, errMsg = "Tag already exists")
 					)
 				).apply {
-					if(!initialText.isNullOrBlank()) {
+					if (!initialText.isNullOrBlank()) {
 						this.check(initialText)
 					}
 				}
@@ -105,6 +107,7 @@ object CreateTagModalSheet {
 					verticalAlignment = Alignment.CenterVertically
 				) {
 					OutlinedTextField(
+						readOnly = readOnly,
 						modifier = Modifier.weight(1f),
 						value = formState.currentValue ?: "",
 						isError = formState.hasError,
@@ -151,11 +154,11 @@ object CreateTagModalSheet {
 				Gap(12.dp)
 
 				Text("Current tags:")
-				if (tags.data.userTags.isEmpty()) {
+				if (tags.data.tagsForItems.isEmpty()) {
 					Text("No added tags yet")
 				} else {
 					ChipGroup {
-						tags.data.userTags.forEach {
+						tags.data.tagsForItems.forEach {
 							SuggestionChip(
 								onClick = {},
 								label = { Text(it.name) },

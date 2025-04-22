@@ -27,6 +27,7 @@ data class TagSlug(
 
 @JsonClass(generateAdapter = true)
 data class Tag(
+	val predefined: Boolean = false,
 	override val id: String = "",
 	@Json(name = "created_at")
 	override val createdAt: String,

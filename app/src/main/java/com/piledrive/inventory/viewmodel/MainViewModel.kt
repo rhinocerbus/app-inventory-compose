@@ -195,7 +195,7 @@ class MainViewModel @Inject constructor(
 					)
 					withContext(Dispatchers.Main) {
 						_userTagsContentFlow.value = userTagsContent
-						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(userTagsContent.data.allTags)
+						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(userTagsContent.data.tagsForFiltering)
 						if (filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
 							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
 						}
