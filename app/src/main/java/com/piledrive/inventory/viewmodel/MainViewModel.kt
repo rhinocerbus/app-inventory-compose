@@ -405,6 +405,7 @@ class MainViewModel @Inject constructor(
 
 				val stashesForItem: List<FullStashData> = input.value
 					.map { stash ->
+						if(tagsForItem.firstOrNull { it.showEmpty } == null && stash.amount == 0.0) return@mapNotNull null
 						val location = locations.firstOrNull { it.id == stash.locationId } ?: return@mapNotNull null
 						FullStashData(stash, location)
 					}

@@ -71,6 +71,8 @@ object CreateTagModalSheet {
 		val tags = coordinator.tagsSourceFlow.collectAsState().value
 		val activeTag = coordinator.activeEditDataState.value
 		val initialText = remember { activeTag?.name ?: "" }
+		val initialShowEmpty = remember { activeTag?.showEmpty ?: false }
+		var showEmpty = remember { initialShowEmpty }
 		val readOnly = activeTag?.predefined ?: false
 
 		Surface(
@@ -137,11 +139,11 @@ object CreateTagModalSheet {
 							    requires fleshing out and/or moving form state to viewmodel, can't decide if better left internal or add
 							    form-level viewmodel, feels like clutter in the main VM
 							 */
-							if(activeTag == null) {
-								val slug = TagSlug(name = formState.currentValue, showEmpty = false)
+							if (activeTag == null) {
+								val slug = TagSlug(name = formState.currentValue, showEmpty = showEmpty)
 								coordinator.onCreateDataModel(slug)
 							} else {
-								val updatedTag = activeTag.copy(name = formState.currentValue)
+								val updatedTag = activeTag.copy(name = formState.currentValue, showEmptyRaw = if(showEmpty) 1 else 0)
 								coordinator.onUpdateDataModel(updatedTag)
 							}
 							coordinator.onDismiss()
@@ -149,6 +151,18 @@ object CreateTagModalSheet {
 					) {
 						Icon(Icons.Default.Done, contentDescription = "add new tag")
 					}
+				}
+
+				Gap(12.dp)
+
+				Text(text = "Tag options:")
+				Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+					Checkbox(
+						checked = showEmpty,
+						onCheckedChange = { showEmpty = it },
+						enabled = readOnly
+					)
+					Text(text = "Show empty")
 				}
 
 				Gap(12.dp)

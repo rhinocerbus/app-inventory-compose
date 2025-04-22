@@ -38,19 +38,18 @@ data class Tag(
 		level = DeprecationLevel.WARNING
 	)
 	@Json(name = "show_empty")
-	val showEmptyRaw: Int = 0
+	val showEmptyRaw: Int = 0,
 ) : TagImpl, FullDataModel, SupaBaseModel {
 	override val showEmpty: Boolean
 		get() = showEmptyRaw == 1
 }
 
-val everythingTag = Tag(STATIC_ID_TAG_ALL, "", "Everything")
+val everythingTag = Tag(predefined = true, STATIC_ID_TAG_ALL, "", "Everything")
 val predefinedTagSet: List<Tag> = listOf(
-	everythingTag,
-	Tag(STATIC_ID_TAG_MEAT, createdAt = "", name = "Meat"),
-	Tag(STATIC_ID_TAG_VEGGIES, createdAt = "", name = "Veggies"),
-	Tag(STATIC_ID_TAG_FRUIT, createdAt = "", name = "Fruit"),
-	Tag(STATIC_ID_TAG_LEFTOVERS, createdAt = "", name = "Leftovers"),
-	Tag(STATIC_ID_TAG_STAPLES, createdAt = "", name = "Staples", showEmptyRaw = 1),
-	Tag(STATIC_ID_TAG_PREPARED, createdAt = "", name = "Prepared"),
+	Tag(predefined = true, STATIC_ID_TAG_MEAT, createdAt = "", name = "Meat"),
+	Tag(predefined = true, STATIC_ID_TAG_VEGGIES, createdAt = "", name = "Veggies"),
+	Tag(predefined = true, STATIC_ID_TAG_FRUIT, createdAt = "", name = "Fruit"),
+	Tag(predefined = true, STATIC_ID_TAG_LEFTOVERS, createdAt = "", name = "Leftovers"),
+	Tag(predefined = true, STATIC_ID_TAG_STAPLES, createdAt = "", name = "Staples", showEmptyRaw = 1),
+	Tag(predefined = true, STATIC_ID_TAG_PREPARED, createdAt = "", name = "Prepared"),
 )
