@@ -2,7 +2,7 @@ package com.piledrive.inventory.repo
 
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.ItemSlug
-import com.piledrive.inventory.data.model.composite.ItemWithTags
+import com.piledrive.inventory.data.model.composite.FullItemData
 import com.piledrive.inventory.repo.datasource.PowerSyncItemsDataSource
 import com.piledrive.inventory.repo.datasource.abstracts.ItemsSourceImpl
 import dagger.hilt.android.scopes.ViewModelScoped
@@ -30,7 +30,7 @@ class ItemsRepo @Inject constructor(
 		//return supaBase.watchLocations()
 	}
 
-	override suspend fun updateItemWithTags(itemData: ItemWithTags) {
+	override suspend fun updateItemWithTags(itemData: FullItemData) {
 		powerSyncSource.updateItemWithTags(itemData)
 	}
 }

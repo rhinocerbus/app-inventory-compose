@@ -7,14 +7,15 @@ import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
-import com.piledrive.inventory.data.model.composite.ContentForLocation
-import com.piledrive.inventory.data.model.composite.FullItemsContent
+import com.piledrive.inventory.data.model.composite.StashesForItem
+import com.piledrive.inventory.data.model.composite.ItemWithTagsContent
 import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemOptions
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.ItemStashOptions
 import com.piledrive.inventory.ui.state.LocalizedContentState
+import com.piledrive.inventory.ui.state.LocalizedStashesPayload
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
@@ -67,7 +68,7 @@ fun previewUnitsContentFlow(
 }
 
 fun previewFullItemsContentFlow(
-	dataSet: FullItemsContent = FullItemsContent.generateSampleSet()
+	dataSet: ItemWithTagsContent = ItemWithTagsContent.generateSampleSet()
 ): StateFlow<FullItemsContentState> {
 	return MutableStateFlow(FullItemsContentState(data = dataSet, hasLoaded = true, isLoading = false))
 }
@@ -92,7 +93,7 @@ fun previewLocalizedContentFlowWithData(
 ): StateFlow<LocalizedContentState> {
 	return MutableStateFlow(
 		LocalizedContentState(
-			data = ContentForLocation.generateSampleSet(),
+			data = LocalizedStashesPayload(StashesForItem.generateSampleSet()),
 			hasLoaded = true,
 			isLoading = false
 		)

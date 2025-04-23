@@ -54,7 +54,7 @@ object TransferItemStashModalSheet {
 	) {
 		val fromStash = coordinator.fromLocationDropdownCoordinator.selectedOptionState.value
 		val toStash = coordinator.toLocationDropdownCoordinator.selectedOptionState.value
-		val activeItem = coordinator.activeItemState.value
+		val activeItem = coordinator.activeItemState.value?.item ?: throw IllegalStateException("Missing item data")
 		val qtyValue = coordinator.amountDifference.value
 
 		Surface(
@@ -67,7 +67,7 @@ object TransferItemStashModalSheet {
 				horizontalAlignment = Alignment.CenterHorizontally
 			) {
 				Text(
-					text = "Transferring ${activeItem?.name ?: "<unset>"}"
+					text = "Transferring ${activeItem.name}"
 				)
 
 				Gap(12.dp)

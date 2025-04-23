@@ -52,7 +52,7 @@ object CreateItemModalSheet {
 	) {
 		val activeItem = coordinator.activeEditDataState.value
 		var selectedQuantityUnitId: String? by remember {
-			val id = activeItem?.quantityUnit?.id
+			val id = activeItem?.unit?.id
 			mutableStateOf(id)
 		}
 		var selectedTagIds by remember {
@@ -183,7 +183,7 @@ object CreateItemModalSheet {
 								val updatedItem = activeItem.copy(
 									item = activeItem.item.copy(name = formState.currentValue),
 									tags = fullTags,
-									quantityUnit = fullUnit
+									unit = fullUnit
 								)
 								coordinator.onUpdateDataModel(updatedItem)
 							}

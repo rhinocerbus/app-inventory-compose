@@ -7,8 +7,7 @@ import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.abstracts.FullDataModel
 import com.piledrive.inventory.data.model.abstracts.SlugDataModel
-import com.piledrive.inventory.data.model.composite.ItemWithTags
-import com.piledrive.inventory.ui.modal.coordinators.CreateDataModalCoordinatorImpl
+import com.piledrive.inventory.data.model.composite.FullItemData
 import com.piledrive.inventory.ui.modal.coordinators.EditableDataModalCoordinatorImpl
 import com.piledrive.inventory.ui.modal.create_item.CreateItemSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_item.stubCreateItemSheetCoordinator
@@ -18,7 +17,6 @@ import com.piledrive.inventory.ui.modal.create_location.stubCreateLocationModalS
 import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_tag.stubCreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
-import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinatorImpl
 import com.piledrive.inventory.ui.modal.create_unit.stubCreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
@@ -45,10 +43,10 @@ class CrudModalCoordinatorUnitTests {
 			onCreateDataModel = {},
 			onUpdateDataModel = {},
 		)
-		val stubItem = ItemWithTags(
+		val stubItem = FullItemData(
 			item = Item(id = "", createdAt = "", name = "", unitId = ""),
 			tags = listOf(),
-			quantityUnit = QuantityUnit.defaultUnitBags
+			unit = QuantityUnit.defaultUnitBags
 		)
 		generic_modal_coordinator_display_state_tests(coordinator, coordinator, stubItem)
 		coordinator.launchAddUnit()

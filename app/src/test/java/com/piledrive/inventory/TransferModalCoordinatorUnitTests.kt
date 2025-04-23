@@ -1,13 +1,10 @@
 package com.piledrive.inventory
 
-import com.piledrive.inventory.data.model.Stash
+import com.piledrive.inventory.data.model.composite.StashesForItem
 import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoordinator
-import com.piledrive.inventory.ui.state.ItemOptions
-import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.util.previewItemStashesContentFlow
 import com.piledrive.inventory.ui.util.previewItemsContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
-import com.piledrive.inventory.ui.util.previewQuantityUnitsContentFlow
 import org.junit.Test
 
 /**
@@ -18,20 +15,18 @@ class TransferModalCoordinatorUnitTests {
 
 	@Test
 	fun test_full_transfer_flow() {
-		val sampleItems = ItemOptions.generateSampleSet()
-		val sampleLocation = LocationOptions.generateSampleSet()
-		val sampleStashes = sampleItems.mapIndexed { idx, item ->
-			Stash(id = "$idx", createdAt = "", itemId = item.id, locationId = sampleLocation[0].id, amount = (idx + 1) * 1.5)
-		}
+		val sampleData = StashesForItem.generateSampleSet()
+		val sampleItems = sampleData.map { it.item.item }
+		val sampleLocation = sampleData.flatMap { it.stashes.map { it.location } }
+		val sampleStashes = sampleData.flatMap { it.stashes.map { it.stash } }
 		val coordinator = TransferItemStashSheetCoordinator(
 			itemsSourceFlow = previewItemsContentFlow(sampleItems),
-			unitsSourceFlow = previewQuantityUnitsContentFlow(),
 			locationsSourceFlow = previewLocationContentFlow(sampleLocation),
 			stashesSourceFlow = previewItemStashesContentFlow(sampleStashes),
 			onCommitStashTransfer = { _, _ -> }
 		)
 
-		val targetItem = sampleItems[0]
+		val targetItem = sampleData[0].item
 		coordinator.showSheetForItem(targetItem)
 		assert(coordinator.showSheetState.value)
 		assert(coordinator.activeItemState.value == targetItem)
