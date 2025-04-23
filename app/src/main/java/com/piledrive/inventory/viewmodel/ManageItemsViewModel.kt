@@ -26,8 +26,12 @@ import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.ui.state.TagsContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -220,53 +224,63 @@ class ManageItemsViewModel @Inject constructor(
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
-		val tags = userTagsContent.data.userTags
-		val quantityUnits = quantityUnitsContent.data.allUnits
-		val items = itemsContent.data.items
-
-		val itemsWithTags: List<FullItemData> = items.map { item ->
-			val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
-			val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-			val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
-			FullItemData(item, unitForItem, tagsForItem)
-		}
-
-		val sort = SortOrder.DEFAULT
-		val sortDesc = true
-		val sorted = when (sort) {
-			SortOrder.NAME -> {
-				if (sortDesc) {
-					itemsWithTags.sortedByDescending { it.item.name }
-				} else {
-					itemsWithTags.sortedBy { it.item.name }
-				}
-			}
-
-			SortOrder.LAST_ADDED -> {
-				if (sortDesc) {
-					itemsWithTags.sortedByDescending { it.item.createdAt }
-				} else {
-					itemsWithTags.sortedBy { it.item.createdAt }
-				}
-			}
-
-			SortOrder.LAST_UPDATED -> {
-				if (sortDesc) {
-					itemsWithTags.sortedByDescending { it.item.createdAt }
-				} else {
-					itemsWithTags.sortedBy { it.item.createdAt }
-				}
+		rebuildContent().debounce(500).collect { updatedContent ->
+			fullItemsContent = updatedContent
+			withContext(Dispatchers.Main) {
+				_fullItemsContentFlow.value = fullItemsContent
 			}
 		}
+	}
 
-		val content = ItemWithTagsContent(
-			sorted
-		)
-		fullItemsContent = fullItemsContent.copy(
-			data = content
-		)
-		withContext(Dispatchers.Main) {
-			_fullItemsContentFlow.value = fullItemsContent
+	private fun rebuildContent(): Flow<FullItemsContentState> {
+		return callbackFlow {
+			val tags = userTagsContent.data.userTags
+			val quantityUnits = quantityUnitsContent.data.allUnits
+			val items = itemsContent.data.items
+
+			val itemsWithTags: List<FullItemData> = items.map { item ->
+				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
+				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
+				val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
+				FullItemData(item, unitForItem, tagsForItem)
+			}
+
+			val sort = SortOrder.DEFAULT
+			val sortDesc = true
+			val sorted = when (sort) {
+				SortOrder.NAME -> {
+					if (sortDesc) {
+						itemsWithTags.sortedByDescending { it.item.name }
+					} else {
+						itemsWithTags.sortedBy { it.item.name }
+					}
+				}
+
+				SortOrder.LAST_ADDED -> {
+					if (sortDesc) {
+						itemsWithTags.sortedByDescending { it.item.createdAt }
+					} else {
+						itemsWithTags.sortedBy { it.item.createdAt }
+					}
+				}
+
+				SortOrder.LAST_UPDATED -> {
+					if (sortDesc) {
+						itemsWithTags.sortedByDescending { it.item.createdAt }
+					} else {
+						itemsWithTags.sortedBy { it.item.createdAt }
+					}
+				}
+			}
+
+			val content = ItemWithTagsContent(
+				sorted
+			)
+			val updated = fullItemsContent.copy(
+				data = content
+			)
+			send(updated)
+			close()
 		}
 	}
 
