@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
 		enableEdgeToEdge()
 		setContent {
 			AppTheme {
-				updateStatusBarColorCompose(MaterialTheme.colorScheme.background)
+				updateStatusBarColorCompose(MaterialTheme.colorScheme.surfaceVariant)
 				RootNavHost()
 			}
 		}
