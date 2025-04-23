@@ -13,8 +13,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class SupaBaseLocationsDataSource @Inject constructor(
 	private val supaBase: SupaBaseWrapper,
 ) : LocationsSourceImpl {

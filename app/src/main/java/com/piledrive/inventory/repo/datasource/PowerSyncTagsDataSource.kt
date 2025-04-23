@@ -9,8 +9,9 @@ import com.powersync.db.getString
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class PowerSyncTagsDataSource @Inject constructor(
 	private val powerSync: PowerSyncDbWrapper,
 ) : TagsSourceImpl {

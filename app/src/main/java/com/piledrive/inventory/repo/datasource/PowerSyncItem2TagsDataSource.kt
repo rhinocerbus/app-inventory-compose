@@ -14,8 +14,9 @@ import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class PowerSyncItem2TagsDataSource @Inject constructor(
 	private val powerSync: PowerSyncDbWrapper,
 ) : Item2TagsSourceImpl {

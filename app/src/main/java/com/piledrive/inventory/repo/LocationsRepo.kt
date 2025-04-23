@@ -8,8 +8,9 @@ import com.piledrive.inventory.repo.datasource.abstracts.LocationsSourceImpl
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class LocationsRepo @Inject constructor(
 	private val powerSyncSource: PowerSyncLocationsDataSource,
 	//private val localSource: LocalMoviesSource,
