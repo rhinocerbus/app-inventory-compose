@@ -18,15 +18,19 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.composite.FullItemData
 import com.piledrive.inventory.ui.state.FullItemsContentState
+import com.piledrive.inventory.ui.util.previewFullItemsContentFlow
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
 import com.piledrive.lib_compose_components.ui.lists.animatedListItemModifier
 import com.piledrive.lib_compose_components.ui.spacer.Gap
+import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 
 object ManageItemsContentList {
 	@Composable
@@ -34,8 +38,7 @@ object ManageItemsContentList {
 		modifier: Modifier = Modifier,
 		coordinator: ManageItemsContentCoordinatorImpl,
 	) {
-		val itemsContent = coordinator.itemsSourceFlow.collectAsState().value
-
+		val itemsContent = coordinator.itemsSourceFlow.collectAsState()
 		DrawContent(
 			modifier,
 			itemsContent,
@@ -46,10 +49,11 @@ object ManageItemsContentList {
 	@Composable
 	internal fun DrawContent(
 		modifier: Modifier = Modifier,
-		itemsContent: FullItemsContentState,
+		itemsContent: State<FullItemsContentState>,
 		coordinator: ManageItemsContentCoordinatorImpl,
 	) {
-		val items = itemsContent.data.fullItems
+		val items = itemsContent.value.data.fullItems
+		val isLoading = itemsContent.value.isLoading
 
 		Surface(
 			modifier = modifier.fillMaxSize(),
@@ -78,7 +82,7 @@ object ManageItemsContentList {
 							coordinator,
 						)
 
-						if (itemsContent.isLoading) {
+						if (isLoading) {
 							// secondary spinner?
 						}
 					}
@@ -93,23 +97,21 @@ object ManageItemsContentList {
 		items: List<FullItemData>,
 		coordinator: ManageItemsContentCoordinatorImpl,
 	) {
-		Surface(
+		LazyColumn(
 			modifier = modifier.fillMaxSize(),
 		) {
-			LazyColumn {
-				itemsIndexed(
-					items,
-					key = { _, item -> item.item.id }
-				) { idx, loc ->
-					if (idx > 0) {
-						HorizontalDivider(Modifier.fillMaxWidth())
-					}
-					ItemListItem(
-						animatedListItemModifier(),
-						loc,
-						coordinator,
-					)
+			itemsIndexed(
+				items,
+				key = { _, item -> item.item.id }
+			) { idx, loc ->
+				if (idx > 0) {
+					HorizontalDivider(Modifier.fillMaxWidth())
 				}
+				ItemListItem(
+					animatedListItemModifier(),
+					loc,
+					coordinator,
+				)
 			}
 		}
 	}
@@ -152,5 +154,17 @@ object ManageItemsContentList {
 				}
 			}
 		}
+	}
+}
+
+@Preview
+@Composable
+private fun ManageItemsContentListPreview() {
+	AppTheme {
+		ManageItemsContentList.DrawContent(
+			Modifier,
+			itemsContent = previewFullItemsContentFlow().collectAsState(),
+			coordinator = stubManageItemsContentCoordinator
+		)
 	}
 }
