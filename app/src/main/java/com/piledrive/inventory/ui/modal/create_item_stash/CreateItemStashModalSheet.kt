@@ -39,8 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Item
+import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.StashSlug
 import com.piledrive.lib_compose_components.ui.coordinators.SearchCoordinator
+import com.piledrive.lib_compose_components.ui.lists.animatedListItemModifier
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 
@@ -218,14 +220,7 @@ object CreateItemStashModalSheet {
 						val checked = selectedLocations.contains(loc.id)
 						val prevAdded =
 							stashes.data.itemStashes.firstOrNull { selectedItem != null && it.itemId == selectedItem?.id && it.locationId == loc.id } != null
-						Row(verticalAlignment = Alignment.CenterVertically) {
-							Checkbox(
-								enabled = !prevAdded && selectedItem != null,
-								checked = checked || prevAdded,
-								onCheckedChange = { onLocationToggle(loc.id, !checked) }
-							)
-							Text(loc.name)
-						}
+						SearchResultItem(animatedListItemModifier(), selectedItem, loc, checked, prevAdded, onLocationToggle)
 					}
 					item {
 						Surface(onClick = { coordinator.launchCreateLocation() }) {
@@ -237,6 +232,28 @@ object CreateItemStashModalSheet {
 					}
 				}
 			}
+		}
+	}
+
+	@Composable
+	private fun SearchResultItem(
+		modifier: Modifier = Modifier,
+		selectedItem: Item?,
+		location: Location,
+		checked: Boolean,
+		prevAdded: Boolean,
+		onLocationToggle: (String, Boolean) -> Unit
+	) {
+		Row(
+			modifier = Modifier.fillMaxWidth(),
+			verticalAlignment = Alignment.CenterVertically
+		) {
+			Checkbox(
+				enabled = !prevAdded && selectedItem != null,
+				checked = checked || prevAdded,
+				onCheckedChange = { onLocationToggle(location.id, !checked) }
+			)
+			Text(location.name)
 		}
 	}
 }

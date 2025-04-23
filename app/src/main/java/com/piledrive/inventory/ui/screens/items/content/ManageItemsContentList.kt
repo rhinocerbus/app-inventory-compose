@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.composite.FullItemData
 import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
+import com.piledrive.lib_compose_components.ui.lists.animatedListItemModifier
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 
 object ManageItemsContentList {
@@ -104,7 +105,7 @@ object ManageItemsContentList {
 						HorizontalDivider(Modifier.fillMaxWidth())
 					}
 					ItemListItem(
-						Modifier,
+						animatedListItemModifier(),
 						loc,
 						coordinator,
 					)

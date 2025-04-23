@@ -39,6 +39,7 @@ import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinato
 import com.piledrive.inventory.ui.screens.main.content.stubMainContentListCoordinator
 import com.piledrive.inventory.ui.shared.AmountAdjuster
 import com.piledrive.lib_compose_components.ui.chips.ChipGroup
+import com.piledrive.lib_compose_components.ui.lists.animatedListItemModifier
 import com.piledrive.lib_compose_components.ui.spacer.Gap
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
 
@@ -94,7 +95,7 @@ object MultiLocationStashContent {
 					}
 					val expanded = expandedStashes.contains(stash.item.item.id)
 					CombinedItemStashListItem(
-						Modifier,
+						animatedListItemModifier(),
 						stash,
 						expanded,
 						coordinator,

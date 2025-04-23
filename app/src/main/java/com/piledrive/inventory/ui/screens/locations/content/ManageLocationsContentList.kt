@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.ui.state.LocationContentState
+import com.piledrive.lib_compose_components.ui.lists.animatedListItemModifier
 
 object ManageLocationsContentList {
 	@Composable
@@ -101,7 +102,7 @@ object ManageLocationsContentList {
 						HorizontalDivider(Modifier.fillMaxWidth())
 					}
 					LocationListItem(
-						Modifier,
+						animatedListItemModifier(),
 						loc,
 						coordinator,
 					)
