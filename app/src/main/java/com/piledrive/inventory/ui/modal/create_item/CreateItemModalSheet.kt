@@ -177,7 +177,7 @@ object CreateItemModalSheet {
 								)
 								coordinator.onCreateDataModel(item)
 							} else {
-								val fullTags = tagPool.data.allTags.filter { selectedTags.contains(it.id) }
+								val fullTags = tagPool.data.tagsForFiltering.filter { selectedTags.contains(it.id) }
 								val fullUnit = quantityUnitPool.data.allUnits.firstOrNull { selectedQuantityUnit == it.id }
 									?: throw IllegalStateException("target quantity unit not found")
 								val updatedItem = activeItem.copy(
@@ -233,7 +233,7 @@ object CreateItemModalSheet {
 				Gap(12.dp)
 
 				Text("Item tags:")
-				if (tagPool.data.userTags.isEmpty()) {
+				if (tagPool.data.tagsForItems.isEmpty()) {
 					Text("No added tags yet")
 				} else {
 					ChipGroup {
@@ -246,7 +246,7 @@ object CreateItemModalSheet {
 							icon = { Icon(Icons.Default.Add, "add new tag") }
 						)
 
-						tagPool.data.userTags.forEach {
+						tagPool.data.tagsForItems.forEach {
 							val selected = selectedTags.contains(it.id)
 							FilterChip(
 								selected = selected,
