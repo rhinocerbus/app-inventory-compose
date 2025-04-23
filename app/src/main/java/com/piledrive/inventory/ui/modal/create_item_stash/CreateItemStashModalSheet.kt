@@ -245,7 +245,7 @@ object CreateItemStashModalSheet {
 		onLocationToggle: (String, Boolean) -> Unit
 	) {
 		Row(
-			modifier = Modifier.fillMaxWidth(),
+			modifier = modifier.fillMaxWidth(),
 			verticalAlignment = Alignment.CenterVertically
 		) {
 			Checkbox(
