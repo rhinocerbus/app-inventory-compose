@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.ui.state.QuantityUnitContentState
+import com.piledrive.lib_compose_components.ui.lists.animatedListItemModifier
 
 object ManageUnitsContentList {
 	@Composable
@@ -101,7 +102,7 @@ object ManageUnitsContentList {
 						HorizontalDivider(Modifier.fillMaxWidth())
 					}
 					QuantityUnitListItem(
-						Modifier,
+						animatedListItemModifier(),
 						unit,
 						coordinator,
 					)
