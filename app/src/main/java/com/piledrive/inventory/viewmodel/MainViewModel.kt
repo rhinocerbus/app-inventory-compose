@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.piledrive.inventory.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
@@ -46,10 +48,15 @@ import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenu
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -86,14 +93,27 @@ class MainViewModel @Inject constructor(
 
 						1 -> {
 							// done
-							watchLocations()
-							watchTags()
-							watchItems()
-							watchItem2Tags()
-							watchItemStashes()
-							watchQuantityUnits()
+							initWatches()
 						}
 					}
+				}
+			}
+		}
+	}
+
+	private fun initWatches() {
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				val itemsSource = watchItems()
+				val tagsSource = watchTags()
+				val item2TagsSource = watchItem2Tags()
+				val unitsSource = watchQuantityUnits()
+				val locationsSource = watchLocations()
+				val stashesSource = watchItemStashes()
+				merge(itemsSource, tagsSource, item2TagsSource, unitsSource, locationsSource, stashesSource)
+					.debounce(500)
+					.collect {
+					rebuildItemsWithTags()
 				}
 			}
 		}
@@ -104,8 +124,8 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var userLocationsContent: LocationContentState = LocationContentState()
-	private val _userLocationsContentFlow = MutableStateFlow<LocationContentState>(userLocationsContent)
-	val userLocationsContentFlow: StateFlow<LocationContentState> = _userLocationsContentFlow
+	private val _userLocationsContentFlow = MutableStateFlow(userLocationsContent)
+	private val userLocationsContentFlow: StateFlow<LocationContentState> = _userLocationsContentFlow
 
 	/*
 	private fun loadLocations() {
@@ -119,35 +139,31 @@ class MainViewModel @Inject constructor(
 	}
 	*/
 
-	private fun watchLocations() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				locationsRepo.watchLocations().collect {
-					Timber.d("Locations received: $it")
-					val flatLocations = listOf(LocationOptions.defaultLocation, *it.toTypedArray())
-					userLocationsContent = LocationContentState(
-						data = LocationOptions(
-							allLocations = flatLocations,
-							userLocations = it,
-							currentLocation = userLocationsContent.data.currentLocation
-						),
-						hasLoaded = true,
-						isLoading = false
-					)
-					withContext(Dispatchers.Main) {
-						_userLocationsContentFlow.value = userLocationsContent
-						filterAppBarCoordinator.locationsDropdownCoordinator.updateOptionsPool(flatLocations)
-						if (filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
-							filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
-						}
-					}
+	private fun watchLocations(): Flow<Unit> {
+		return locationsRepo.watchLocations().mapLatest {
+			Timber.d("Locations received: $it")
+			val flatLocations = listOf(LocationOptions.defaultLocation, *it.toTypedArray())
+			userLocationsContent = LocationContentState(
+				data = LocationOptions(
+					allLocations = flatLocations,
+					userLocations = it,
+					currentLocation = userLocationsContent.data.currentLocation
+				),
+				hasLoaded = true,
+				isLoading = false
+			)
+			withContext(Dispatchers.Main) {
+				_userLocationsContentFlow.value = userLocationsContent
+				filterAppBarCoordinator.locationsDropdownCoordinator.updateOptionsPool(flatLocations)
+				if (filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
+					filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
 				}
 			}
 		}
 	}
 
 	//todo: possible add pref, or keep it session-level
-	fun changeLocation(loc: Location) {
+	private fun changeLocation(loc: Location) {
 		viewModelScope.launch {
 			userLocationsContent = userLocationsContent.copy(
 				data = userLocationsContent.data.copy(currentLocation = loc)
@@ -177,43 +193,39 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var userTagsContent: TagsContentState = TagsContentState()
-	private val _userTagsContentFlow = MutableStateFlow<TagsContentState>(userTagsContent)
-	val userTagsContentFlow: StateFlow<TagsContentState> = _userTagsContentFlow
+	private val _userTagsContentFlow = MutableStateFlow(userTagsContent)
+	private val userTagsContentFlow: StateFlow<TagsContentState> = _userTagsContentFlow
 
-	private fun watchTags() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				tagsRepo.watchTags().collect {
-					Timber.d("Tags received: $it")
-					userTagsContent = userTagsContent.copy(
-						data = TagOptions(
-							userTags = it,
-							currentTag = userTagsContent.data.currentTag
-						),
-						hasLoaded = true,
-						isLoading = false
-					)
-					withContext(Dispatchers.Main) {
-						_userTagsContentFlow.value = userTagsContent
-						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(userTagsContent.data.tagsForFiltering)
-						if (filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
-							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
-						}
+	private fun watchTags(): Flow<Unit> {
+		return tagsRepo.watchTags()
+			.mapLatest {
+				Timber.d("Tags received: $it")
+				userTagsContent = userTagsContent.copy(
+					data = TagOptions(
+						userTags = it,
+						currentTag = userTagsContent.data.currentTag
+					),
+					hasLoaded = true,
+					isLoading = false
+				)
+				withContext(Dispatchers.Main) {
+					_userTagsContentFlow.value = userTagsContent
+					filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(userTagsContent.data.tagsForFiltering)
+					if (filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
+						filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
 					}
-					rebuildItemsWithTags()
 				}
 			}
-		}
 	}
 
-	fun addNewTag(slug: TagSlug) {
+	private fun addNewTag(slug: TagSlug) {
 		viewModelScope.launch {
 			tagsRepo.addTag(slug)
 		}
 	}
 
 	//todo: possible add pref, or keep it session-level
-	fun changeTag(tag: Tag) {
+	private fun changeTag(tag: Tag) {
 		viewModelScope.launch {
 			userTagsContent = userTagsContent.copy(
 				data = userTagsContent.data.copy(currentTag = tag)
@@ -231,28 +243,23 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var quantityUnitsContent: QuantityUnitContentState = QuantityUnitContentState()
-	private val _quantityUnitsContentFlow = MutableStateFlow<QuantityUnitContentState>(quantityUnitsContent)
-	val quantityUnitsContentFlow: StateFlow<QuantityUnitContentState> = _quantityUnitsContentFlow
+	private val _quantityUnitsContentFlow = MutableStateFlow(quantityUnitsContent)
+	private val quantityUnitsContentFlow: StateFlow<QuantityUnitContentState> = _quantityUnitsContentFlow
 
-	fun addNewQuantityUnit(slug: QuantityUnitSlug) {
+	private fun addNewQuantityUnit(slug: QuantityUnitSlug) {
 		viewModelScope.launch {
 			quantityUnitsRepo.addQuantityUnit(slug)
 		}
 	}
 
-	private fun watchQuantityUnits() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				quantityUnitsRepo.watchQuantityUnits().collect {
-					Timber.d("Units received: $it")
-					quantityUnitsContent = quantityUnitsContent.copy(
-						data = quantityUnitsContent.data.copy(customUnits = it)
-					)
-					withContext(Dispatchers.Main) {
-						_quantityUnitsContentFlow.value = quantityUnitsContent
-					}
-					rebuildItemsWithTags()
-				}
+	private fun watchQuantityUnits(): Flow<Unit> {
+		return quantityUnitsRepo.watchQuantityUnits().mapLatest {
+			Timber.d("Units received: $it")
+			quantityUnitsContent = quantityUnitsContent.copy(
+				data = quantityUnitsContent.data.copy(customUnits = it)
+			)
+			withContext(Dispatchers.Main) {
+				_quantityUnitsContentFlow.value = quantityUnitsContent
 			}
 		}
 	}
@@ -265,8 +272,8 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var itemsContent: ItemContentState = ItemContentState()
-	private val _itemsContentFlow = MutableStateFlow<ItemContentState>(itemsContent)
-	val itemsContentFlow: StateFlow<ItemContentState> = _itemsContentFlow
+	private val _itemsContentFlow = MutableStateFlow(itemsContent)
+	private val itemsContentFlow: StateFlow<ItemContentState> = _itemsContentFlow
 
 	private fun addNewItem(item: ItemSlug) {
 		viewModelScope.launch {
@@ -280,34 +287,24 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	private fun watchItems() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				itemsRepo.watchItems().collect {
-					Timber.d("Items received: $it")
-					itemsContent = itemsContent.copy(
-						data = itemsContent.data.copy(items = it)
-					)
-					withContext(Dispatchers.Main) {
-						_itemsContentFlow.value = itemsContent
-					}
-					rebuildItemsWithTags()
-				}
+	private fun watchItems(): Flow<Unit> {
+		return itemsRepo.watchItems().mapLatest {
+			Timber.d("Items received: $it")
+			itemsContent = itemsContent.copy(
+				data = itemsContent.data.copy(items = it)
+			)
+			withContext(Dispatchers.Main) {
+				_itemsContentFlow.value = itemsContent
 			}
 		}
 	}
 
 	private val item2Tags = mutableListOf<Item2Tag>()
-	private fun watchItem2Tags() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				item2TagsRepo.watchItem2Tags().collect {
-					Timber.d("Items2Tags received: $it")
-					item2Tags.clear()
-					item2Tags.addAll(it)
-					rebuildItemsWithTags()
-				}
-			}
+	private fun watchItem2Tags(): Flow<Boolean> {
+		return item2TagsRepo.watchItem2Tags().mapLatest {
+			Timber.d("Items2Tags received: $it")
+			item2Tags.clear()
+			item2Tags.addAll(it)
 		}
 	}
 
@@ -319,34 +316,29 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var itemStashesContent: ItemStashContentState = ItemStashContentState()
-	private val _itemStashesContentFlow = MutableStateFlow<ItemStashContentState>(itemStashesContent)
-	val itemStashesContentFlow: StateFlow<ItemStashContentState> = _itemStashesContentFlow
+	private val _itemStashesContentFlow = MutableStateFlow(itemStashesContent)
+	private val itemStashesContentFlow: StateFlow<ItemStashContentState> = _itemStashesContentFlow
 
-	fun addNewItemStash(slug: StashSlug) {
+	private fun addNewItemStash(slug: StashSlug) {
 		viewModelScope.launch {
 			itemStashesRepo.addItemStash(slug)
 		}
 	}
 
-	fun watchItemStashes() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				itemStashesRepo.watchItemStashes().collect {
-					Timber.d("Stashes received: $it")
-					itemStashesContent = itemStashesContent.copy(
-						data = itemStashesContent.data.copy(itemStashes = it)
-					)
-					withContext(Dispatchers.Main) {
-						_itemStashesContentFlow.value = itemStashesContent
-					}
-					rebuildItemsWithTags()
-				}
+	private fun watchItemStashes(): Flow<Unit> {
+		return itemStashesRepo.watchItemStashes().mapLatest {
+			Timber.d("Stashes received: $it")
+			itemStashesContent = itemStashesContent.copy(
+				data = itemStashesContent.data.copy(itemStashes = it)
+			)
+			withContext(Dispatchers.Main) {
+				_itemStashesContentFlow.value = itemStashesContent
 			}
 		}
 	}
 
 	private var quantityJobs = hashMapOf<String, Job?>()
-	fun updateStashQuantity(stashId: String, quantity: Double) {
+	private fun updateStashQuantity(stashId: String, quantity: Double) {
 		quantityJobs[stashId]?.cancel()
 		quantityJobs[stashId] = viewModelScope.launch {
 			delay(5000)
@@ -363,8 +355,8 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var locationStashesContent: LocalizedContentState = LocalizedContentState()
-	private val _locationStashesContentFlow = MutableStateFlow<LocalizedContentState>(locationStashesContent)
-	val locationStashesContentFlow: StateFlow<LocalizedContentState> = _locationStashesContentFlow
+	private val _locationStashesContentFlow = MutableStateFlow(locationStashesContent)
+	private val locationStashesContentFlow: StateFlow<LocalizedContentState> = _locationStashesContentFlow
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
@@ -405,7 +397,7 @@ class MainViewModel @Inject constructor(
 
 				val stashesForItem: List<FullStashData> = input.value
 					.map { stash ->
-						if(tagsForItem.firstOrNull { it.showEmpty } == null && stash.amount == 0.0) return@mapNotNull null
+						if (tagsForItem.firstOrNull { it.showEmpty } == null && stash.amount == 0.0) return@mapNotNull null
 						val location = locations.firstOrNull { it.id == stash.locationId } ?: return@mapNotNull null
 						FullStashData(stash, location)
 					}
@@ -555,7 +547,7 @@ class MainViewModel @Inject constructor(
 		onItemClicked = {
 			createItemCoordinator.showSheetWithData(FullItemData(it.item.item, it.item.unit, it.item.tags))
 		},
-		onStartStashTransfer = { item, locId ->
+		onStartStashTransfer = { item, _ ->
 			//todo - hook up starting location
 			transferItemStashSheetCoordinator.showSheetForItem(item)
 		}
@@ -571,7 +563,7 @@ class MainViewModel @Inject constructor(
 			},
 			excludeSelected = true,
 			showSelectedState = false,
-			optionTextMutator = { "${it.name}" },
+			optionTextMutator = { it.name },
 			optionIdForSelectedCheck = { it.id }
 		),
 		tagsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
@@ -581,7 +573,7 @@ class MainViewModel @Inject constructor(
 			},
 			excludeSelected = true,
 			showSelectedState = false,
-			optionTextMutator = { "${it.name}" },
+			optionTextMutator = { it.name },
 			optionIdForSelectedCheck = { it.id }
 		),
 		sortDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
@@ -594,7 +586,7 @@ class MainViewModel @Inject constructor(
 			},
 			showSelectedState = true,
 			optionIdForSelectedCheck = { it.name },
-			optionTextMutator = { "${it.name}" }
+			optionTextMutator = { it.name }
 		),
 		sortDesc = false
 	)
