@@ -283,11 +283,12 @@ class MainViewModel @Inject constructor(
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
-		val locations = userLocationsContent.data.userLocations
 		val items = itemsDataCollector.itemsContentFlow.value.data.items
 		val tags = itemsDataCollector.userTagsContentFlow.value.data.userTags
 		val item2Tags = itemsDataCollector.item2TagsContentFlow.value
 		val quantityUnits = itemsDataCollector.quantityUnitsContentFlow.value.data.allUnits
+
+		val locations = userLocationsContent.data.userLocations
 		val stashes = itemStashesContent.data.itemStashes
 
 		val currLocation = filterOptions.currentLocation
