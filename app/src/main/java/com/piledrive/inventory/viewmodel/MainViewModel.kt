@@ -49,11 +49,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -169,6 +168,7 @@ class MainViewModel @Inject constructor(
 	private fun changeLocation(loc: Location) {
 		viewModelScope.launch {
 			filterOptions = filterOptions.copy(currentLocation = loc)
+			_filterOptionsFlow.value = filterOptions
 			rebuildItemsWithTags()
 		}
 	}
@@ -225,11 +225,14 @@ class MainViewModel @Inject constructor(
 	}
 
 	private var filterOptions = FilterOptions()
+	private val _filterOptionsFlow = MutableStateFlow(filterOptions)
+	val filterOptionsFlow: StateFlow<FilterOptions> = _filterOptionsFlow
 
 	//todo: possible add pref, or keep it session-level
 	private fun changeTag(tag: Tag) {
 		viewModelScope.launch {
 			filterOptions = filterOptions.copy(currentTag = tag)
+			_filterOptionsFlow.value = filterOptions
 			rebuildItemsWithTags()
 		}
 	}
@@ -457,6 +460,7 @@ class MainViewModel @Inject constructor(
 		_locationStashesContentFlow,
 		locationsSourceFlow = _userLocationsContentFlow,
 		tagsSourceFlow = itemsDataCollector.userTagsContentFlow,
+		filterOptionsFlow = filterOptionsFlow,
 		itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
 		onItemStashQuantityUpdated = { stashId, qty ->
 			updateStashQuantity(stashId, qty)

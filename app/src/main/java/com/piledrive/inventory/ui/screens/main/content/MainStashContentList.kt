@@ -22,6 +22,7 @@ import androidx.compose.ui.zIndex
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.ui.screens.main.content.multi_location.MultiLocationStashContent
 import com.piledrive.inventory.ui.screens.main.content.single_location.SingleLocationStashContent
+import com.piledrive.inventory.ui.state.FilterOptions
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.lib_compose_components.ui.theme.custom.AppTheme
@@ -36,11 +37,13 @@ object MainStashContentList {
 	) {
 		val itemStashContent = coordinator.stashesSourceFlow.collectAsState().value
 		val locationContent = coordinator.locationsSourceFlow.collectAsState().value
+		val filterOptions = coordinator.filterOptionsFlow.collectAsState().value
 
 		DrawContent(
 			modifier,
 			locationContent,
 			itemStashContent,
+			filterOptions,
 			coordinator,
 			onLaunchCreateLocation,
 			onLaunchCreateItemStash
@@ -52,12 +55,13 @@ object MainStashContentList {
 		modifier: Modifier = Modifier,
 		locationContent: LocationContentState,
 		itemStashContent: LocalizedContentState,
+		filterOptions: FilterOptions,
 		coordinator: MainContentListCoordinatorImpl,
 		onLaunchCreateLocation: () -> Unit,
 		onLaunchCreateItemStash: () -> Unit
 	) {
 		val stashesForLocation = itemStashContent.data.stashes
-		val currLocationId = locationContent.data.currentLocation.id
+		val currLocationId = filterOptions.currentLocation.id
 
 		Surface(
 			modifier = modifier.fillMaxSize(),
@@ -94,7 +98,7 @@ object MainStashContentList {
 							}
 						} else {
 							Text(
-								"no items in ${locationContent.data.currentLocation.name}"
+								"no items in ${filterOptions.currentLocation.name}"
 							)
 							Button(onClick = {
 								onLaunchCreateItemStash()
@@ -151,6 +155,7 @@ private fun MainStashContentListPreview() {
 			modifier = Modifier,
 			locationContent = LocationContentState(),
 			itemStashContent = LocalizedContentState(/*data = ContentForLocation.generateSampleSet()*/),
+			filterOptions = FilterOptions(),
 			stubMainContentListCoordinator,
 			onLaunchCreateLocation = {},
 			onLaunchCreateItemStash = {}

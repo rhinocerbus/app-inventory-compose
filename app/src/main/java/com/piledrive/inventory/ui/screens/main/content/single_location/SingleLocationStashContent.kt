@@ -41,8 +41,9 @@ object SingleLocationStashContent {
 	) {
 		val itemStashContent = coordinator.stashesSourceFlow.collectAsState().value
 		val stashes = itemStashContent.data.stashes
-		val currLocationId = coordinator.locationsSourceFlow.collectAsState().value.data.currentLocation.id
-		val currTagId = coordinator.tagsSourceFlow.collectAsState().value.data.currentTag.id
+		val filterOptions = coordinator.filterOptionsFlow.collectAsState().value
+		val currLocationId = filterOptions.currentLocation.id
+		val currTagId = filterOptions.currentTag.id
 
 		DrawContent(
 			modifier,

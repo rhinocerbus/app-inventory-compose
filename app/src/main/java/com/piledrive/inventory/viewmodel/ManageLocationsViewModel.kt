@@ -69,7 +69,6 @@ class ManageLocationsViewModel @Inject constructor(
 						data = LocationOptions(
 							allLocations = flatLocations,
 							userLocations = it,
-							currentLocation = userLocationsContent.data.currentLocation
 						),
 						hasLoaded = true,
 						isLoading = false
