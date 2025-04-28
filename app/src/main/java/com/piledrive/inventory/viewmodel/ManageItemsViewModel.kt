@@ -8,7 +8,7 @@ import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.data.model.composite.FullItemData
-import com.piledrive.inventory.data.model.composite.ItemWithTagsContent
+import com.piledrive.inventory.data.model.composite.FullItemsContent
 import com.piledrive.inventory.repo.Item2TagsRepo
 import com.piledrive.inventory.repo.ItemsRepo
 import com.piledrive.inventory.repo.QuantityUnitsRepo
@@ -24,7 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -70,14 +69,12 @@ class ManageItemsViewModel @Inject constructor(
 		}
 	}
 
+	// todo - can clean this up further
 	private fun initWatches() {
 		viewModelScope.launch {
 			withContext(Dispatchers.Default) {
-				val itemsSource = itemsDataCollector.itemsContentFlow
-				val unitsSource = itemsDataCollector.quantityUnitsContentFlow
-				val tagsSource = itemsDataCollector.userTagsContentFlow
-				val item2TagsSource = itemsDataCollector.item2TagsContentFlow
-				merge(itemsSource, tagsSource, item2TagsSource, unitsSource)
+				val fullItemsSource = itemsDataCollector.fullItemsContentFlow
+				merge(fullItemsSource)
 					.debounce(500)
 					.collect {
 						rebuildItemsWithTags()
@@ -90,6 +87,7 @@ class ManageItemsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private val itemsDataCollector = ItemsCollector(
+		viewModelScope,
 		itemsRepo.watchItems(),
 		quantityUnitsRepo.watchQuantityUnits(),
 		tagsRepo.watchTags(),
@@ -108,7 +106,7 @@ class ManageItemsViewModel @Inject constructor(
 		}
 	}
 
-	fun addNewTag(slug: TagSlug) {
+	private fun addNewTag(slug: TagSlug) {
 		viewModelScope.launch {
 			tagsRepo.addTag(slug)
 		}
@@ -133,47 +131,37 @@ class ManageItemsViewModel @Inject constructor(
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
-		val items = itemsDataCollector.itemsContentFlow.value.data.items
-		val tags = itemsDataCollector.userTagsContentFlow.value.data.userTags
-		val item2Tags = itemsDataCollector.item2TagsContentFlow.value
-		val quantityUnits = itemsDataCollector.quantityUnitsContentFlow.value.data.allUnits
-
-		val itemsWithTags: List<FullItemData> = items.map { item ->
-			val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
-			val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-			val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
-			FullItemData(item, unitForItem, tagsForItem)
-		}
+		val fullItems = itemsDataCollector.fullItemsContentFlow.value.data.fullItems
 
 		val sort = SortOrder.DEFAULT
 		val sortDesc = true
 		val sorted = when (sort) {
 			SortOrder.NAME -> {
 				if (sortDesc) {
-					itemsWithTags.sortedByDescending { it.item.name }
+					fullItems.sortedByDescending { it.item.name }
 				} else {
-					itemsWithTags.sortedBy { it.item.name }
+					fullItems.sortedBy { it.item.name }
 				}
 			}
 
 			SortOrder.LAST_ADDED -> {
 				if (sortDesc) {
-					itemsWithTags.sortedByDescending { it.item.createdAt }
+					fullItems.sortedByDescending { it.item.createdAt }
 				} else {
-					itemsWithTags.sortedBy { it.item.createdAt }
+					fullItems.sortedBy { it.item.createdAt }
 				}
 			}
 
 			SortOrder.LAST_UPDATED -> {
 				if (sortDesc) {
-					itemsWithTags.sortedByDescending { it.item.createdAt }
+					fullItems.sortedByDescending { it.item.createdAt }
 				} else {
-					itemsWithTags.sortedBy { it.item.createdAt }
+					fullItems.sortedBy { it.item.createdAt }
 				}
 			}
 		}
 
-		val content = ItemWithTagsContent(
+		val content = FullItemsContent(
 			sorted
 		)
 		val updated = fullItemsContent.copy(

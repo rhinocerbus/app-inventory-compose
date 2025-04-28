@@ -193,6 +193,7 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private val itemsDataCollector = ItemsCollector(
+		viewModelScope,
 		itemsRepo.watchItems(),
 		quantityUnitsRepo.watchQuantityUnits(),
 		tagsRepo.watchTags(),
@@ -283,13 +284,9 @@ class MainViewModel @Inject constructor(
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
-		val items = itemsDataCollector.itemsContentFlow.value.data.items
-		val tags = itemsDataCollector.userTagsContentFlow.value.data.userTags
-		val item2Tags = itemsDataCollector.item2TagsContentFlow.value
-		val quantityUnits = itemsDataCollector.quantityUnitsContentFlow.value.data.allUnits
-
 		val locations = userLocationsContent.data.userLocations
 		val stashes = itemStashesContent.data.itemStashes
+		val fullItems = itemsDataCollector.fullItemsContentFlow.value.data.fullItems
 
 		val currLocation = filterOptions.currentLocation
 		val currTag = filterOptions.currentTag
@@ -313,13 +310,8 @@ class MainViewModel @Inject constructor(
 			.filter { it.amount > 0.0 }
 			.groupBy { it.itemId }
 			.mapNotNull { input ->
-				val item = items.firstOrNull { it.id == input.key } ?: return@mapNotNull null
-				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
-
-				if (currTag.id != STATIC_ID_TAG_ALL && !tagIdsForItem.contains(currTag.id)) return@mapNotNull null
-
-				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-				val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
+				val fullItem = fullItems.firstOrNull { it.item.id == input.key } ?: return@mapNotNull null
+				if (currTag.id != STATIC_ID_TAG_ALL && !fullItem.tags.map { it.id }.contains(currTag.id)) return@mapNotNull null
 
 				val stashesForItem: List<FullStashData> = input.value
 					.map { stash ->
@@ -354,7 +346,7 @@ class MainViewModel @Inject constructor(
 							}
 						}
 					}
-				StashesForItem(FullItemData(item, unitForItem, tagsForItem), stashesForItem)
+				StashesForItem(fullItem, stashesForItem)
 			}
 
 		val sorted = stashesByItem.run {
