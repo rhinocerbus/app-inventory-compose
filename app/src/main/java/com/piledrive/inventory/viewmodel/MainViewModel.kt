@@ -6,10 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.enums.SortOrder
+import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
-import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
@@ -35,13 +35,12 @@ import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinator
 import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
 import com.piledrive.inventory.ui.screens.main.content.SectionedListCoordinator
 import com.piledrive.inventory.ui.state.FilterOptions
-import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocalizedStashesPayload
-import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.TagOptions
 import com.piledrive.inventory.viewmodel.nuggets.ItemsCollector
+import com.piledrive.inventory.viewmodel.nuggets.StashesCollector
 import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -112,8 +111,16 @@ class MainViewModel @Inject constructor(
 					}
 				}
 				val item2TagsSource = itemsDataCollector.item2TagsContentFlow
-				val locationsSource = watchLocations()
-				val stashesSource = watchItemStashes()
+
+				val locationsSource = stashesDataCollector.locationsContentFlow.map {
+					val flatLocations = it.data.allLocations
+					filterAppBarCoordinator.locationsDropdownCoordinator.updateOptionsPool(flatLocations)
+					if (filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
+						filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
+					}
+				}
+				val stashesSource = stashesDataCollector.itemStashesContentFlow
+
 				merge(itemsSource, tagsSource, item2TagsSource, unitsSource, locationsSource, stashesSource)
 					.debounce(500)
 					.collect {
@@ -127,9 +134,6 @@ class MainViewModel @Inject constructor(
 	//  region Location data
 	/////////////////////////////////////////////////
 
-	private var userLocationsContent: LocationContentState = LocationContentState()
-	private val _userLocationsContentFlow = MutableStateFlow(userLocationsContent)
-
 	/* supabase-only stub
 	private fun loadLocations() {
 		viewModelScope.launch {
@@ -141,28 +145,6 @@ class MainViewModel @Inject constructor(
 		}
 	}
 	*/
-
-	private fun watchLocations(): Flow<Unit> {
-		return locationsRepo.watchLocations().mapLatest {
-			Timber.d("Locations received: $it")
-			val flatLocations = listOf(LocationOptions.defaultLocation, *it.toTypedArray())
-			userLocationsContent = LocationContentState(
-				data = LocationOptions(
-					allLocations = flatLocations,
-					userLocations = it,
-				),
-				hasLoaded = true,
-				isLoading = false
-			)
-			withContext(Dispatchers.Main) {
-				_userLocationsContentFlow.value = userLocationsContent
-				filterAppBarCoordinator.locationsDropdownCoordinator.updateOptionsPool(flatLocations)
-				if (filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
-					filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
-				}
-			}
-		}
-	}
 
 	//todo: possible add pref, or keep it session-level
 	private fun changeLocation(loc: Location) {
@@ -241,27 +223,25 @@ class MainViewModel @Inject constructor(
 	//  endregion
 
 
-	//  region Item stashes data
+	//  region Location/Stashes data
 	/////////////////////////////////////////////////
 
-	private var itemStashesContent: ItemStashContentState = ItemStashContentState()
-	private val _itemStashesContentFlow = MutableStateFlow(itemStashesContent)
+	private val stashesDataCollector = StashesCollector(
+		coroutineScope = viewModelScope,
+		locationsSourceFlow = locationsRepo.watchLocations(),
+		stashesSourceFlow = itemStashesRepo.watchItemStashes()
+	)
+
+	/////////////////////////////////////////////////
+	//  endregion
+
+
+	//  region Item stashes data
+	/////////////////////////////////////////////////
 
 	private fun addNewItemStash(slug: StashSlug) {
 		viewModelScope.launch {
 			itemStashesRepo.addItemStash(slug)
-		}
-	}
-
-	private fun watchItemStashes(): Flow<Unit> {
-		return itemStashesRepo.watchItemStashes().mapLatest {
-			Timber.d("Stashes received: $it")
-			itemStashesContent = itemStashesContent.copy(
-				data = itemStashesContent.data.copy(itemStashes = it)
-			)
-			withContext(Dispatchers.Main) {
-				_itemStashesContentFlow.value = itemStashesContent
-			}
 		}
 	}
 
@@ -287,9 +267,8 @@ class MainViewModel @Inject constructor(
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
-		val locations = userLocationsContent.data.userLocations
-		val stashes = itemStashesContent.data.itemStashes
 		val fullItems = itemsDataCollector.fullItemsContentFlow.value.data.fullItems
+		val fullStashes = stashesDataCollector.fullStashesContentFlow.value.data.fullStashes
 
 		val currLocation = filterOptions.currentLocation
 		val currTag = filterOptions.currentTag
@@ -304,23 +283,20 @@ class MainViewModel @Inject constructor(
 		// 2)		StashesForItem by item
 
 		val stashesForLocation = if (currLocation.id == STATIC_ID_LOCATION_ALL) {
-			stashes
+			fullStashes
 		} else {
-			stashes.filter { it.locationId == currLocation.id }
+			fullStashes.filter { it.location.id == currLocation.id }
 		}
 
 		val stashesByItem: List<StashesForItem> = stashesForLocation
-			.filter { it.amount > 0.0 }
-			.groupBy { it.itemId }
+			.groupBy { it.stash.itemId }
 			.mapNotNull { input ->
 				val fullItem = fullItems.firstOrNull { it.item.id == input.key } ?: return@mapNotNull null
 				if (currTag.id != STATIC_ID_TAG_ALL && !fullItem.tags.map { it.id }.contains(currTag.id)) return@mapNotNull null
 
 				val stashesForItem: List<FullStashData> = input.value
-					.map { stash ->
-						if (tagsForItem.firstOrNull { it.showEmpty } == null && stash.amount == 0.0) return@mapNotNull null
-						val location = locations.firstOrNull { it.id == stash.locationId } ?: return@mapNotNull null
-						FullStashData(stash, location)
+					.filter { stash ->
+						fullItem.tags.firstOrNull { it.showEmpty } != null || stash.stash.amount > 0.0
 					}
 					.run {
 						when (sort) {
@@ -396,7 +372,7 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
-		locationsSourceFlow = _userLocationsContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
 		onCreateDataModel = {
 			addNewLocation(it)
 		},
@@ -435,9 +411,9 @@ class MainViewModel @Inject constructor(
 	)
 
 	val createItemStashCoordinator = CreateItemStashSheetCoordinator(
-		_itemStashesContentFlow,
-		itemsDataCollector.itemsContentFlow,
-		_userLocationsContentFlow,
+		stashesSourceFlow = stashesDataCollector.itemStashesContentFlow,
+		itemsSourceFlow = itemsDataCollector.itemsContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
 		createItemCoordinator = createItemCoordinator,
 		createLocationCoordinator = createLocationCoordinator,
 		onCreateDataModel = {
@@ -447,8 +423,8 @@ class MainViewModel @Inject constructor(
 
 	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
 		itemsSourceFlow = itemsDataCollector.itemsContentFlow,
-		locationsSourceFlow = _userLocationsContentFlow,
-		stashesSourceFlow = _itemStashesContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
+		stashesSourceFlow = stashesDataCollector.itemStashesContentFlow,
 		onCommitStashTransfer = { fromStash, toStash ->
 			viewModelScope.launch {
 				itemStashesRepo.performTransfer(fromStash, toStash)
@@ -458,7 +434,7 @@ class MainViewModel @Inject constructor(
 
 	val listContentCoordinator = MainContentListCoordinator(
 		_locationStashesContentFlow,
-		locationsSourceFlow = _userLocationsContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
 		tagsSourceFlow = itemsDataCollector.userTagsContentFlow,
 		filterOptionsFlow = filterOptionsFlow,
 		itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
@@ -476,7 +452,7 @@ class MainViewModel @Inject constructor(
 	)
 
 	val filterAppBarCoordinator = MainFilterAppBarCoordinator(
-		locationsSourceFlow = _userLocationsContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
 		tagsSourceFlow = itemsDataCollector.userTagsContentFlow,
 		locationsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
 			externalOnOptionSelected = {

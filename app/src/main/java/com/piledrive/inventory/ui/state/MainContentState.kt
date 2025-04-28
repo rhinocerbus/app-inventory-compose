@@ -6,7 +6,8 @@ import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
-import com.piledrive.inventory.data.model.composite.ItemWithTagsContent
+import com.piledrive.inventory.data.model.composite.FullItemsContent
+import com.piledrive.inventory.data.model.composite.FullStashesContent
 import com.piledrive.inventory.data.model.composite.StashesForItem
 import com.piledrive.inventory.data.model.everythingTag
 import com.piledrive.inventory.data.model.predefinedTagSet
@@ -140,7 +141,13 @@ data class LocalizedContentState(
 /////////////////////////////////////////////////
 
 data class FullItemsContentState(
-	override val data: ItemWithTagsContent = ItemWithTagsContent(),
+	override val data: FullItemsContent = FullItemsContent(),
+	override val hasLoaded: Boolean = false,
+	override val isLoading: Boolean = true
+) : GenericContentState()
+
+data class FullStashesContentState(
+	override val data: FullStashesContent = FullStashesContent(),
 	override val hasLoaded: Boolean = false,
 	override val isLoading: Boolean = true
 ) : GenericContentState()
