@@ -1,15 +1,11 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.piledrive.inventory.viewmodel.nuggets
+package com.piledrive.inventory.viewmodel.data_collectors
 
 import com.piledrive.inventory.data.model.Location
-import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.Stash
-import com.piledrive.inventory.data.model.composite.FullItemData
-import com.piledrive.inventory.data.model.composite.FullItemsContent
 import com.piledrive.inventory.data.model.composite.FullStashData
 import com.piledrive.inventory.data.model.composite.FullStashesContent
-import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.inventory.ui.state.FullStashesContentState
 import com.piledrive.inventory.ui.state.ItemStashContentState
 import com.piledrive.inventory.ui.state.LocationContentState

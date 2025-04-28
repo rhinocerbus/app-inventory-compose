@@ -11,7 +11,6 @@ import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -56,10 +55,9 @@ class ManageUnitsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var unitsContent: QuantityUnitContentState = QuantityUnitContentState()
-	private val _unitsContentFlow = MutableStateFlow<QuantityUnitContentState>(unitsContent)
-	val unitsContentFlow: StateFlow<QuantityUnitContentState> = _unitsContentFlow
+	private val _unitsContentFlow = MutableStateFlow(unitsContent)
 
-	fun addNewQuantityUnit(slug: QuantityUnitSlug) {
+	private fun addNewQuantityUnit(slug: QuantityUnitSlug) {
 		viewModelScope.launch {
 			unitsRepo.addQuantityUnit(slug)
 		}
@@ -95,9 +93,9 @@ class ManageUnitsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageUnitsContentCoordinator(
-		unitsSourceFlow = unitsContentFlow,
+		unitsSourceFlow = _unitsContentFlow,
 		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-			unitsContentFlow,
+			_unitsContentFlow,
 			onCreateDataModel = {
 				addNewQuantityUnit(it)
 			},

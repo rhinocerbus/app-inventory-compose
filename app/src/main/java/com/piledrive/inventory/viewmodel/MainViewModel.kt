@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalCoroutinesApi::class)
+@file:OptIn(FlowPreview::class)
 
 package com.piledrive.inventory.viewmodel
 
@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.enums.SortOrder
-import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
@@ -39,17 +38,16 @@ import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocalizedStashesPayload
 import com.piledrive.inventory.ui.state.LocationOptions
 import com.piledrive.inventory.ui.state.TagOptions
-import com.piledrive.inventory.viewmodel.nuggets.ItemsCollector
-import com.piledrive.inventory.viewmodel.nuggets.StashesCollector
+import com.piledrive.inventory.viewmodel.data_collectors.ItemsCollector
+import com.piledrive.inventory.viewmodel.data_collectors.StashesCollector
 import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -208,7 +206,6 @@ class MainViewModel @Inject constructor(
 
 	private var filterOptions = FilterOptions()
 	private val _filterOptionsFlow = MutableStateFlow(filterOptions)
-	val filterOptionsFlow: StateFlow<FilterOptions> = _filterOptionsFlow
 
 	//todo: possible add pref, or keep it session-level
 	private fun changeTag(tag: Tag) {
@@ -436,7 +433,7 @@ class MainViewModel @Inject constructor(
 		_locationStashesContentFlow,
 		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
 		tagsSourceFlow = itemsDataCollector.userTagsContentFlow,
-		filterOptionsFlow = filterOptionsFlow,
+		filterOptionsFlow = _filterOptionsFlow,
 		itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
 		onItemStashQuantityUpdated = { stashId, qty ->
 			updateStashQuantity(stashId, qty)

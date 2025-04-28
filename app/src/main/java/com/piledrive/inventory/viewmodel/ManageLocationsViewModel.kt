@@ -12,7 +12,6 @@ import com.piledrive.inventory.ui.state.LocationOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -56,8 +55,7 @@ class ManageLocationsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var userLocationsContent: LocationContentState = LocationContentState()
-	private val _userLocationContentFlow = MutableStateFlow<LocationContentState>(userLocationsContent)
-	val userLocationContentFlow: StateFlow<LocationContentState> = _userLocationContentFlow
+	private val _userLocationContentFlow = MutableStateFlow(userLocationsContent)
 
 	private fun watchLocations() {
 		viewModelScope.launch {
@@ -101,9 +99,9 @@ class ManageLocationsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageLocationsContentCoordinator(
-		locationsSourceFlow = userLocationContentFlow,
+		locationsSourceFlow = _userLocationContentFlow,
 		createLocationCoordinator = CreateLocationModalSheetCoordinator(
-			locationsSourceFlow = userLocationContentFlow,
+			locationsSourceFlow = _userLocationContentFlow,
 			onCreateDataModel = {
 				addNewLocation(it)
 			},

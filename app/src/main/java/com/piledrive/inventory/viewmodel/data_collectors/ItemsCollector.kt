@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package com.piledrive.inventory.viewmodel.nuggets
+package com.piledrive.inventory.viewmodel.data_collectors
 
 import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag

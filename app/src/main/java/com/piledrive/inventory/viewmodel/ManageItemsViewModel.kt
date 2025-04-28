@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.enums.SortOrder
 import com.piledrive.inventory.data.model.ItemSlug
-import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.TagSlug
 import com.piledrive.inventory.data.model.composite.FullItemData
@@ -18,11 +17,10 @@ import com.piledrive.inventory.ui.modal.create_tag.CreateTagSheetCoordinator
 import com.piledrive.inventory.ui.modal.create_unit.CreateQuantityUnitSheetCoordinator
 import com.piledrive.inventory.ui.screens.items.content.ManageItemsContentCoordinator
 import com.piledrive.inventory.ui.state.FullItemsContentState
-import com.piledrive.inventory.viewmodel.nuggets.ItemsCollector
+import com.piledrive.inventory.viewmodel.data_collectors.ItemsCollector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
@@ -126,8 +124,7 @@ class ManageItemsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var fullItemsContent: FullItemsContentState = FullItemsContentState()
-	private val _fullItemsContentFlow = MutableStateFlow<FullItemsContentState>(fullItemsContent)
-	val fullItemsContentFlow: StateFlow<FullItemsContentState> = _fullItemsContentFlow
+	private val _fullItemsContentFlow = MutableStateFlow(fullItemsContent)
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
@@ -180,7 +177,7 @@ class ManageItemsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageItemsContentCoordinator(
-		itemsSourceFlow = fullItemsContentFlow,
+		itemsSourceFlow = _fullItemsContentFlow,
 		createItemCoordinator = CreateItemSheetCoordinator(
 			itemsSourceFlow = itemsDataCollector.itemsContentFlow,
 			unitsSourceFlow = itemsDataCollector.quantityUnitsContentFlow,
