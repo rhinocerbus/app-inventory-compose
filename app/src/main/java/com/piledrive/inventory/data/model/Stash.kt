@@ -2,7 +2,7 @@ package com.piledrive.inventory.data.model
 
 import com.piledrive.inventory.data.model.abstracts.FullDataModel
 import com.piledrive.inventory.data.model.abstracts.SlugDataModel
-import com.piledrive.inventory.data.model.abstracts.SupaBaseModel
+import com.piledrive.lib_supabase_powersync.data.model.abstracts.SupaBaseModel
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 

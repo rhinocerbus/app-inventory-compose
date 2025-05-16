@@ -4,10 +4,9 @@ import android.content.ContentValues
 import com.piledrive.inventory.data.model.QuantityType
 import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
-import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.repo.datasource.abstracts.QuantityUnitsSourceImpl
+import com.piledrive.lib_supabase_powersync.powersync.PowerSyncDbWrapper
 import com.powersync.db.getString
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton

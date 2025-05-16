@@ -5,11 +5,10 @@ import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.composite.FullItemData
-import com.piledrive.inventory.data.powersync.PowerSyncDbWrapper
 import com.piledrive.inventory.repo.datasource.abstracts.ItemsSourceImpl
 import com.piledrive.inventory.ui.util.UUIDv5
+import com.piledrive.lib_supabase_powersync.powersync.PowerSyncDbWrapper
 import com.powersync.db.getString
-import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
