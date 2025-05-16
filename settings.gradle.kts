@@ -27,3 +27,4 @@ include(":app")
 // composite build config
 // list private library git submodules
 includeBuild("lib-compose-components")
+includeBuild("lib-supabase-powersync")

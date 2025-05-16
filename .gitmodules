@@ -7,3 +7,6 @@
 [submodule "lib-compose-components"]
 	path = lib-compose-components
 	url = git@github.com:rhinocerbus/lib-compose-components.git
+[submodule "lib-supabase-powersync"]
+	path = lib-supabase-powersync
+	url = git@github.com:rhinocerbus/lib-supabase-powersync.git
