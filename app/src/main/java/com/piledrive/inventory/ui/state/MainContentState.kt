@@ -6,10 +6,25 @@ import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
-import com.piledrive.inventory.data.model.everythingTag
+import com.piledrive.inventory.data.model.composite.FullItemsContent
+import com.piledrive.inventory.data.model.composite.FullStashesContent
 import com.piledrive.inventory.data.model.composite.StashesForItem
-import com.piledrive.inventory.data.model.composite.ItemWithTagsContent
+import com.piledrive.inventory.data.model.everythingTag
 import com.piledrive.inventory.data.model.predefinedTagSet
+import com.piledrive.inventory.ui.state.LocationOptions.Companion.defaultLocation
+import com.piledrive.inventory.ui.state.TagOptions.Companion.defaultTag
+
+
+//  region Content filter bar
+/////////////////////////////////////////////////
+
+data class FilterOptions(
+	val currentLocation: Location = defaultLocation,
+	val currentTag: Tag = defaultTag
+)
+
+/////////////////////////////////////////////////
+//  endregion
 
 
 //  region location filter
@@ -18,7 +33,6 @@ import com.piledrive.inventory.data.model.predefinedTagSet
 data class LocationOptions(
 	val allLocations: List<Location> = listOf(defaultLocation),
 	val userLocations: List<Location> = listOf(),
-	val currentLocation: Location = defaultLocation
 ) {
 	companion object {
 		val defaultLocation = Location(STATIC_ID_LOCATION_ALL, "", "Everywhere")
@@ -46,7 +60,6 @@ data class LocationContentState(
 
 data class TagOptions(
 	val userTags: List<Tag> = listOf(),
-	val currentTag: Tag = defaultTag
 ) {
 
 	val tagsForFiltering: List<Tag>
@@ -128,7 +141,13 @@ data class LocalizedContentState(
 /////////////////////////////////////////////////
 
 data class FullItemsContentState(
-	override val data: ItemWithTagsContent = ItemWithTagsContent(),
+	override val data: FullItemsContent = FullItemsContent(),
+	override val hasLoaded: Boolean = false,
+	override val isLoading: Boolean = true
+) : GenericContentState()
+
+data class FullStashesContentState(
+	override val data: FullStashesContent = FullStashesContent(),
 	override val hasLoaded: Boolean = false,
 	override val isLoading: Boolean = true
 ) : GenericContentState()

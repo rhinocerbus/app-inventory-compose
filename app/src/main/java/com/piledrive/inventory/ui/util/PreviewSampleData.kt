@@ -8,7 +8,8 @@ import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.Stash
 import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.data.model.composite.StashesForItem
-import com.piledrive.inventory.data.model.composite.ItemWithTagsContent
+import com.piledrive.inventory.data.model.composite.FullItemsContent
+import com.piledrive.inventory.ui.state.FilterOptions
 import com.piledrive.inventory.ui.state.FullItemsContentState
 import com.piledrive.inventory.ui.state.ItemContentState
 import com.piledrive.inventory.ui.state.ItemOptions
@@ -50,6 +51,13 @@ fun previewTagsContentFlow(
 	)
 }
 
+fun previewFilterOptionsFlow(
+): StateFlow<FilterOptions> {
+	return MutableStateFlow(
+		FilterOptions()
+	)
+}
+
 fun previewQuantityUnitsContentFlow(
 ): StateFlow<QuantityUnitContentState> {
 	return MutableStateFlow(QuantityUnitContentState(hasLoaded = true, isLoading = false))
@@ -68,7 +76,7 @@ fun previewUnitsContentFlow(
 }
 
 fun previewFullItemsContentFlow(
-	dataSet: ItemWithTagsContent = ItemWithTagsContent.generateSampleSet()
+	dataSet: FullItemsContent = FullItemsContent.generateSampleSet()
 ): StateFlow<FullItemsContentState> {
 	return MutableStateFlow(FullItemsContentState(data = dataSet, hasLoaded = true, isLoading = false))
 }

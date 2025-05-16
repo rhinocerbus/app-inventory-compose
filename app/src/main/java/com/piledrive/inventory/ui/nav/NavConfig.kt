@@ -44,7 +44,7 @@ fun RootNavHost() {
 		composable(route = MainScreen.routeValue) {
 			val viewModel: MainViewModel = hiltViewModel<MainViewModel>()
 			LaunchedEffect("load_content_on_launch") {
-				viewModel.reloadContent()
+				viewModel.initDataSync()
 			}
 			MainScreen.draw(
 				viewModel,
@@ -66,7 +66,7 @@ fun RootNavHost() {
 		composable(route = ManageItemsScreen.routeValue) {
 			val viewModel: ManageItemsViewModel = hiltViewModel<ManageItemsViewModel>()
 			LaunchedEffect("load_items_content_on_launch") {
-				viewModel.reloadContent()
+				viewModel.initDataSync()
 			}
 			ManageItemsScreen.draw(
 				viewModel,

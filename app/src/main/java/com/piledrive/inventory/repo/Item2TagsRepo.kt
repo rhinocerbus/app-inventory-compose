@@ -11,8 +11,9 @@ import com.piledrive.inventory.repo.datasource.SupaBaseLocationsDataSource
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class Item2TagsRepo @Inject constructor(
 	private val powerSyncSource: PowerSyncItem2TagsDataSource,
 	//private val localSource: LocalMoviesSource,

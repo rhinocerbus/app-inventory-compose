@@ -12,7 +12,6 @@ import com.piledrive.inventory.ui.state.TagsContentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -57,8 +56,7 @@ class ManageTagsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var userTagsContent: TagsContentState = TagsContentState()
-	private val _userTagsContentFlow = MutableStateFlow<TagsContentState>(userTagsContent)
-	val userTagsContentFlow: StateFlow<TagsContentState> = _userTagsContentFlow
+	private val _userTagsContentFlow = MutableStateFlow(userTagsContent)
 
 	private fun watchTags() {
 		viewModelScope.launch {
@@ -80,13 +78,13 @@ class ManageTagsViewModel @Inject constructor(
 		}
 	}
 
-	fun addNewTag(slug: TagSlug) {
+	private fun addNewTag(slug: TagSlug) {
 		viewModelScope.launch {
 			tagsRepo.addTag(slug)
 		}
 	}
 
-	fun updateTag(tag: Tag) {
+	private fun updateTag(tag: Tag) {
 		viewModelScope.launch {
 			tagsRepo.updateTag(tag)
 		}
@@ -100,9 +98,9 @@ class ManageTagsViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val contentCoordinator = ManageTagsContentCoordinator(
-		tagsSourceFlow = userTagsContentFlow,
+		tagsSourceFlow = _userTagsContentFlow,
 		createTagCoordinator = CreateTagSheetCoordinator(
-			userTagsContentFlow,
+			_userTagsContentFlow,
 			onCreateDataModel = {
 				addNewTag(it)
 			},

@@ -4,9 +4,11 @@ import com.piledrive.inventory.data.model.Item
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.composite.FullItemData
 import com.piledrive.inventory.data.model.composite.StashesForItem
+import com.piledrive.inventory.ui.state.FilterOptions
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.TagsContentState
+import com.piledrive.inventory.ui.util.previewFilterOptionsFlow
 import com.piledrive.inventory.ui.util.previewLocalizedContentFlow
 import com.piledrive.inventory.ui.util.previewLocationContentFlow
 import com.piledrive.inventory.ui.util.previewTagsContentFlow
@@ -17,6 +19,7 @@ interface MainContentListCoordinatorImpl {
 	val stashesSourceFlow: StateFlow<LocalizedContentState>
 	val locationsSourceFlow: StateFlow<LocationContentState>
 	val tagsSourceFlow: StateFlow<TagsContentState>
+	val filterOptionsFlow: StateFlow<FilterOptions>
 	val allLocationsSectionsCoordinator: SectionedListCoordinator
 	val itemMenuCoordinator: ListItemOverflowMenuCoordinator
 	val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit
@@ -28,6 +31,7 @@ class MainContentListCoordinator(
 	override val stashesSourceFlow: StateFlow<LocalizedContentState>,
 	override val locationsSourceFlow: StateFlow<LocationContentState>,
 	override val tagsSourceFlow: StateFlow<TagsContentState>,
+	override val filterOptionsFlow: StateFlow<FilterOptions>,
 	override val allLocationsSectionsCoordinator: SectionedListCoordinator,
 	override val itemMenuCoordinator: ListItemOverflowMenuCoordinator,
 	override val onItemStashQuantityUpdated: (stashId: String, qty: Double) -> Unit,
@@ -44,6 +48,7 @@ val stubMainContentListCoordinator = MainContentListCoordinator(
 	stashesSourceFlow = previewLocalizedContentFlow(),
 	locationsSourceFlow = previewLocationContentFlow(),
 	tagsSourceFlow = previewTagsContentFlow(),
+	filterOptionsFlow = previewFilterOptionsFlow(),
 	allLocationsSectionsCoordinator = SectionedListCoordinator(),
 	itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
 	onItemStashQuantityUpdated = { _, _ -> },

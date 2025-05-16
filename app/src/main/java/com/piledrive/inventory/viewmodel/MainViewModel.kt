@@ -1,14 +1,14 @@
+@file:OptIn(FlowPreview::class)
+
 package com.piledrive.inventory.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.piledrive.inventory.data.enums.SortOrder
-import com.piledrive.inventory.data.model.Item2Tag
 import com.piledrive.inventory.data.model.ItemSlug
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
-import com.piledrive.inventory.data.model.QuantityUnit
 import com.piledrive.inventory.data.model.QuantityUnitSlug
 import com.piledrive.inventory.data.model.STATIC_ID_LOCATION_ALL
 import com.piledrive.inventory.data.model.STATIC_ID_TAG_ALL
@@ -33,23 +33,24 @@ import com.piledrive.inventory.ui.modal.transfer_item.TransferItemStashSheetCoor
 import com.piledrive.inventory.ui.screens.main.bars.MainFilterAppBarCoordinator
 import com.piledrive.inventory.ui.screens.main.content.MainContentListCoordinator
 import com.piledrive.inventory.ui.screens.main.content.SectionedListCoordinator
-import com.piledrive.inventory.ui.state.ItemContentState
-import com.piledrive.inventory.ui.state.ItemStashContentState
+import com.piledrive.inventory.ui.state.FilterOptions
 import com.piledrive.inventory.ui.state.LocalizedContentState
 import com.piledrive.inventory.ui.state.LocalizedStashesPayload
-import com.piledrive.inventory.ui.state.LocationContentState
 import com.piledrive.inventory.ui.state.LocationOptions
-import com.piledrive.inventory.ui.state.QuantityUnitContentState
 import com.piledrive.inventory.ui.state.TagOptions
-import com.piledrive.inventory.ui.state.TagsContentState
+import com.piledrive.inventory.viewmodel.data_collectors.ItemsCollector
+import com.piledrive.inventory.viewmodel.data_collectors.StashesCollector
 import com.piledrive.lib_compose_components.ui.coordinators.ListItemOverflowMenuCoordinator
 import com.piledrive.lib_compose_components.ui.dropdown.readonly.ReadOnlyDropdownCoordinatorGeneric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -65,11 +66,13 @@ class MainViewModel @Inject constructor(
 	private val itemStashesRepo: ItemStashesRepo,
 ) : ViewModel() {
 
+	/* not init block because instantiation vs declaration order
 	init {
-		//reloadContent()
+		initDataSync()
 	}
+	*/
 
-	fun reloadContent() {
+	fun initDataSync() {
 		viewModelScope.launch {
 			withContext(Dispatchers.Default) {
 				locationsRepo.initialize().collect {
@@ -86,15 +89,41 @@ class MainViewModel @Inject constructor(
 
 						1 -> {
 							// done
-							watchLocations()
-							watchTags()
-							watchItems()
-							watchItem2Tags()
-							watchItemStashes()
-							watchQuantityUnits()
+							initWatches()
 						}
 					}
 				}
+			}
+		}
+	}
+
+	private fun initWatches() {
+		viewModelScope.launch {
+			withContext(Dispatchers.Default) {
+				val itemsSource = itemsDataCollector.itemsContentFlow
+				val unitsSource = itemsDataCollector.quantityUnitsContentFlow
+				val tagsSource = itemsDataCollector.userTagsContentFlow.map {
+					filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(it.data.tagsForFiltering)
+					if (filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
+						filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
+					}
+				}
+				val item2TagsSource = itemsDataCollector.item2TagsContentFlow
+
+				val locationsSource = stashesDataCollector.locationsContentFlow.map {
+					val flatLocations = it.data.allLocations
+					filterAppBarCoordinator.locationsDropdownCoordinator.updateOptionsPool(flatLocations)
+					if (filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
+						filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
+					}
+				}
+				val stashesSource = stashesDataCollector.itemStashesContentFlow
+
+				merge(itemsSource, tagsSource, item2TagsSource, unitsSource, locationsSource, stashesSource)
+					.debounce(500)
+					.collect {
+						rebuildItemsWithTags()
+					}
 			}
 		}
 	}
@@ -103,11 +132,7 @@ class MainViewModel @Inject constructor(
 	//  region Location data
 	/////////////////////////////////////////////////
 
-	private var userLocationsContent: LocationContentState = LocationContentState()
-	private val _userLocationsContentFlow = MutableStateFlow<LocationContentState>(userLocationsContent)
-	val userLocationsContentFlow: StateFlow<LocationContentState> = _userLocationsContentFlow
-
-	/*
+	/* supabase-only stub
 	private fun loadLocations() {
 		viewModelScope.launch {
 			val apiLocations = repo.getAllLocations()
@@ -119,40 +144,11 @@ class MainViewModel @Inject constructor(
 	}
 	*/
 
-	private fun watchLocations() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				locationsRepo.watchLocations().collect {
-					Timber.d("Locations received: $it")
-					val flatLocations = listOf(LocationOptions.defaultLocation, *it.toTypedArray())
-					userLocationsContent = LocationContentState(
-						data = LocationOptions(
-							allLocations = flatLocations,
-							userLocations = it,
-							currentLocation = userLocationsContent.data.currentLocation
-						),
-						hasLoaded = true,
-						isLoading = false
-					)
-					withContext(Dispatchers.Main) {
-						_userLocationsContentFlow.value = userLocationsContent
-						filterAppBarCoordinator.locationsDropdownCoordinator.updateOptionsPool(flatLocations)
-						if (filterAppBarCoordinator.locationsDropdownCoordinator.selectedOptionState.value == null) {
-							filterAppBarCoordinator.locationsDropdownCoordinator.onOptionSelected(LocationOptions.defaultLocation)
-						}
-					}
-				}
-			}
-		}
-	}
-
 	//todo: possible add pref, or keep it session-level
-	fun changeLocation(loc: Location) {
+	private fun changeLocation(loc: Location) {
 		viewModelScope.launch {
-			userLocationsContent = userLocationsContent.copy(
-				data = userLocationsContent.data.copy(currentLocation = loc)
-			)
-			_userLocationsContentFlow.value = userLocationsContent
+			filterOptions = filterOptions.copy(currentLocation = loc)
+			_filterOptionsFlow.value = filterOptions
 			rebuildItemsWithTags()
 		}
 	}
@@ -173,100 +169,16 @@ class MainViewModel @Inject constructor(
 	//  endregion
 
 
-	//  region Tags data
+	//  region Items/Tags/Units data
 	/////////////////////////////////////////////////
 
-	private var userTagsContent: TagsContentState = TagsContentState()
-	private val _userTagsContentFlow = MutableStateFlow<TagsContentState>(userTagsContent)
-	val userTagsContentFlow: StateFlow<TagsContentState> = _userTagsContentFlow
-
-	private fun watchTags() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				tagsRepo.watchTags().collect {
-					Timber.d("Tags received: $it")
-					userTagsContent = userTagsContent.copy(
-						data = TagOptions(
-							userTags = it,
-							currentTag = userTagsContent.data.currentTag
-						),
-						hasLoaded = true,
-						isLoading = false
-					)
-					withContext(Dispatchers.Main) {
-						_userTagsContentFlow.value = userTagsContent
-						filterAppBarCoordinator.tagsDropdownCoordinator.updateOptionsPool(userTagsContent.data.tagsForFiltering)
-						if (filterAppBarCoordinator.tagsDropdownCoordinator.selectedOptionState.value == null) {
-							filterAppBarCoordinator.tagsDropdownCoordinator.onOptionSelected(TagOptions.defaultTag)
-						}
-					}
-					rebuildItemsWithTags()
-				}
-			}
-		}
-	}
-
-	fun addNewTag(slug: TagSlug) {
-		viewModelScope.launch {
-			tagsRepo.addTag(slug)
-		}
-	}
-
-	//todo: possible add pref, or keep it session-level
-	fun changeTag(tag: Tag) {
-		viewModelScope.launch {
-			userTagsContent = userTagsContent.copy(
-				data = userTagsContent.data.copy(currentTag = tag)
-			)
-			_userTagsContentFlow.value = userTagsContent
-			rebuildItemsWithTags()
-		}
-	}
-
-	/////////////////////////////////////////////////
-	//  endregion
-
-
-	//  region Quantity units data
-	/////////////////////////////////////////////////
-
-	private var quantityUnitsContent: QuantityUnitContentState = QuantityUnitContentState()
-	private val _quantityUnitsContentFlow = MutableStateFlow<QuantityUnitContentState>(quantityUnitsContent)
-	val quantityUnitsContentFlow: StateFlow<QuantityUnitContentState> = _quantityUnitsContentFlow
-
-	fun addNewQuantityUnit(slug: QuantityUnitSlug) {
-		viewModelScope.launch {
-			quantityUnitsRepo.addQuantityUnit(slug)
-		}
-	}
-
-	private fun watchQuantityUnits() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				quantityUnitsRepo.watchQuantityUnits().collect {
-					Timber.d("Units received: $it")
-					quantityUnitsContent = quantityUnitsContent.copy(
-						data = quantityUnitsContent.data.copy(customUnits = it)
-					)
-					withContext(Dispatchers.Main) {
-						_quantityUnitsContentFlow.value = quantityUnitsContent
-					}
-					rebuildItemsWithTags()
-				}
-			}
-		}
-	}
-
-	/////////////////////////////////////////////////
-	//  endregion
-
-
-	//  region Items data
-	/////////////////////////////////////////////////
-
-	private var itemsContent: ItemContentState = ItemContentState()
-	private val _itemsContentFlow = MutableStateFlow<ItemContentState>(itemsContent)
-	val itemsContentFlow: StateFlow<ItemContentState> = _itemsContentFlow
+	private val itemsDataCollector = ItemsCollector(
+		viewModelScope,
+		itemsRepo.watchItems(),
+		quantityUnitsRepo.watchQuantityUnits(),
+		tagsRepo.watchTags(),
+		item2TagsRepo.watchItem2Tags()
+	)
 
 	private fun addNewItem(item: ItemSlug) {
 		viewModelScope.launch {
@@ -280,36 +192,42 @@ class MainViewModel @Inject constructor(
 		}
 	}
 
-	private fun watchItems() {
+	private fun addNewQuantityUnit(slug: QuantityUnitSlug) {
 		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				itemsRepo.watchItems().collect {
-					Timber.d("Items received: $it")
-					itemsContent = itemsContent.copy(
-						data = itemsContent.data.copy(items = it)
-					)
-					withContext(Dispatchers.Main) {
-						_itemsContentFlow.value = itemsContent
-					}
-					rebuildItemsWithTags()
-				}
-			}
+			quantityUnitsRepo.addQuantityUnit(slug)
 		}
 	}
 
-	private val item2Tags = mutableListOf<Item2Tag>()
-	private fun watchItem2Tags() {
+	private fun addNewTag(slug: TagSlug) {
 		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				item2TagsRepo.watchItem2Tags().collect {
-					Timber.d("Items2Tags received: $it")
-					item2Tags.clear()
-					item2Tags.addAll(it)
-					rebuildItemsWithTags()
-				}
-			}
+			tagsRepo.addTag(slug)
 		}
 	}
+
+	private var filterOptions = FilterOptions()
+	private val _filterOptionsFlow = MutableStateFlow(filterOptions)
+
+	//todo: possible add pref, or keep it session-level
+	private fun changeTag(tag: Tag) {
+		viewModelScope.launch {
+			filterOptions = filterOptions.copy(currentTag = tag)
+			_filterOptionsFlow.value = filterOptions
+			rebuildItemsWithTags()
+		}
+	}
+
+	/////////////////////////////////////////////////
+	//  endregion
+
+
+	//  region Location/Stashes data
+	/////////////////////////////////////////////////
+
+	private val stashesDataCollector = StashesCollector(
+		coroutineScope = viewModelScope,
+		locationsSourceFlow = locationsRepo.watchLocations(),
+		stashesSourceFlow = itemStashesRepo.watchItemStashes()
+	)
 
 	/////////////////////////////////////////////////
 	//  endregion
@@ -318,35 +236,14 @@ class MainViewModel @Inject constructor(
 	//  region Item stashes data
 	/////////////////////////////////////////////////
 
-	private var itemStashesContent: ItemStashContentState = ItemStashContentState()
-	private val _itemStashesContentFlow = MutableStateFlow<ItemStashContentState>(itemStashesContent)
-	val itemStashesContentFlow: StateFlow<ItemStashContentState> = _itemStashesContentFlow
-
-	fun addNewItemStash(slug: StashSlug) {
+	private fun addNewItemStash(slug: StashSlug) {
 		viewModelScope.launch {
 			itemStashesRepo.addItemStash(slug)
 		}
 	}
 
-	fun watchItemStashes() {
-		viewModelScope.launch {
-			withContext(Dispatchers.Default) {
-				itemStashesRepo.watchItemStashes().collect {
-					Timber.d("Stashes received: $it")
-					itemStashesContent = itemStashesContent.copy(
-						data = itemStashesContent.data.copy(itemStashes = it)
-					)
-					withContext(Dispatchers.Main) {
-						_itemStashesContentFlow.value = itemStashesContent
-					}
-					rebuildItemsWithTags()
-				}
-			}
-		}
-	}
-
 	private var quantityJobs = hashMapOf<String, Job?>()
-	fun updateStashQuantity(stashId: String, quantity: Double) {
+	private fun updateStashQuantity(stashId: String, quantity: Double) {
 		quantityJobs[stashId]?.cancel()
 		quantityJobs[stashId] = viewModelScope.launch {
 			delay(5000)
@@ -363,18 +260,15 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	private var locationStashesContent: LocalizedContentState = LocalizedContentState()
-	private val _locationStashesContentFlow = MutableStateFlow<LocalizedContentState>(locationStashesContent)
-	val locationStashesContentFlow: StateFlow<LocalizedContentState> = _locationStashesContentFlow
+	private val _locationStashesContentFlow = MutableStateFlow(locationStashesContent)
 
 	// todo - resolve this with powersync queries, relations
 	private suspend fun rebuildItemsWithTags() {
-		val locations = userLocationsContent.data.userLocations
-		val currLocation = userLocationsContent.data.currentLocation
-		val tags = userTagsContent.data.userTags
-		val currTag = userTagsContent.data.currentTag
-		val quantityUnits = quantityUnitsContent.data.allUnits
-		val items = itemsContent.data.items
-		val stashes = itemStashesContent.data.itemStashes
+		val fullItems = itemsDataCollector.fullItemsContentFlow.value.data.fullItems
+		val fullStashes = stashesDataCollector.fullStashesContentFlow.value.data.fullStashes
+
+		val currLocation = filterOptions.currentLocation
+		val currTag = filterOptions.currentTag
 
 		val sort = filterAppBarCoordinator.sortDropdownCoordinator.selectedOptionState.value ?: SortOrder.DEFAULT
 		val sortDesc = filterAppBarCoordinator.sortDescendingState.value
@@ -386,28 +280,20 @@ class MainViewModel @Inject constructor(
 		// 2)		StashesForItem by item
 
 		val stashesForLocation = if (currLocation.id == STATIC_ID_LOCATION_ALL) {
-			stashes
+			fullStashes
 		} else {
-			stashes.filter { it.locationId == currLocation.id }
+			fullStashes.filter { it.location.id == currLocation.id }
 		}
 
 		val stashesByItem: List<StashesForItem> = stashesForLocation
-			.filter { it.amount > 0.0 }
-			.groupBy { it.itemId }
+			.groupBy { it.stash.itemId }
 			.mapNotNull { input ->
-				val item = items.firstOrNull { it.id == input.key } ?: return@mapNotNull null
-				val tagIdsForItem = item2Tags.filter { it.itemId == item.id }.map { it.tagId }
-
-				if (currTag.id != STATIC_ID_TAG_ALL && !tagIdsForItem.contains(currTag.id)) return@mapNotNull null
-
-				val tagsForItem = tags.filter { tagIdsForItem.contains(it.id) }
-				val unitForItem = quantityUnits.firstOrNull { it.id == item.unitId } ?: QuantityUnit.defaultUnitBags
+				val fullItem = fullItems.firstOrNull { it.item.id == input.key } ?: return@mapNotNull null
+				if (currTag.id != STATIC_ID_TAG_ALL && !fullItem.tags.map { it.id }.contains(currTag.id)) return@mapNotNull null
 
 				val stashesForItem: List<FullStashData> = input.value
-					.map { stash ->
-						if(tagsForItem.firstOrNull { it.showEmpty } == null && stash.amount == 0.0) return@mapNotNull null
-						val location = locations.firstOrNull { it.id == stash.locationId } ?: return@mapNotNull null
-						FullStashData(stash, location)
+					.filter { stash ->
+						fullItem.tags.firstOrNull { it.showEmpty } != null || stash.stash.amount > 0.0
 					}
 					.run {
 						when (sort) {
@@ -436,7 +322,7 @@ class MainViewModel @Inject constructor(
 							}
 						}
 					}
-				StashesForItem(FullItemData(item, unitForItem, tagsForItem), stashesForItem)
+				StashesForItem(fullItem, stashesForItem)
 			}
 
 		val sorted = stashesByItem.run {
@@ -483,7 +369,7 @@ class MainViewModel @Inject constructor(
 	/////////////////////////////////////////////////
 
 	val createLocationCoordinator = CreateLocationModalSheetCoordinator(
-		locationsSourceFlow = userLocationsContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
 		onCreateDataModel = {
 			addNewLocation(it)
 		},
@@ -493,11 +379,11 @@ class MainViewModel @Inject constructor(
 	)
 
 	val createItemCoordinator = CreateItemSheetCoordinator(
-		itemsSourceFlow = itemsContentFlow,
-		unitsSourceFlow = quantityUnitsContentFlow,
-		tagsSourceFlow = userTagsContentFlow,
+		itemsSourceFlow = itemsDataCollector.itemsContentFlow,
+		unitsSourceFlow = itemsDataCollector.quantityUnitsContentFlow,
+		tagsSourceFlow = itemsDataCollector.userTagsContentFlow,
 		createTagCoordinator = CreateTagSheetCoordinator(
-			userTagsContentFlow,
+			itemsDataCollector.userTagsContentFlow,
 			onCreateDataModel = {
 				addNewTag(it)
 			},
@@ -509,7 +395,7 @@ class MainViewModel @Inject constructor(
 			}
 		),
 		createQuantityUnitSheetCoordinator = CreateQuantityUnitSheetCoordinator(
-			quantityUnitsContentFlow,
+			itemsDataCollector.quantityUnitsContentFlow,
 			onCreateDataModel = {
 				addNewQuantityUnit(it)
 			},
@@ -522,9 +408,9 @@ class MainViewModel @Inject constructor(
 	)
 
 	val createItemStashCoordinator = CreateItemStashSheetCoordinator(
-		itemStashesContentFlow,
-		itemsContentFlow,
-		userLocationsContentFlow,
+		stashesSourceFlow = stashesDataCollector.itemStashesContentFlow,
+		itemsSourceFlow = itemsDataCollector.itemsContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
 		createItemCoordinator = createItemCoordinator,
 		createLocationCoordinator = createLocationCoordinator,
 		onCreateDataModel = {
@@ -533,9 +419,9 @@ class MainViewModel @Inject constructor(
 	)
 
 	val transferItemStashSheetCoordinator = TransferItemStashSheetCoordinator(
-		itemsSourceFlow = itemsContentFlow,
-		locationsSourceFlow = userLocationsContentFlow,
-		stashesSourceFlow = itemStashesContentFlow,
+		itemsSourceFlow = itemsDataCollector.itemsContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
+		stashesSourceFlow = stashesDataCollector.itemStashesContentFlow,
 		onCommitStashTransfer = { fromStash, toStash ->
 			viewModelScope.launch {
 				itemStashesRepo.performTransfer(fromStash, toStash)
@@ -544,9 +430,10 @@ class MainViewModel @Inject constructor(
 	)
 
 	val listContentCoordinator = MainContentListCoordinator(
-		locationStashesContentFlow,
-		locationsSourceFlow = userLocationsContentFlow,
-		tagsSourceFlow = userTagsContentFlow,
+		_locationStashesContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
+		tagsSourceFlow = itemsDataCollector.userTagsContentFlow,
+		filterOptionsFlow = _filterOptionsFlow,
 		itemMenuCoordinator = ListItemOverflowMenuCoordinator(),
 		onItemStashQuantityUpdated = { stashId, qty ->
 			updateStashQuantity(stashId, qty)
@@ -555,15 +442,15 @@ class MainViewModel @Inject constructor(
 		onItemClicked = {
 			createItemCoordinator.showSheetWithData(FullItemData(it.item.item, it.item.unit, it.item.tags))
 		},
-		onStartStashTransfer = { item, locId ->
+		onStartStashTransfer = { item, _ ->
 			//todo - hook up starting location
 			transferItemStashSheetCoordinator.showSheetForItem(item)
 		}
 	)
 
 	val filterAppBarCoordinator = MainFilterAppBarCoordinator(
-		locationsSourceFlow = _userLocationsContentFlow,
-		tagsSourceFlow = userTagsContentFlow,
+		locationsSourceFlow = stashesDataCollector.locationsContentFlow,
+		tagsSourceFlow = itemsDataCollector.userTagsContentFlow,
 		locationsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
 			externalOnOptionSelected = {
 				it ?: return@ReadOnlyDropdownCoordinatorGeneric
@@ -571,7 +458,7 @@ class MainViewModel @Inject constructor(
 			},
 			excludeSelected = true,
 			showSelectedState = false,
-			optionTextMutator = { "${it.name}" },
+			optionTextMutator = { it.name },
 			optionIdForSelectedCheck = { it.id }
 		),
 		tagsDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
@@ -581,7 +468,7 @@ class MainViewModel @Inject constructor(
 			},
 			excludeSelected = true,
 			showSelectedState = false,
-			optionTextMutator = { "${it.name}" },
+			optionTextMutator = { it.name },
 			optionIdForSelectedCheck = { it.id }
 		),
 		sortDropdownCoordinator = ReadOnlyDropdownCoordinatorGeneric(
@@ -594,7 +481,7 @@ class MainViewModel @Inject constructor(
 			},
 			showSelectedState = true,
 			optionIdForSelectedCheck = { it.name },
-			optionTextMutator = { "${it.name}" }
+			optionTextMutator = { it.name }
 		),
 		sortDesc = false
 	)

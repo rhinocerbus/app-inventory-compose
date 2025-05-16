@@ -7,8 +7,9 @@ import com.piledrive.inventory.repo.datasource.PowerSyncItemStashesDataSource
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@ViewModelScoped
+@Singleton
 class ItemStashesRepo @Inject constructor(
 	private val powerSyncSource: PowerSyncItemStashesDataSource,
 	//private val localSource: LocalMoviesSource,
@@ -36,7 +37,7 @@ class ItemStashesRepo @Inject constructor(
 	suspend fun performTransfer(updatedFromStash: Stash, updatedToStash: Stash) {
 		powerSyncSource.updateItemStashQuantity(updatedFromStash.id, updatedFromStash.amount)
 		if(updatedToStash.id == STATIC_ID_NEW_FROM_TRANSFER) {
-			powerSyncSource.addItemStash(StashSlug(updatedToStash.id, updatedToStash.locationId, updatedToStash.amount))
+			powerSyncSource.addItemStash(StashSlug(updatedToStash.itemId, updatedToStash.locationId, updatedToStash.amount))
 		} else {
 			powerSyncSource.updateItemStashQuantity(updatedToStash.id, updatedToStash.amount)
 		}
