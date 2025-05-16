@@ -3,7 +3,6 @@ package com.piledrive.inventory.repo
 import com.piledrive.inventory.data.model.Location
 import com.piledrive.inventory.data.model.LocationSlug
 import com.piledrive.inventory.repo.datasource.PowerSyncLocationsDataSource
-import com.piledrive.inventory.repo.datasource.SupaBaseLocationsDataSource
 import com.piledrive.inventory.repo.datasource.abstracts.LocationsSourceImpl
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow

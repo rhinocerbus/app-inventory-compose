@@ -7,7 +7,6 @@ import com.piledrive.inventory.data.model.Tag
 import com.piledrive.inventory.repo.datasource.PowerSyncItem2TagsDataSource
 import com.piledrive.inventory.repo.datasource.PowerSyncLocationsDataSource
 import com.piledrive.inventory.repo.datasource.PowerSyncTagsDataSource
-import com.piledrive.inventory.repo.datasource.SupaBaseLocationsDataSource
 import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

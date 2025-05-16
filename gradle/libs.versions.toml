@@ -57,19 +57,6 @@ androidx-compose-constraint = { group = "androidx.constraintlayout", name = "con
 ## internal libraries
 lib-compose-components = { module = "com.piledrive.lib_compose_components:lib" }
 lib-supabase-powersync = { module = "com.piledrive.lib_supabase_powersync:lib" }
-# supabase
-supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom" }
-supabase-db = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }
-supabase-realtime = { group = "io.github.jan-tennert.supabase", name = "realtime-kt" }
-supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
-supabase-moshi = { group = "io.github.jan-tennert.supabase", name = "serializer-moshi" }
-ktor = { group = "io.ktor", name = "ktor-client-okhttp" }
-# serialization
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json" }
-moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin" }
-# powersync
-powersync-core = { group = "com.powersync", name = "core" }
-powersync-supabase = { group = "com.powersync", name = "connector-supabase" }
 # logging
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 # testing

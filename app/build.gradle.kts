@@ -86,43 +86,6 @@ dependencies {
 	ksp(libs.hilt.compiler)
 	implementation(libs.hilt.navigation)
 
-	// supabase
-	implementation(platform(libs.supabase.bom)) {
-		isTransitive = true
-	}
-	implementation(libs.supabase.db) {
-		isTransitive = true
-	}
-	implementation(libs.supabase.realtime) {
-		isTransitive = true
-	}
-	implementation(libs.supabase.auth) {
-		isTransitive = true
-	}
-	implementation(libs.supabase.moshi) {
-		isTransitive = true
-	}
-	implementation(libs.ktor) {
-		isTransitive = true
-	}
-
-	// serialization
-	implementation(libs.kotlinx.serialization.json){
-		isTransitive = true
-	}
-	implementation(libs.moshi.kotlin){
-		isTransitive = true
-	}
-	ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
-
-	// powersync
-	implementation(libs.powersync.core){
-		isTransitive = true
-	}
-	implementation(libs.powersync.supabase){
-		isTransitive = true
-	}
-
 	// logging
 	implementation(libs.timber)
 
